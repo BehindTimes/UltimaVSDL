@@ -1,0 +1,7 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="UltimaVSDL/UltimaVSDL.vcxproj" Id="f2967aca-fa5f-4153-b726-631cc27f0c5b" />
+</Solution>
