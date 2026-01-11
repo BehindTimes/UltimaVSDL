@@ -91,14 +91,8 @@ int UltimaVResource::ReadImage(std::vector<unsigned char>& data, size_t offset, 
 
 	uint32_t bufWidth = 0;
 
-	if (numPixelsPerByte == 2)
-	{
-		bufWidth = (8 - (outImage.width % 8)) % 8;
-	}
-	else if (numPixelsPerByte == 4)
-	{
-		bufWidth = (4 - (outImage.width % 4)) % 4;
-	}
+	int bufNum = (8 / numPixelsPerByte) * 2;
+	bufWidth = (bufNum - (outImage.width % bufNum)) % bufNum;
 
 	int modnum = 0;
 	int byteInc = 0;
@@ -152,7 +146,7 @@ int UltimaVResource::ReadImage(std::vector<unsigned char>& data, size_t offset, 
 	return 0;
 }
 
-int UltimaVResource::Parse16File(std::vector<U5ImageData>& bit_file_data, std::vector<unsigned char>& data)
+int UltimaVResource::Parse16File(std::vector<U5ImageData>& bit_file_data, std::vector<unsigned char>& data, int numPixelsPerByte)
 {
 	if (data.size() < 2)
 	{
@@ -176,7 +170,7 @@ int UltimaVResource::Parse16File(std::vector<U5ImageData>& bit_file_data, std::v
 		{
 			return -4; // Only dungeons have missing offsets
 		}
-		if (0 != ReadImage(data, file_offsets[index], 2, bit_file_data[index]))
+		if (0 != ReadImage(data, file_offsets[index], numPixelsPerByte, bit_file_data[index]))
 		{
 			return -5; // Invalid data
 		}
@@ -284,14 +278,15 @@ int UltimaVResource::LoadBitFiles()
 
 int UltimaVResource::Load16Images()
 {
-	const std::vector<std::string> file_names = { "CREATE.16", "END1.16", "END2.16", "ENDSC.16", "STARTSC.16",
-			"STORY1.16", "STORY2.16", "STORY3.16", "STORY4.16", "STORY5.16", "STORY6.16", "TEXT.16", "ULTIMA.16" };
+	const std::string strExt(".16");
+	const std::vector<std::string> file_names = { "CREATE", "END1", "END2", "ENDSC", "STARTSC",
+			"STORY1", "STORY2", "STORY3", "STORY4", "STORY5", "STORY6", "TEXT", "ULTIMA" };
 
 	m_Image16FileData.resize(file_names.size());
 
 	for (size_t index = 0; index < file_names.size(); index++)
 	{
-		std::filesystem::path file_path = GAME_DIRECTORY / file_names[index];
+		std::filesystem::path file_path = GAME_DIRECTORY / (file_names[index] + strExt);
 		if (!std::filesystem::exists(file_path))
 		{
 			return -1;
@@ -309,7 +304,7 @@ int UltimaVResource::Load16Images()
 		}
 		auto& curVec = m_Image16FileData[index];
 
-		if (0 != Parse16File(curVec, buffer_lzw))
+		if (0 != Parse16File(curVec, buffer_lzw, 2))
 		{
 			return -1;
 		}

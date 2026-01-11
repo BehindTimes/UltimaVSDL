@@ -43,7 +43,7 @@ private:
 	int LoadPathFile();
 	int Load16Images();
 	int ParseBitFile(std::vector<U5ImageData> &bit_file_data, std::vector<unsigned char> &data);
-	int Parse16File(std::vector<U5ImageData>& bit_file_data, std::vector<unsigned char>& data);
+	int Parse16File(std::vector<U5ImageData>& bit_file_data, std::vector<unsigned char>& data, int numPixelsPerByte);
 	uint32_t ReadInt16(std::vector<unsigned char> &data, size_t &curPos);
 	uint32_t ReadInt32(std::vector<unsigned char> &data, size_t &curPos);
 	int ReadOffsets(std::vector<unsigned char> &data, int offsetSize, int numOffsets, std::vector<size_t> &file_offsets, size_t &curPos);
