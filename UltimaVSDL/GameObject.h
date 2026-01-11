@@ -3,6 +3,7 @@
 
 #include "SDL3Helper.h"
 #include "UltimaVResource.h"
+#include "U5Enums.h"
 
 class GameObject
 {
@@ -13,6 +14,7 @@ public:
 	virtual void Render() = 0;
 	virtual void LoadData();
 	void GetElapsedTime();
+	bool ChangeMode(U5Modes &newMode);
 	
 protected:
 	virtual void SetSDLData();
@@ -22,5 +24,7 @@ protected:
 	Uint64 m_curTick;
 	Uint64 m_prevTick;
 	Uint64 m_tickElapse;
+	U5Modes m_newMode;
+	bool m_clearScreen;
 };
 

@@ -24,10 +24,12 @@ public:
 
 	bool m_quit;
 	std::vector<std::vector<SDL_Texture*>> m_BitFileTextures;
+	std::vector<std::vector<SDL_Texture*>> m_Image16FileTextures;
 	SDL_Texture* m_PathFileTexture;
 private:
 	void LoadPathFileTexture(UltimaVResource* u5_resources);
 	void LoadBitFileTextures(UltimaVResource* u5_resources);
+	void LoadImage16FileTextures(UltimaVResource* u5_resources);
 	void CreateTextureFromMemory(SDL_Texture*& texture, const U5ImageData& curData);
 
 	SDL_Window* m_window;

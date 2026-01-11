@@ -1,9 +1,6 @@
 #pragma once
 #include "GameObject.h"
 
-const int ORIGINAL_GAME_WIDTH = 320;
-const int ORIGINAL_GAME_HEIGHT = 200;
-
 enum class SplashScreenMode
 {
 	LOGO,
@@ -26,6 +23,7 @@ protected:
 	const Uint64 LOGO_DELAY = 2000;
 	const Uint64 A_DELAY = 1000;
 	const Uint64 FULL_SIG_DISPLAY = 4000;
+	const Uint64 FULL_SIG_DISPLAY_DONE = 6000;
 
 	Uint64 m_curDelay;
 	SplashScreenMode m_curMode;
@@ -33,6 +31,6 @@ protected:
 private:
 	void RenderLogo();
 	void RenderSignature();
-	void LoadSignaturePath(float percent);
+	int LoadSignaturePath(float percent);
 };
 

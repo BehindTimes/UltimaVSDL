@@ -26,6 +26,8 @@ int SDL3Helper::Intialize()
 		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't create window and renderer: %s", SDL_GetError());
 		return 3;
 	}
+
+	//SDL_SetWindowFullscreen(m_window, true);
 	return 0;
 }
 
@@ -42,6 +44,18 @@ void SDL3Helper::Cleanup()
 		}
 	}
 	m_BitFileTextures.clear();
+
+	for (auto& curImage : m_Image16FileTextures)
+	{
+		for (auto& curTexture : curImage)
+		{
+			if (curTexture)
+			{
+				SDL_DestroyTexture(curTexture);
+			}
+		}
+	}
+	m_Image16FileTextures.clear();
 
 	if (m_PathFileTexture)
 	{
@@ -148,19 +162,38 @@ void SDL3Helper::CreateTextureFromMemory(SDL_Texture *&texture, const U5ImageDat
 		for (size_t x = 0; x < curData.width; x++)
 		{
 			unsigned char curByte = curData.pixel_data[y * curData.width + x];
-			unsigned char colorArray[3];
-			if (curByte == 0)
+			unsigned char colorArray[3] = {};
+			if (curData.mode == 8)
 			{
-				std::memcpy(colorArray, ega_table[0], sizeof(colorArray));
+				if (curByte == 0)
+				{
+					std::memcpy(colorArray, ega_table[0], sizeof(colorArray));
+				}
+				else
+				{
+					std::memcpy(colorArray, ega_table[15], sizeof(colorArray));
+				}
+			}
+			else if (curData.mode == 4)
+			{
+				if (curByte < 4)
+				{
+					std::memcpy(colorArray, cga_table[curByte], sizeof(colorArray));
+				}
 			}
 			else
 			{
-				std::memcpy(colorArray, ega_table[15], sizeof(colorArray));
+				if (curByte < 16)
+				{
+					std::memcpy(colorArray, ega_table[curByte], sizeof(colorArray));
+				}
 			}
+			
+			// ABGR
 			canvas[(y * curData.width * 4 + x * 4) + 0] = 0xFF;
-			canvas[(y * curData.width * 4 + x * 4) + 1] = colorArray[0];
+			canvas[(y * curData.width * 4 + x * 4) + 1] = colorArray[2];
 			canvas[(y * curData.width * 4 + x * 4) + 2] = colorArray[1];
-			canvas[(y * curData.width * 4 + x * 4) + 3] = colorArray[2];
+			canvas[(y * curData.width * 4 + x * 4) + 3] = colorArray[0];
 		}
 	}
 	SDL_UpdateTexture(texture, NULL, canvas.data(), (int)curData.width * 4);
@@ -192,10 +225,25 @@ void SDL3Helper::LoadBitFileTextures(UltimaVResource* u5_resources)
 	}
 }
 
+void SDL3Helper::LoadImage16FileTextures(UltimaVResource* u5_resources)
+{
+	m_Image16FileTextures.resize(u5_resources->m_Image16FileData.size());
+	for (int indexBit = 0; indexBit < u5_resources->m_Image16FileData.size(); indexBit++)
+	{
+		m_Image16FileTextures[indexBit].resize(u5_resources->m_Image16FileData[indexBit].size());
+		for (int indexPic = 0; indexPic < u5_resources->m_Image16FileData[indexBit].size(); indexPic++)
+		{
+			auto curData = u5_resources->m_Image16FileData[indexBit][indexPic];
+			CreateTextureFromMemory(m_Image16FileTextures[indexBit][indexPic], curData);
+		}
+	}
+}
+
 void SDL3Helper::LoadImageData(UltimaVResource *u5_resources)
 {
 	LoadBitFileTextures(u5_resources);
 	LoadPathFileTexture(u5_resources);
+	LoadImage16FileTextures(u5_resources);
 }
 
 void SDL3Helper::UpdateTicks()

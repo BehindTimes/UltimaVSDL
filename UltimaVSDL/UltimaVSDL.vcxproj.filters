@@ -33,6 +33,9 @@
     <ClCompile Include="LzwDecompressor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Intro.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SDL3Helper.h">
@@ -51,6 +54,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="LzwDecompressor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="U5Enums.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Intro.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

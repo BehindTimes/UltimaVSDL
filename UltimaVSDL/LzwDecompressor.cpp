@@ -81,10 +81,7 @@ bool LzwDecompressor::get_next_codeword(int& codeword, std::vector<unsigned char
 
 	int xx, xy, xz;
 	xx = bits_read / 8;
-	if (bits_read / 8 >= 0x1520)
-	{
-		return false;
-	}
+
 	b0 = source[bits_read / 8];
 	if (source.size() > bits_read / 8 + 1)
 	{

@@ -2,7 +2,8 @@
 
 GameObject::GameObject(SDL3Helper *sdl_helper, UltimaVResource *u5_resources) :
 	m_sdl_helper(sdl_helper),
-	m_resources(u5_resources)
+	m_resources(u5_resources),
+	m_clearScreen(false)
 {
 }
 
@@ -27,4 +28,15 @@ void GameObject::GetElapsedTime()
 	m_prevTick = m_curTick;
 	m_curTick = m_sdl_helper->GetCurrentTick();
 	m_tickElapse = m_curTick - m_prevTick;
+}
+
+bool GameObject::ChangeMode(U5Modes& newMode)
+{
+	bool retval = false;
+	if (m_newMode != U5Modes::None)
+	{
+		newMode = m_newMode;
+		retval = true;
+	}
+	return retval;
 }

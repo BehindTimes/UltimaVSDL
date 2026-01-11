@@ -1,5 +1,6 @@
 #include <filesystem>
 #include <fstream>
+#include <iostream>
 
 #include "UltimaVResource.h"
 #include "LzwDecompressor.h"
@@ -26,6 +27,10 @@ int UltimaVResource::LoadResources()
 		return -1;
 	}
 	if (0 != LoadPathFile())
+	{
+		return -1;
+	}
+	if (0 != Load16Images())
 	{
 		return -1;
 	}
@@ -83,6 +88,7 @@ int UltimaVResource::ReadImage(std::vector<unsigned char>& data, size_t offset, 
 	}
 	outImage.width = ReadInt16(data, offset);
 	outImage.height = ReadInt16(data, offset);
+
 	uint32_t bufWidth = (8 - (outImage.width % 8)) % 8;
 
 	int modnum = 0;
@@ -99,7 +105,7 @@ int UltimaVResource::ReadImage(std::vector<unsigned char>& data, size_t offset, 
 	}
 	else if (numPixelsPerByte == 2)
 	{
-		modnum = 0b111;
+		modnum = 0b1111;
 		byteInc = 4;
 	}
 	else
@@ -126,12 +132,44 @@ int UltimaVResource::ReadImage(std::vector<unsigned char>& data, size_t offset, 
 			for (int byteIndex = 0; byteIndex < 8; byteIndex += byteInc)
 			{
 				int curColor = (static_cast<int>(curByte) >> ((8 - byteInc) - byteIndex)) & modnum;
-				if (indexX * numPixelsPerByte + byteIndex < outImage.width)
+				if (indexX * numPixelsPerByte + (byteIndex / byteInc) < outImage.width)
 				{
-					outImage.pixel_data[indexY * outImage.width + indexX * numPixelsPerByte + byteIndex] = static_cast<unsigned char>(curColor);
+					outImage.pixel_data[indexY * outImage.width + indexX * numPixelsPerByte + (byteIndex / byteInc)] = static_cast<unsigned char>(curColor);
 				}
 			}
 			curPos++;
+		}
+	}
+	return 0;
+}
+
+int UltimaVResource::Parse16File(std::vector<U5ImageData>& bit_file_data, std::vector<unsigned char>& data)
+{
+	if (data.size() < 2)
+	{
+		return -1;
+	}
+	size_t curPos = 0;
+	uint32_t numImages = ReadInt16(data, curPos);
+	if (numImages == 0 || numImages > 32)
+	{
+		return -2;
+	}
+	bit_file_data.resize(numImages);
+	std::vector<size_t> file_offsets;
+	if (0 != ReadOffsets(data, 4, numImages, file_offsets, curPos))
+	{
+		return -3;
+	}
+	for (uint32_t index = 0; index < numImages; index++)
+	{
+		if (file_offsets[index] == 0)
+		{
+			return -4; // Only dungeons have missing offsets
+		}
+		if (0 != ReadImage(data, file_offsets[index], 2, bit_file_data[index]))
+		{
+			return -5; // Invalid data
 		}
 	}
 
@@ -191,7 +229,7 @@ int UltimaVResource::LoadPathFile()
 int UltimaVResource::LoadBitFiles()
 {
 	const std::vector<std::string> file_names = { "BRITISH.BIT", "TITLE.BIT", "WD.BIT" };
-	m_BitFileData.resize(3);
+	m_BitFileData.resize(file_names.size());
 	
 	int array_pos = 0;
 
@@ -230,6 +268,42 @@ int UltimaVResource::LoadBitFiles()
 			}
 		}
 		array_pos++;
+	}
+
+	return 0;
+}
+
+int UltimaVResource::Load16Images()
+{
+	const std::vector<std::string> file_names = { "CREATE.16", "END1.16", "END2.16", "ENDSC.16", "STARTSC.16",
+			"STORY1.16", "STORY2.16", "STORY3.16", "STORY4.16", "STORY5.16", "STORY6.16", "TEXT.16", "ULTIMA.16" };
+
+	m_Image16FileData.resize(file_names.size());
+
+	for (size_t index = 0; index < file_names.size(); index++)
+	{
+		std::filesystem::path file_path = GAME_DIRECTORY / file_names[index];
+		if (!std::filesystem::exists(file_path))
+		{
+			return -1;
+		}
+		std::uintmax_t file_size = std::filesystem::file_size(file_path);
+		std::vector<unsigned char> buffer(file_size);
+		std::ifstream file(file_path, std::ios::binary);
+		file.read(reinterpret_cast<char*>(buffer.data()), static_cast<std::streamsize>(file_size));
+		file.close();
+
+		std::vector<unsigned char> buffer_lzw;
+		if (!LzwDecompressor::Extract(buffer, buffer_lzw))
+		{
+			return -2;
+		}
+		auto& curVec = m_Image16FileData[index];
+
+		if (0 != Parse16File(curVec, buffer_lzw))
+		{
+			return -1;
+		}
 	}
 
 	return 0;

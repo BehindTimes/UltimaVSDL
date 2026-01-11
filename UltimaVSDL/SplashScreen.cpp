@@ -8,6 +8,7 @@ SplashScreen::SplashScreen(SDL3Helper* sdl_helper, UltimaVResource* u5_resources
 	m_curMode(SplashScreenMode::LOGO),
 	m_oldMode(SplashScreenMode::LOGO)
 {
+	m_clearScreen = true;
 }
 
 SplashScreen::~SplashScreen()
@@ -84,7 +85,6 @@ void SplashScreen::RenderLogo()
 
 		m_sdl_helper->RenderFlipTextureAt(curTexture, x * hMult, y * vMult, width * hMult, height * vMult, (m_CurrentLogo + 1) % 2);
 	}
-	m_sdl_helper->RenderPresent();
 }
 
 void SplashScreen::RenderSignature()
@@ -108,6 +108,7 @@ void SplashScreen::RenderSignature()
 	float y = 0;
 
 	m_sdl_helper->RenderTextureAt(curTexture, x * hMult, y * vMult, width * hMult, height * vMult);
+	
 	if (m_curDelay > FULL_SIG_DISPLAY) // Just display everything
 	{
 		curTexture = m_sdl_helper->m_BitFileTextures[0][0]; // Lord British
@@ -125,6 +126,11 @@ void SplashScreen::RenderSignature()
 		x = (ORIGINAL_GAME_WIDTH - width) / 2.0f;
 		y = 160;
 		m_sdl_helper->RenderTextureAt(curTexture, x * hMult, y * vMult, width * hMult, height * vMult);
+
+		if (m_curDelay > FULL_SIG_DISPLAY_DONE) // We're done here
+		{
+			m_newMode = U5Modes::Menu;
+		}
 	}
 	else if (m_curDelay > A_DELAY) // Draw the signature
 	{
@@ -133,16 +139,18 @@ void SplashScreen::RenderSignature()
 		width = 272;
 
 		float percentToDraw = (m_curDelay - A_DELAY) / static_cast<float>(FULL_SIG_DISPLAY - A_DELAY);
-		LoadSignaturePath(percentToDraw);
-
+		if (0 != LoadSignaturePath(percentToDraw))
+		{
+			m_curDelay = FULL_SIG_DISPLAY;
+			m_clearScreen = true;
+		}
 		x = (ORIGINAL_GAME_WIDTH - width) / 2.0f;
 		y = 66;
 		m_sdl_helper->RenderTextureAt(curTexture, x * hMult, y * vMult, width * hMult, height * vMult);
 	}
-	m_sdl_helper->RenderPresent();
 }
 
-void SplashScreen::LoadSignaturePath(float percent)
+int SplashScreen::LoadSignaturePath(float percent)
 {
 	size_t maxPixel = static_cast<size_t>(m_resources->m_PathFileData.size() * percent);
 	const int offsetX = 20;
@@ -213,7 +221,8 @@ void SplashScreen::LoadSignaturePath(float percent)
 				ypos = offsetY + 37;
 				break;
 			default:
-				return;
+				SDL_UnlockTexture(m_sdl_helper->m_PathFileTexture);
+				return - 1;
 			}
 
 			if (xpos >= 0 && xpos < 272 && ypos >= 0 && ypos < 62)
@@ -223,6 +232,7 @@ void SplashScreen::LoadSignaturePath(float percent)
 		}
 	}
 	SDL_UnlockTexture(m_sdl_helper->m_PathFileTexture);
+	return 0;
 }
 
 void SplashScreen::Render()
@@ -236,6 +246,12 @@ void SplashScreen::Render()
 	}
 	else
 	{
+		//if (m_clearScreen)
+		{
+			m_sdl_helper->ClearScreen();
+			m_clearScreen = false;
+		}
+
 		switch (m_curMode)
 		{
 		case SplashScreenMode::LOGO:
@@ -248,6 +264,7 @@ void SplashScreen::Render()
 			break;
 		}
 	}
+	m_sdl_helper->RenderPresent();
 }
 
 void SplashScreen::LoadData()
