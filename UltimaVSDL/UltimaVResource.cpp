@@ -25,6 +25,10 @@ int UltimaVResource::LoadResources()
 	{
 		return -1;
 	}
+	if (0 != LoadPathFile())
+	{
+		return -1;
+	}
 
 	return 0;
 }
@@ -163,6 +167,23 @@ int UltimaVResource::ParseBitFile(std::vector<U5ImageData> &bit_file_data, std::
 			return -5; // Invalid data
 		}
 	}
+
+	return 0;
+}
+
+int UltimaVResource::LoadPathFile()
+{
+	const std::string file_name = "BRITISH.PTH";
+	std::filesystem::path file_path = GAME_DIRECTORY / file_name;
+	if (!std::filesystem::exists(file_path))
+	{
+		return -1;
+	}
+	std::uintmax_t file_size = std::filesystem::file_size(file_path);
+	std::ifstream file(file_path, std::ios::binary);
+	m_PathFileData.resize(file_size);
+	file.read(reinterpret_cast<char*>(m_PathFileData.data()), static_cast<std::streamsize>(file_size));
+	file.close();
 
 	return 0;
 }

@@ -14,3 +14,17 @@ void GameObject::LoadData()
 {
 
 }
+
+void GameObject::SetSDLData()
+{
+	m_curTick = m_sdl_helper->GetCurrentTick();
+	m_prevTick = m_curTick;
+	m_tickElapse = 0;
+}
+
+void GameObject::GetElapsedTime()
+{
+	m_prevTick = m_curTick;
+	m_curTick = m_sdl_helper->GetCurrentTick();
+	m_tickElapse = m_curTick - m_prevTick;
+}

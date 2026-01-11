@@ -32,20 +32,18 @@ public:
 
 	int LoadResources();
 
-	U5ImageData getBitData() {
-		return m_BitFileData[1][6];
-	}
+	std::vector<std::vector<U5ImageData>> m_BitFileData;
+	std::vector<unsigned char> m_PathFileData;
 private:
 	
 	void Cleanup();
 
 	int LoadBitFiles();
+	int LoadPathFile();
 	int ParseBitFile(std::vector<U5ImageData> &bit_file_data, std::vector<unsigned char> &data);
 	uint32_t ReadInt16(std::vector<unsigned char> &data, size_t &curPos);
 	uint32_t ReadInt32(std::vector<unsigned char> &data, size_t &curPos);
 	int ReadOffsets(std::vector<unsigned char> &data, int offsetSize, int numOffsets, std::vector<size_t> &file_offsets, size_t &curPos);
 	int ReadImage(std::vector<unsigned char> &data, size_t offset, int numPixelsPerByte, U5ImageData& outImage);
-
-	std::vector<std::vector<U5ImageData>> m_BitFileData;
 };
 

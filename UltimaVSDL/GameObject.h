@@ -12,8 +12,15 @@ public:
 
 	virtual void Render() = 0;
 	virtual void LoadData();
+	void GetElapsedTime();
+	
 protected:
+	virtual void SetSDLData();
+
 	SDL3Helper *m_sdl_helper;
 	UltimaVResource *m_resources;
+	Uint64 m_curTick;
+	Uint64 m_prevTick;
+	Uint64 m_tickElapse;
 };
 

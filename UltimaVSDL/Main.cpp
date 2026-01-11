@@ -37,7 +37,8 @@ void MainLoop()
 		{
 			break;
 		}
-
+		sdl_helper->UpdateTicks();
+		curObject->GetElapsedTime();
 	}
 }
 
