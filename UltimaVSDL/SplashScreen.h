@@ -18,12 +18,6 @@ public:
 	void SetSDLData() override;
 protected:
 	int m_CurrentLogo;
-	
-	const Uint64 LOGO_ROTATE_DELAY = 750;
-	const Uint64 LOGO_DELAY = 2000;
-	const Uint64 A_DELAY = 1000;
-	const Uint64 FULL_SIG_DISPLAY = 4000;
-	const Uint64 FULL_SIG_DISPLAY_DONE = 6000;
 
 	Uint64 m_curDelay;
 	SplashScreenMode m_curMode;
@@ -32,5 +26,11 @@ private:
 	void RenderLogo();
 	void RenderSignature();
 	int LoadSignaturePath(float percent);
+
+	const Uint64 LOGO_ROTATE_DELAY = 750;
+	const Uint64 LOGO_DELAY = 2000;
+	const Uint64 A_DELAY = 1000;
+	const Uint64 FULL_SIG_DISPLAY = 4000;
+	const Uint64 FULL_SIG_DISPLAY_DONE = 6000;
 };
 

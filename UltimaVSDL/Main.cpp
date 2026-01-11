@@ -24,13 +24,13 @@ void MainLoop()
 	}
 	sdl_helper->LoadImageData(u5_resources.get());
 
-	splash_screen = std::make_unique<SplashScreen>(sdl_helper.get(), u5_resources.get());
+	/*splash_screen = std::make_unique<SplashScreen>(sdl_helper.get(), u5_resources.get());
 	splash_screen->LoadData();
-	curObject = splash_screen.get();
+	curObject = splash_screen.get();*/
 
-	/*intro_screen = std::make_unique<Intro>(sdl_helper.get(), u5_resources.get());
+	intro_screen = std::make_unique<Intro>(sdl_helper.get(), u5_resources.get());
 	intro_screen->LoadData();
-	curObject = intro_screen.get();*/
+	curObject = intro_screen.get();
 	
 	while (1)
 	{

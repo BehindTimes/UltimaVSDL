@@ -89,7 +89,16 @@ int UltimaVResource::ReadImage(std::vector<unsigned char>& data, size_t offset, 
 	outImage.width = ReadInt16(data, offset);
 	outImage.height = ReadInt16(data, offset);
 
-	uint32_t bufWidth = (8 - (outImage.width % 8)) % 8;
+	uint32_t bufWidth = 0;
+
+	if (numPixelsPerByte == 2)
+	{
+		bufWidth = (8 - (outImage.width % 8)) % 8;
+	}
+	else if (numPixelsPerByte == 4)
+	{
+		bufWidth = (4 - (outImage.width % 4)) % 4;
+	}
 
 	int modnum = 0;
 	int byteInc = 0;
