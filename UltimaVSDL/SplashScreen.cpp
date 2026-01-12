@@ -1,5 +1,11 @@
 #include "SplashScreen.h"
 #include "ColorData.h"
+#include "SDL3Helper.h"
+#include <SDL3/SDL_render.h>
+#include "GameObject.h"
+#include "U5Enums.h"
+#include "UltimaVResource.h"
+#include <cstring>
 
 SplashScreen::SplashScreen(SDL3Helper* sdl_helper, UltimaVResource* u5_resources) :
 	GameObject(sdl_helper, u5_resources),
@@ -72,13 +78,13 @@ void SplashScreen::RenderLogo()
 			}
 		}
 
-		height = static_cast<float>(m_resources->m_BitFileData[1][m_CurrentLogo - 1].height) * scale;
-		width = static_cast<float>(m_resources->m_BitFileData[1][m_CurrentLogo - 1].width);
+		height = static_cast<float>(m_resources->m_BitFileData[1][static_cast<size_t>(m_CurrentLogo - 1)].height) * scale;
+		width = static_cast<float>(m_resources->m_BitFileData[1][static_cast<size_t>(m_CurrentLogo - 1)].width);
 		
 		x = (ORIGINAL_GAME_WIDTH - width) / 2.0f;
 		y = (ORIGINAL_GAME_HEIGHT - height) / 2.0f - 23;
 
-		curTexture = m_sdl_helper->m_BitFileTextures[1][m_CurrentLogo - 1];
+		curTexture = m_sdl_helper->m_BitFileTextures[1][static_cast<size_t>(m_CurrentLogo - 1)];
 
 		int curColor = 9;
 		SDL_SetTextureColorMod(curTexture, ega_table[curColor][0], ega_table[curColor][1], ega_table[curColor][2]);
@@ -163,7 +169,7 @@ int SplashScreen::LoadSignaturePath(float percent)
 	unsigned char* pixels = NULL;
 	int pitch;
 	SDL_LockTexture(m_sdl_helper->m_PathFileTexture, NULL, (void**)&pixels, &pitch);
-	memset(pixels + (pitch * ypos) + (xpos * 4), 0xFF, sizeof(unsigned char) * 4);
+	std::memset(pixels + (pitch * ypos) + (xpos * 4), 0xFF, sizeof(unsigned char) * 4);
 	for (size_t index = 0; index < maxPixel; index++)
 	{
 		unsigned char curByte = m_resources->m_PathFileData[index];

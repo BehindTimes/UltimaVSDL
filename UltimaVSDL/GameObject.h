@@ -1,9 +1,9 @@
 #pragma once
-#include <iostream>
 
 #include "SDL3Helper.h"
 #include "UltimaVResource.h"
 #include "U5Enums.h"
+#include <SDL3/SDL_stdinc.h>
 
 class GameObject
 {

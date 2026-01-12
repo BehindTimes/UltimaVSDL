@@ -6,16 +6,20 @@
 
 #include "Intro.h"
 #include "SplashScreen.h"
+#include "U5Utils.h"
 
 static std::unique_ptr<SDL3Helper> sdl_helper;
 static std::unique_ptr<UltimaVResource> u5_resources;
 static std::unique_ptr<SplashScreen> splash_screen;
 static std::unique_ptr<Intro> intro_screen;
+std::unique_ptr<U5Utils> m_utilities;
 
 void MainLoop()
 {
 	bool quit = false;
 	GameObject* curObject = nullptr;
+
+	m_utilities = std::make_unique<U5Utils>();
 
 	u5_resources = std::make_unique<UltimaVResource>();
 	if (0 != u5_resources->LoadResources())
@@ -24,13 +28,13 @@ void MainLoop()
 	}
 	sdl_helper->LoadImageData(u5_resources.get());
 
-	/*splash_screen = std::make_unique<SplashScreen>(sdl_helper.get(), u5_resources.get());
+	splash_screen = std::make_unique<SplashScreen>(sdl_helper.get(), u5_resources.get());
 	splash_screen->LoadData();
-	curObject = splash_screen.get();*/
+	curObject = splash_screen.get();
 
-	intro_screen = std::make_unique<Intro>(sdl_helper.get(), u5_resources.get());
+	/*intro_screen = std::make_unique<Intro>(sdl_helper.get(), u5_resources.get());
 	intro_screen->LoadData();
-	curObject = intro_screen.get();
+	curObject = intro_screen.get();*/
 	
 	while (1)
 	{

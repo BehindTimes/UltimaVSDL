@@ -36,6 +36,9 @@
     <ClCompile Include="Intro.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="U5Utils.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SDL3Helper.h">
@@ -60,6 +63,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Intro.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="U5Utils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

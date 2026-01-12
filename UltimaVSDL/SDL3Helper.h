@@ -1,8 +1,11 @@
 #pragma once
 
-#include <SDL3/SDL.h>
-
 #include "UltimaVResource.h"
+#include <SDL3/SDL_stdinc.h>
+#include <SDL3/SDL_events.h>
+#include <vector>
+#include <SDL3/SDL_render.h>
+#include <SDL3/SDL_video.h>
 
 class SDL3Helper
 {
@@ -15,22 +18,25 @@ public:
 	void Poll();
 	void LoadImageData(UltimaVResource *u5_resources);
 	void UpdateTicks();
-	Uint64 GetCurrentTick();
+	Uint64 GetCurrentTick() const;
 	void ClearScreen();
 	void RenderFlipTextureAt(SDL_Texture* texture, float x, float y, float width, float height, bool flip);
 	void RenderTextureAt(SDL_Texture* texture, float x, float y, float width, float height);
 	void RenderPresent();
 	void GetScreenDimensions(int& width, int& height);
+	void TurnOnPixels(SDL_Texture* texture, std::vector<int>& vec_pixels);
 
 	bool m_quit;
 	std::vector<std::vector<SDL_Texture*>> m_BitFileTextures;
 	std::vector<std::vector<SDL_Texture*>> m_Image16FileTextures;
 	SDL_Texture* m_PathFileTexture;
+	SDL_Texture* m_LogoFadeTexture;
 private:
 	void LoadPathFileTexture(UltimaVResource* u5_resources);
 	void LoadBitFileTextures(UltimaVResource* u5_resources);
 	void LoadImage16FileTextures(UltimaVResource* u5_resources);
 	void CreateTextureFromMemory(SDL_Texture*& texture, const U5ImageData& curData);
+	void LoadFadeTexture(U5ImageData& data, SDL_Texture*& texture);
 
 	SDL_Window* m_window;
 	SDL_Renderer* m_renderer;

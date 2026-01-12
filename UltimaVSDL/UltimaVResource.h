@@ -1,6 +1,6 @@
 #pragma once
-#include <string>
 #include <vector>
+#include <cstdint>
 
 enum class BitFileNames : uint_fast8_t
 {
