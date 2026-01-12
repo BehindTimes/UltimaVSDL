@@ -78,6 +78,12 @@ void SDL3Helper::Cleanup()
 		m_LogoFadeTexture = nullptr;
 	}
 
+	if (m_Flame1FadeTexture)
+	{
+		SDL_DestroyTexture(m_Flame1FadeTexture);
+		m_Flame1FadeTexture = nullptr;
+	}
+
 	if (m_PathFileTexture)
 	{
 		SDL_DestroyTexture(m_PathFileTexture);
@@ -246,7 +252,30 @@ void SDL3Helper::LoadBitFileTextures(UltimaVResource* u5_resources)
 	}
 }
 
-void SDL3Helper::LoadFadeTexture(U5ImageData& data, SDL_Texture *&texture)
+void SDL3Helper::LoadMaskTexture(U5ImageData& data, SDL_Texture*& texture, bool alpha)
+{
+	texture = SDL_CreateTexture(m_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING,
+		data.width, data.height);
+	unsigned char* pixels = NULL;
+	int pitch;
+	SDL_LockTexture(texture, NULL, (void**)&pixels, &pitch);
+
+	memset(pixels, 0xFF, sizeof(unsigned char) * pitch * data.height);
+	//if (alpha)
+	{
+		for (size_t y = 0; y < data.height; y++)
+		{
+			for (size_t x = 0; x < data.width; x++)
+			{
+				pixels[(y * pitch) + (x * 4)] = alpha ? 0xFF : 0x00;
+			}
+		}
+	}
+	SDL_UnlockTexture(texture);
+	SDL_SetTextureScaleMode(texture, SDL_SCALEMODE_NEAREST);
+}
+
+void SDL3Helper::LoadFadeTexture(U5ImageData& data, SDL_Texture *&texture, bool alpha)
 {
 	texture = SDL_CreateTexture(m_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING,
 		data.width, data.height);
@@ -287,7 +316,7 @@ void SDL3Helper::LoadFadeTexture(U5ImageData& data, SDL_Texture *&texture)
 				}
 			}
 			// ABGR
-			pixels[(y * pitch) + (x * 4)] = 0x00;
+			pixels[(y * pitch) + (x * 4)] = alpha ? 0xFF : 0x00;
 			pixels[(y * pitch) + (x * 4) + 1] = colorArray[2];
 			pixels[(y * pitch) + (x * 4) + 2] = colorArray[1];
 			pixels[(y * pitch) + (x * 4) + 3] = colorArray[0];
@@ -297,7 +326,7 @@ void SDL3Helper::LoadFadeTexture(U5ImageData& data, SDL_Texture *&texture)
 	SDL_SetTextureScaleMode(texture, SDL_SCALEMODE_NEAREST);
 }
 
-void SDL3Helper::TurnOnPixels(SDL_Texture* texture, std::vector<int>& vec_pixels)
+void SDL3Helper::TurnOnPixels(SDL_Texture* texture, std::vector<int>& vec_pixels, bool on)
 {
 	unsigned char* pixels = NULL;
 	int pitch;
@@ -311,7 +340,7 @@ void SDL3Helper::TurnOnPixels(SDL_Texture* texture, std::vector<int>& vec_pixels
 		int curY = cur_pixel / static_cast<int>(width);
 		int curX = cur_pixel % static_cast<int>(width);
 
-		pixels[(curY * pitch) + (curX * 4)] = 0xFF;
+		pixels[(curY * pitch) + (curX * 4)] = on ? 0xFF : 0x00;
 	}
 
 	SDL_UnlockTexture(texture);
@@ -329,7 +358,9 @@ void SDL3Helper::LoadImage16FileTextures(UltimaVResource* u5_resources)
 			CreateTextureFromMemory(m_Image16FileTextures[indexBit][indexPic], curData);
 		}
 	}
-	LoadFadeTexture(u5_resources->m_Image16FileData[12][0], m_LogoFadeTexture);
+	LoadFadeTexture(u5_resources->m_Image16FileData[12][0], m_LogoFadeTexture, false);
+	LoadMaskTexture(u5_resources->m_Image16FileData[12][1], m_Flame1FadeTexture, true);
+	SDL_SetTextureColorMod(m_Flame1FadeTexture, 0, 0, 0);
 }
 
 void SDL3Helper::LoadImageData(UltimaVResource *u5_resources)

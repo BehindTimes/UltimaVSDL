@@ -10,7 +10,7 @@
 enum class IntroMode
 {
 	FADE_LOGO,
-	FADE_FLAME,
+	FADE_FLAME_1,
 	SHOW_ALL
 };
 
@@ -24,21 +24,29 @@ public:
 	virtual void LoadData() override;
 	void SetSDLData() override;
 private:
-	void RenderFadeIn();
+	void RenderLogoFadeIn();
+	void RenderFlameFadeIn1();
 	void RenderFlame();
 	void RenderLogo();
 
 	Uint64 m_curDelayFlame;
 	Uint64 m_curLogoFade;
+	Uint64 m_curFlame1Fade;
 	int m_curFlame;
 
 	const Uint64 FLAME_DELAY = 100;
 	const Uint64 LOGO_FADE_DELAY = 3000;
+	const Uint64 FLAME_FADE_1_DELAY = 3000;
 	IntroMode m_curMode;
 	int m_window_width;
 	int m_window_height;
 	std::vector<uint8_t> m_logo_fade_locations;
+	std::vector<uint8_t> m_flame1_fade_locations;
 	int m_logo_fade_count;
 	int m_cur_logo_count;
+	int m_flame1_fade_count;
+	int m_cur_flame1_fade_count;
+	uint32_t m_num_pixels;
+	uint32_t m_num_flame1_pixels;
 };
 

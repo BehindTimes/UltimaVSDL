@@ -1,4 +1,4 @@
-#include <iostream>
+#include <memory>
 #include <cstdlib>
 #include <SDL3/SDL_main.h>
 
@@ -7,6 +7,10 @@
 #include "Intro.h"
 #include "SplashScreen.h"
 #include "U5Utils.h"
+#include <SDL3/SDL_main_impl.h>
+#include "GameObject.h"
+#include "U5Enums.h"
+#include "UltimaVResource.h"
 
 static std::unique_ptr<SDL3Helper> sdl_helper;
 static std::unique_ptr<UltimaVResource> u5_resources;
@@ -28,13 +32,19 @@ void MainLoop()
 	}
 	sdl_helper->LoadImageData(u5_resources.get());
 
+	sdl_helper->UpdateTicks();
+
 	splash_screen = std::make_unique<SplashScreen>(sdl_helper.get(), u5_resources.get());
 	splash_screen->LoadData();
 	curObject = splash_screen.get();
 
 	/*intro_screen = std::make_unique<Intro>(sdl_helper.get(), u5_resources.get());
 	intro_screen->LoadData();
-	curObject = intro_screen.get();*/
+	curObject = intro_screen.get();
+	curObject->GetElapsedTime();
+	*/
+
+	
 	
 	while (1)
 	{

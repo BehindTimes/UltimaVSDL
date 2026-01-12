@@ -14,7 +14,7 @@ public:
 	virtual void Render() = 0;
 	virtual void LoadData();
 	void GetElapsedTime();
-	bool ChangeMode(U5Modes &newMode);
+	bool ChangeMode(U5Modes &newMode) const;
 	
 protected:
 	virtual void SetSDLData();
