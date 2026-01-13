@@ -16,6 +16,7 @@
 #include <SDL3/SDL_timer.h>
 #include <SDL3/SDL_video.h>
 #include "UltimaVResource.h"
+#include "U5Enums.h"
 
 SDL3Helper::SDL3Helper() :
 	m_window(nullptr),
@@ -25,7 +26,8 @@ SDL3Helper::SDL3Helper() :
 	m_curTick(0),
 	m_PathFileTexture(nullptr),
 	m_LogoFadeTexture(nullptr),
-	m_WoDFadeTexture(nullptr)
+	m_WoDFadeTexture(nullptr),
+	m_Flame1FadeTexture(nullptr)
 {
 }
 
@@ -37,11 +39,13 @@ int SDL3Helper::Intialize()
 		return 3;
 	}
 
-	if (!SDL_CreateWindowAndRenderer("Ultima V - SDL", 1280, 800, SDL_WINDOW_OPENGL /*| SDL_WINDOW_HIGH_PIXEL_DENSITY*/, &m_window, &m_renderer))
+	if (!SDL_CreateWindowAndRenderer("Ultima V - SDL", RENDER_WIDTH, RENDER_HEIGHT, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE /*| SDL_WINDOW_HIGH_PIXEL_DENSITY*/, &m_window, &m_renderer))
 	{
 		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't create window and renderer: %s", SDL_GetError());
 		return 3;
 	}
+
+	SDL_SetRenderLogicalPresentation(m_renderer, RENDER_WIDTH, RENDER_HEIGHT, SDL_LOGICAL_PRESENTATION_LETTERBOX);
 
 	//SDL_SetWindowFullscreen(m_window, true);
 	return 0;
@@ -72,6 +76,39 @@ void SDL3Helper::Cleanup()
 		}
 	}
 	m_Image16FileTextures.clear();
+
+	for (auto& curCharType : m_CharacterSetsTextures)
+	{
+		for (auto& curImage : curCharType)
+		{
+			for (auto& curTexture : curImage)
+			{
+				if (curTexture)
+				{
+					SDL_DestroyTexture(curTexture);
+				}
+			}
+		}
+	}
+	m_CharacterSetsTextures.clear();
+
+	for (auto& curTexture : m_TargetTextures)
+	{
+		if (curTexture)
+		{
+			SDL_DestroyTexture(curTexture);
+		}
+	}
+	m_TargetTextures.clear();
+
+	for (auto& curTexture : m_ArrowTextures)
+	{
+		if (curTexture)
+		{
+			SDL_DestroyTexture(curTexture);
+		}
+	}
+	m_ArrowTextures.clear();
 
 	if (m_LogoFadeTexture)
 	{
@@ -104,15 +141,17 @@ void SDL3Helper::Cleanup()
 
 void SDL3Helper::GetScreenDimensions(int &width, int &height)
 {
-	SDL_GetWindowSize(m_window , &width, &height);
+	width = RENDER_WIDTH;
+	height = RENDER_HEIGHT;
+	//SDL_GetWindowSize(m_window , &width, &height);
 }
 
-void SDL3Helper::ClearScreen()
+void SDL3Helper::ClearScreen() const
 {
 	SDL_RenderClear(m_renderer);
 }
 
-void SDL3Helper::RenderTextureAt(SDL_Texture* texture, float x, float y, float width, float height)
+void SDL3Helper::RenderTextureAt(SDL_Texture* texture, float x, float y, float width, float height) const
 {
 	SDL_FRect toRect{};
 	toRect.x = static_cast<float>(x);
@@ -126,7 +165,7 @@ void SDL3Helper::RenderTextureAt(SDL_Texture* texture, float x, float y, float w
 	}
 }
 
-void SDL3Helper::RenderFlipTextureAt(SDL_Texture* texture, float x, float y, float width, float height, bool flip)
+void SDL3Helper::RenderFlipTextureAt(SDL_Texture* texture, float x, float y, float width, float height, bool flip) const
 {
 	SDL_FRect toRect{};
 	toRect.x = static_cast<float>(x);
@@ -146,7 +185,7 @@ void SDL3Helper::RenderFlipTextureAt(SDL_Texture* texture, float x, float y, flo
 	}
 }
 
-void SDL3Helper::RenderPresent()
+void SDL3Helper::RenderPresent() const
 {
 	SDL_RenderPresent(m_renderer);
 }
@@ -180,7 +219,7 @@ void SDL3Helper::Poll()
 	}
 }
 
-void SDL3Helper::CreateTextureFromMemory(SDL_Texture *&texture, const U5ImageData &curData)
+void SDL3Helper::CreateTextureFromMemory(SDL_Texture *&texture, const U5ImageData &curData) const
 {
 	texture = SDL_CreateTexture(m_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STATIC,
 		static_cast<int>(curData.width), static_cast<int>(curData.height));
@@ -262,7 +301,101 @@ void SDL3Helper::LoadBitFileTextures(UltimaVResource* u5_resources)
 	SDL_SetTextureColorMod(m_WoDFadeTexture, 0, 0, 0);
 }
 
-void SDL3Helper::LoadMaskTexture(U5ImageData& data, SDL_Texture*& texture, bool alpha)
+// For real outlines, we should check that the entire border is black, rather than just the pixel next to it,
+// but this is used for characters, where we won't have to be as specific
+void SDL3Helper::CreateOutlineTexture(SDL_Texture*& texture, const U5ImageData& curData, unsigned char color_data[3]) const
+{
+	texture = SDL_CreateTexture(m_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STATIC,
+		static_cast<int>(curData.width), static_cast<int>(curData.height));
+	SDL_SetTextureScaleMode(texture, SDL_SCALEMODE_NEAREST);
+
+	std::vector<unsigned char> canvas;
+	size_t canvasSize = static_cast<size_t>(curData.width) * static_cast<size_t>(curData.height) * 4;
+	canvas.resize(canvasSize);
+	std::fill(canvas.begin(), canvas.end(), static_cast<unsigned char>(0));
+
+	unsigned char color_white[3] = { 0xFF, 0xFF, 0xFF };
+
+	for (size_t y = 0; y < curData.height; y++)
+	{
+		for (size_t x = 0; x < curData.width; x++)
+		{
+			unsigned char curByte = curData.pixel_data[y * curData.width + x];
+
+			if (curByte != 0)
+			{
+				bool outline = false;
+				if (x > 0)
+				{
+					if (curData.pixel_data[y * curData.width + (x - 1)] == 0)
+					{
+						outline = true;
+					}
+				}
+				if (x < curData.width - 1)
+				{
+					if (curData.pixel_data[y * curData.width + (x + 1)] == 0)
+					{
+						outline = true;
+					}
+				}
+				if (y > 0)
+				{
+					if (curData.pixel_data[(y - 1) * curData.width + x] == 0)
+					{
+						outline = true;
+					}
+				}
+				if (y < curData.height - 1)
+				{
+					if (curData.pixel_data[(y + 1) * curData.width + x] == 0)
+					{
+						outline = true;
+					}
+				}
+				if (outline)
+				{
+					canvas[(y * curData.width * 4 + x * 4) + 0] = 0xFF;
+					canvas[(y * curData.width * 4 + x * 4) + 1] = color_white[2];
+					canvas[(y * curData.width * 4 + x * 4) + 2] = color_white[1];
+					canvas[(y * curData.width * 4 + x * 4) + 3] = color_white[0];
+				}
+				else
+				{
+					canvas[(y * curData.width * 4 + x * 4) + 0] = 0xFF;
+					canvas[(y * curData.width * 4 + x * 4) + 1] = color_data[2];
+					canvas[(y * curData.width * 4 + x * 4) + 2] = color_data[1];
+					canvas[(y * curData.width * 4 + x * 4) + 3] = color_data[0];
+				}
+			}
+		}
+	}
+	SDL_UpdateTexture(texture, NULL, canvas.data(), (int)curData.width * 4);
+}
+
+void SDL3Helper::LoadCharacterSetTextures(UltimaVResource* u5_resources)
+{
+	m_CharacterSetsTextures.resize(u5_resources->m_CharacterSetsData.size());
+	for (int indexCharType = 0; indexCharType < u5_resources->m_CharacterSetsData.size(); indexCharType++)
+	{
+		m_CharacterSetsTextures[indexCharType].resize(u5_resources->m_CharacterSetsData[indexCharType].size());
+		for (int indexPic = 0; indexPic < u5_resources->m_CharacterSetsData[indexCharType].size(); indexPic++)
+		{
+			m_CharacterSetsTextures[indexCharType][indexPic].resize(u5_resources->m_CharacterSetsData[indexCharType][indexPic].size());
+			for (int indexChar = 0; indexChar < u5_resources->m_CharacterSetsData[indexCharType][indexPic].size(); indexChar++)
+			{
+				U5ImageData& curData = u5_resources->m_CharacterSetsData[indexCharType][indexPic][indexChar];
+				CreateTextureFromMemory(m_CharacterSetsTextures[indexCharType][indexPic][indexChar], curData);
+			}
+		}
+	}
+	m_ArrowTextures.resize(2);
+	m_ArrowTextures.resize(2);
+	CreateOutlineTexture(m_ArrowTextures[0], u5_resources->m_CharacterSetsData[0][0][1], ega_table[1]);
+	CreateOutlineTexture(m_ArrowTextures[1], u5_resources->m_CharacterSetsData[0][0][2], ega_table[1]);
+}
+
+void SDL3Helper::LoadMaskTexture(U5ImageData& data, SDL_Texture*& texture, bool alpha) const
 {
 	texture = SDL_CreateTexture(m_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING,
 		data.width, data.height);
@@ -285,7 +418,7 @@ void SDL3Helper::LoadMaskTexture(U5ImageData& data, SDL_Texture*& texture, bool 
 	SDL_SetTextureScaleMode(texture, SDL_SCALEMODE_NEAREST);
 }
 
-void SDL3Helper::LoadFadeTexture(U5ImageData& data, SDL_Texture *&texture, bool alpha, bool has_transparent, unsigned char transparent_color[3])
+void SDL3Helper::LoadFadeTexture(U5ImageData& data, SDL_Texture *&texture, bool alpha, bool has_transparent, unsigned char transparent_color[3]) const
 {
 	texture = SDL_CreateTexture(m_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING,
 		data.width, data.height);
@@ -389,11 +522,24 @@ void SDL3Helper::LoadImage16FileTextures(UltimaVResource* u5_resources)
 	SDL_SetTextureColorMod(m_Flame1FadeTexture, 0, 0, 0);
 }
 
+void SDL3Helper::LoadTargetTextures()
+{
+	m_TargetTextures.resize(2);
+	m_TargetTextures[TTV_INTROBOX] = SDL_CreateTexture(m_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET,
+		20 * TILE_WIDTH, 5 * TILE_HEIGHT);
+	SDL_SetTextureScaleMode(m_TargetTextures[TTV_INTROBOX], SDL_SCALEMODE_NEAREST);
+	m_TargetTextures[TTV_INTROBOX_DISPLAY] = SDL_CreateTexture(m_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET,
+		19 * TILE_WIDTH, 4 * TILE_HEIGHT);
+	SDL_SetTextureScaleMode(m_TargetTextures[TTV_INTROBOX_DISPLAY], SDL_SCALEMODE_NEAREST);
+}
+
 void SDL3Helper::LoadImageData(UltimaVResource *u5_resources)
 {
 	LoadBitFileTextures(u5_resources);
 	LoadPathFileTexture(u5_resources);
 	LoadImage16FileTextures(u5_resources);
+	LoadCharacterSetTextures(u5_resources);
+	LoadTargetTextures();
 }
 
 void SDL3Helper::UpdateTicks()
@@ -404,4 +550,9 @@ void SDL3Helper::UpdateTicks()
 Uint64 SDL3Helper::GetCurrentTick() const
 {
 	return m_curTick;
+}
+
+void SDL3Helper::SetRenderTarget(SDL_Texture* texture) const
+{
+	SDL_SetRenderTarget(m_renderer, texture);
 }

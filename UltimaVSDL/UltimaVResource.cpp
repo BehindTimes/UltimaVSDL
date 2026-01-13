@@ -4,6 +4,9 @@
 
 #include "UltimaVResource.h"
 #include "LzwDecompressor.h"
+#include <cstdint>
+#include <string>
+#include <vector>
 
 static const std::filesystem::path GAME_DIRECTORY("G:/source/UltimaVSDL/u5data");
 
@@ -34,6 +37,10 @@ int UltimaVResource::LoadResources()
 	{
 		return -1;
 	}
+	if (0 != LoadCharacterSets())
+	{
+		return -1;
+	}
 
 	return 0;
 }
@@ -55,7 +62,7 @@ uint32_t UltimaVResource::ReadInt32(std::vector<unsigned char>& data, size_t& cu
 
 int UltimaVResource::ReadOffsets(std::vector<unsigned char> &data, int offsetSize, int numOffsets, std::vector<size_t> &file_offsets, size_t &curPos)
 {
-	if (data.size() < curPos + numOffsets * offsetSize)
+	if (data.size() < curPos + static_cast<size_t>(numOffsets * offsetSize))
 	{
 		return -1;
 	}
@@ -116,7 +123,7 @@ int UltimaVResource::ReadImage(std::vector<unsigned char>& data, size_t offset, 
 		return -2;
 	}
 
-	outImage.pixel_data.resize(outImage.width * outImage.height);
+	outImage.pixel_data.resize(static_cast<size_t>(outImage.width * outImage.height));
 	outImage.mode = numPixelsPerByte;
 
 	int data_size = (outImage.width + bufWidth) * outImage.height / numPixelsPerByte;
@@ -137,7 +144,7 @@ int UltimaVResource::ReadImage(std::vector<unsigned char>& data, size_t offset, 
 				int curColor = (static_cast<int>(curByte) >> ((8 - byteInc) - byteIndex)) & modnum;
 				if (indexX * numPixelsPerByte + (byteIndex / byteInc) < outImage.width)
 				{
-					outImage.pixel_data[indexY * outImage.width + indexX * numPixelsPerByte + (byteIndex / byteInc)] = static_cast<unsigned char>(curColor);
+					outImage.pixel_data[static_cast<size_t>(indexY * outImage.width + indexX * numPixelsPerByte + (byteIndex / byteInc))] = static_cast<unsigned char>(curColor);
 				}
 			}
 			curPos++;
@@ -212,6 +219,42 @@ int UltimaVResource::ParseBitFile(std::vector<U5ImageData> &bit_file_data, std::
 	return 0;
 }
 
+int UltimaVResource::ParseCharacterFile(std::vector<U5ImageData>& bit_file_data, std::vector<unsigned char>& data, int width, int height)
+{
+	const int NUM_CHARACTERS = 128;
+
+	bit_file_data.resize(NUM_CHARACTERS);
+
+	size_t curOffset = 0;
+	for (int index = 0; index < NUM_CHARACTERS; index++)
+	{
+		bit_file_data[index].width = width;
+		bit_file_data[index].height = height;
+		bit_file_data[index].mode = 8;
+		bit_file_data[index].pixel_data.resize(static_cast<size_t>(width * height));
+		size_t curPos = 0;
+
+		for (size_t byteIndex = 0; byteIndex < (static_cast<size_t>(width * height)) / 8; byteIndex++)
+		{
+			if (curOffset >= data.size())
+			{
+				return -1;
+			}
+			unsigned char curByte = data[curOffset];
+
+			for (int bitIndex = 0; bitIndex < 8; bitIndex++)
+			{
+				unsigned char curColor = (static_cast<int>(curByte) >> ((7 - bitIndex)) & 0x1);
+				bit_file_data[index].pixel_data[curPos] = curColor;
+				curPos++;
+			}
+
+			curOffset++;
+		}
+	}
+	return 0;
+}
+
 int UltimaVResource::LoadPathFile()
 {
 	const std::string file_name = "BRITISH.PTH";
@@ -273,6 +316,41 @@ int UltimaVResource::LoadBitFiles()
 		array_pos++;
 	}
 
+	return 0;
+}
+
+int UltimaVResource::LoadCharacterSets()
+{
+	const int NUM_CHARACTERS = 128;
+	const std::vector<std::string> file_names = { "IBM", "RUNES" };
+	const std::vector<std::string> file_extensions = { ".CH", ".HCS" };
+	m_CharacterSetsData.resize(file_names.size());
+	const int WIDTH[2] = { 8, 16 };
+	const int HEIGHT[2] = { 8, 12 };
+	for (size_t index = 0; index < file_names.size(); index++)
+	{
+		m_CharacterSetsData[index].resize(file_extensions.size());
+		for (size_t ext_index = 0; ext_index < file_names.size(); ext_index++)
+		{
+			std::filesystem::path file_path = GAME_DIRECTORY / (file_names[index] + file_extensions[ext_index]);
+			if (!std::filesystem::exists(file_path))
+			{
+				return -1;
+			}
+			std::uintmax_t file_size = std::filesystem::file_size(file_path);
+			std::vector<unsigned char> buffer(file_size);
+			std::ifstream file(file_path, std::ios::binary);
+			file.read(reinterpret_cast<char*>(buffer.data()), static_cast<std::streamsize>(file_size));
+			file.close();
+
+			m_CharacterSetsData[index][ext_index].resize(NUM_CHARACTERS);
+
+			if (0 != ParseCharacterFile(m_CharacterSetsData[index][ext_index], buffer, WIDTH[ext_index], HEIGHT[ext_index]))
+			{
+				return -2;
+			}
+		}
+	}
 	return 0;
 }
 

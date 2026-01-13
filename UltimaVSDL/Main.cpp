@@ -18,7 +18,7 @@ static std::unique_ptr<SplashScreen> splash_screen;
 static std::unique_ptr<Intro> intro_screen;
 std::unique_ptr<U5Utils> m_utilities;
 
-void MainLoop()
+static void MainLoop()
 {
 	bool quit = false;
 	GameObject* curObject = nullptr;
@@ -38,9 +38,9 @@ void MainLoop()
 	splash_screen->LoadData();
 	curObject = splash_screen.get();
 
-	/*intro_screen = std::make_unique<Intro>(sdl_helper.get(), u5_resources.get());
+	intro_screen = std::make_unique<Intro>(sdl_helper.get(), u5_resources.get());
 	intro_screen->LoadData();
-	curObject = intro_screen.get();*/
+	curObject = intro_screen.get();
 	
 	while (1)
 	{

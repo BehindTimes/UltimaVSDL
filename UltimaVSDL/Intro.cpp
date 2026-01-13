@@ -8,6 +8,8 @@
 #include "SDL3Helper.h"
 #include "U5Enums.h"
 #include "UltimaVResource.h"
+#include "ColorData.h"
+#include <SDL3/SDL_rect.h>
 
 extern std::unique_ptr<U5Utils> m_utilities;
 
@@ -347,6 +349,54 @@ void Intro::RenderFlame()
 	m_sdl_helper->RenderTextureAt(curTexture, x * hMult, y * vMult, width * hMult, height * vMult);
 }
 
+void Intro::RenderIntroBox()
+{
+	const int blue = 1;
+
+	float x = 0;
+	float y = 15 * HALF_TILE_HEIGHT;
+	SDL_Texture* curTexture = m_sdl_helper->m_TargetTextures[TTV_INTROBOX];
+
+	m_sdl_helper->RenderTextureAt(curTexture, x, y, RENDER_WIDTH, TILE_HEIGHT * 5);
+	x = HALF_TILE_WIDTH;
+	y = 8 * TILE_HEIGHT;
+	curTexture = m_sdl_helper->m_TargetTextures[TTV_INTROBOX_DISPLAY];
+	m_sdl_helper->RenderTextureAt(curTexture, x, y, RENDER_WIDTH - TILE_WIDTH, TILE_HEIGHT * 4);
+
+	SDL_SetTextureColorMod(m_sdl_helper->m_CharacterSetsTextures[0][0][123], ega_table[blue][0], ega_table[blue][1], ega_table[blue][2]);
+	SDL_SetTextureColorMod(m_sdl_helper->m_CharacterSetsTextures[0][0][124], ega_table[blue][0], ega_table[blue][1], ega_table[blue][2]);
+	SDL_SetTextureColorMod(m_sdl_helper->m_CharacterSetsTextures[0][0][125], ega_table[blue][0], ega_table[blue][1], ega_table[blue][2]);
+	SDL_SetTextureColorMod(m_sdl_helper->m_CharacterSetsTextures[0][0][126], ega_table[blue][0], ega_table[blue][1], ega_table[blue][2]);
+
+	m_sdl_helper->SetRenderTarget(m_sdl_helper->m_TargetTextures[TTV_INTROBOX]);
+	curTexture = m_sdl_helper->m_CharacterSetsTextures[0][0][123];
+	m_sdl_helper->RenderTextureAt(curTexture, 0, 0, HALF_TILE_WIDTH, HALF_TILE_HEIGHT);
+	curTexture = m_sdl_helper->m_CharacterSetsTextures[0][0][124];
+	m_sdl_helper->RenderTextureAt(curTexture, RENDER_WIDTH - HALF_TILE_WIDTH, 0, HALF_TILE_WIDTH, HALF_TILE_HEIGHT);
+	curTexture = m_sdl_helper->m_CharacterSetsTextures[0][0][125];
+	m_sdl_helper->RenderTextureAt(curTexture, 0, HALF_TILE_HEIGHT * 9, HALF_TILE_WIDTH, HALF_TILE_HEIGHT);
+	curTexture = m_sdl_helper->m_CharacterSetsTextures[0][0][126];
+	m_sdl_helper->RenderTextureAt(curTexture, RENDER_WIDTH - HALF_TILE_WIDTH, HALF_TILE_HEIGHT * 9, HALF_TILE_WIDTH, HALF_TILE_HEIGHT);
+
+	//curTexture = m_sdl_helper->m_ArrowTextures[1];
+	//m_sdl_helper->RenderTextureAt(curTexture, 100, 0, HALF_TILE_WIDTH, HALF_TILE_HEIGHT);
+
+	SDL_SetRenderDrawColor(m_sdl_helper->m_renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+	SDL_FRect line{ HALF_TILE_WIDTH - LINE_THICKNESS, HALF_TILE_HEIGHT - LINE_THICKNESS, RENDER_WIDTH - TILE_WIDTH + (2 * LINE_THICKNESS), LINE_THICKNESS };
+	SDL_RenderFillRect(m_sdl_helper->m_renderer, &line);
+	line = { HALF_TILE_WIDTH - LINE_THICKNESS, (TILE_HEIGHT * 4) + HALF_TILE_HEIGHT, RENDER_WIDTH - TILE_WIDTH + (2 * LINE_THICKNESS), LINE_THICKNESS };
+	SDL_RenderFillRect(m_sdl_helper->m_renderer, &line);
+	line = { HALF_TILE_WIDTH - LINE_THICKNESS, HALF_TILE_HEIGHT, LINE_THICKNESS, (TILE_HEIGHT * 4) };
+	SDL_RenderFillRect(m_sdl_helper->m_renderer, &line);
+	line = { RENDER_WIDTH - HALF_TILE_WIDTH, HALF_TILE_HEIGHT, LINE_THICKNESS, (TILE_HEIGHT * 4) };
+	SDL_RenderFillRect(m_sdl_helper->m_renderer, &line);
+
+	
+
+	m_sdl_helper->SetRenderTarget(nullptr);
+	SDL_SetRenderDrawColor(m_sdl_helper->m_renderer, 0, 0, 0, 0);
+}
+
 void Intro::Render()
 {
 	m_sdl_helper->GetScreenDimensions(m_window_width, m_window_height);
@@ -372,6 +422,7 @@ void Intro::Render()
 	default:
 		RenderLogo();
 		RenderFlame();
+		RenderIntroBox();
 		break;
 	}
 
@@ -381,6 +432,7 @@ void Intro::Render()
 void Intro::LoadData()
 {
 	SetSDLData();
+	CreateIntroBox();
 }
 
 void Intro::SetSDLData()
@@ -388,3 +440,17 @@ void Intro::SetSDLData()
 	GameObject::SetSDLData();
 }
 
+void Intro::CreateIntroBox()
+{
+	const int blue = 1;
+	m_sdl_helper->SetRenderTarget(m_sdl_helper->m_TargetTextures[TTV_INTROBOX]);
+	SDL_SetRenderDrawColor(m_sdl_helper->m_renderer, ega_table[blue][0], ega_table[blue][1], ega_table[blue][2], 0xFF);
+	//SDL_Texture* curTexture = m_sdl_helper->m_BitFileTextures[TTV_INTROBOX];
+
+	m_sdl_helper->ClearScreen();
+	m_sdl_helper->SetRenderTarget(m_sdl_helper->m_TargetTextures[TTV_INTROBOX_DISPLAY]);
+	SDL_SetRenderDrawColor(m_sdl_helper->m_renderer, 0x00, 0, 0x00, 0xFF);
+	m_sdl_helper->ClearScreen();
+	m_sdl_helper->SetRenderTarget(nullptr);
+	SDL_SetRenderDrawColor(m_sdl_helper->m_renderer, 0, 0, 0, 0);
+}

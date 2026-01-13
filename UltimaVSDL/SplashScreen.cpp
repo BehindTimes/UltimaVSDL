@@ -252,11 +252,7 @@ void SplashScreen::Render()
 	}
 	else
 	{
-		//if (m_clearScreen)
-		{
-			m_sdl_helper->ClearScreen();
-			m_clearScreen = false;
-		}
+		m_sdl_helper->ClearScreen();
 
 		switch (m_curMode)
 		{

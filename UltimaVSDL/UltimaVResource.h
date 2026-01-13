@@ -35,6 +35,7 @@ public:
 	std::vector<std::vector<U5ImageData>> m_BitFileData;
 	std::vector<unsigned char> m_PathFileData;
 	std::vector<std::vector<U5ImageData>> m_Image16FileData;
+	std::vector<std::vector<std::vector<U5ImageData>>> m_CharacterSetsData;
 private:
 	
 	void Cleanup();
@@ -42,6 +43,8 @@ private:
 	int LoadBitFiles();
 	int LoadPathFile();
 	int Load16Images();
+	int LoadCharacterSets();
+	int ParseCharacterFile(std::vector<U5ImageData>& bit_file_data, std::vector<unsigned char>& data, int width, int height);
 	int ParseBitFile(std::vector<U5ImageData> &bit_file_data, std::vector<unsigned char> &data);
 	int Parse16File(std::vector<U5ImageData>& bit_file_data, std::vector<unsigned char>& data, int numPixelsPerByte);
 	uint32_t ReadInt16(std::vector<unsigned char> &data, size_t &curPos);

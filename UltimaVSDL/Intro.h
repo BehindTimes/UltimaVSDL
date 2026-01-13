@@ -31,6 +31,8 @@ private:
 	void RenderFlame();
 	void RenderLogo();
 	void RenderWoD();
+	void RenderIntroBox();
+	void CreateIntroBox();
 
 	Uint64 m_curDelayFlame;
 	Uint64 m_curLogoFade;
