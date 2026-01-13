@@ -40,11 +40,7 @@ void MainLoop()
 
 	/*intro_screen = std::make_unique<Intro>(sdl_helper.get(), u5_resources.get());
 	intro_screen->LoadData();
-	curObject = intro_screen.get();
-	curObject->GetElapsedTime();
-	*/
-
-	
+	curObject = intro_screen.get();*/
 	
 	while (1)
 	{

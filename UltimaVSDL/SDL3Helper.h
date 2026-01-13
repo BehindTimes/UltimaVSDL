@@ -32,12 +32,13 @@ public:
 	SDL_Texture* m_PathFileTexture;
 	SDL_Texture* m_LogoFadeTexture;
 	SDL_Texture* m_Flame1FadeTexture;
+	SDL_Texture* m_WoDFadeTexture;
 private:
 	void LoadPathFileTexture(UltimaVResource* u5_resources);
 	void LoadBitFileTextures(UltimaVResource* u5_resources);
 	void LoadImage16FileTextures(UltimaVResource* u5_resources);
 	void CreateTextureFromMemory(SDL_Texture*& texture, const U5ImageData& curData);
-	void LoadFadeTexture(U5ImageData& data, SDL_Texture*& texture, bool alpha);
+	void LoadFadeTexture(U5ImageData& data, SDL_Texture*& texture, bool alpha, bool has_transparent = false, unsigned char transparent_color[3] = {});
 	void LoadMaskTexture(U5ImageData& data, SDL_Texture*& texture, bool alpha);
 
 	SDL_Window* m_window;

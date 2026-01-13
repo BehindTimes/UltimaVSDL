@@ -24,7 +24,8 @@ SDL3Helper::SDL3Helper() :
 	m_event(NULL),
 	m_curTick(0),
 	m_PathFileTexture(nullptr),
-	m_LogoFadeTexture(nullptr)
+	m_LogoFadeTexture(nullptr),
+	m_WoDFadeTexture(nullptr)
 {
 }
 
@@ -82,6 +83,12 @@ void SDL3Helper::Cleanup()
 	{
 		SDL_DestroyTexture(m_Flame1FadeTexture);
 		m_Flame1FadeTexture = nullptr;
+	}
+
+	if (m_WoDFadeTexture)
+	{
+		SDL_DestroyTexture(m_WoDFadeTexture);
+		m_WoDFadeTexture = nullptr;
 	}
 
 	if (m_PathFileTexture)
@@ -250,6 +257,9 @@ void SDL3Helper::LoadBitFileTextures(UltimaVResource* u5_resources)
 			CreateTextureFromMemory(m_BitFileTextures[indexBit][indexPic], curData);
 		}
 	}
+	unsigned char transparent_color[3] = { 0, 0, 0 };
+	LoadFadeTexture(u5_resources->m_BitFileData[2][0], m_WoDFadeTexture, true, true, transparent_color);
+	SDL_SetTextureColorMod(m_WoDFadeTexture, 0, 0, 0);
 }
 
 void SDL3Helper::LoadMaskTexture(U5ImageData& data, SDL_Texture*& texture, bool alpha)
@@ -275,7 +285,7 @@ void SDL3Helper::LoadMaskTexture(U5ImageData& data, SDL_Texture*& texture, bool 
 	SDL_SetTextureScaleMode(texture, SDL_SCALEMODE_NEAREST);
 }
 
-void SDL3Helper::LoadFadeTexture(U5ImageData& data, SDL_Texture *&texture, bool alpha)
+void SDL3Helper::LoadFadeTexture(U5ImageData& data, SDL_Texture *&texture, bool alpha, bool has_transparent, unsigned char transparent_color[3])
 {
 	texture = SDL_CreateTexture(m_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING,
 		data.width, data.height);
@@ -316,7 +326,23 @@ void SDL3Helper::LoadFadeTexture(U5ImageData& data, SDL_Texture *&texture, bool 
 				}
 			}
 			// ABGR
-			pixels[(y * pitch) + (x * 4)] = alpha ? 0xFF : 0x00;
+			if (has_transparent)
+			{
+				if (transparent_color[0] == colorArray[0] &&
+					transparent_color[1] == colorArray[1] &&
+					transparent_color[2] == colorArray[2])
+				{
+					pixels[(y * pitch) + (x * 4)] = 0;
+				}
+				else
+				{
+					pixels[(y * pitch) + (x * 4)] = alpha ? 0xFF : 0x00;
+				}
+			}
+			else
+			{
+				pixels[(y * pitch) + (x * 4)] = alpha ? 0xFF : 0x00;
+			}
 			pixels[(y * pitch) + (x * 4) + 1] = colorArray[2];
 			pixels[(y * pitch) + (x * 4) + 2] = colorArray[1];
 			pixels[(y * pitch) + (x * 4) + 3] = colorArray[0];
