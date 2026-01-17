@@ -278,3 +278,11 @@ void SplashScreen::SetSDLData()
 {
 	GameObject::SetSDLData();
 }
+
+void SplashScreen::ProcessEvents()
+{
+	if (m_sdl_helper->isAnyKeyHit())
+	{
+		m_newMode = U5Modes::MenuSkip;
+	}
+}

@@ -25,7 +25,8 @@ Intro::Intro(SDL3Helper* sdl_helper, UltimaVResource* u5_resources) :
 	m_num_wod_pixels(0),
 	m_curLogoFade(0),
 	m_curFlame1Fade(0),
-	m_curWodFade(0)
+	m_curWodFade(0),
+	m_curStoryboard(0)
 {
 	m_clearScreen = true;
 
@@ -397,6 +398,10 @@ void Intro::RenderIntroBox()
 	SDL_SetRenderDrawColor(m_sdl_helper->m_renderer, 0, 0, 0, 0);
 }
 
+void Intro::RenderStory()
+{
+}
+
 void Intro::Render()
 {
 	m_sdl_helper->GetScreenDimensions(m_window_width, m_window_height);
@@ -404,6 +409,9 @@ void Intro::Render()
 
 	switch (m_curMode)
 	{
+	case IntroMode::STORY:
+		RenderStory();
+		break;
 	case IntroMode::FADE_LOGO:
 		RenderLogoFadeIn();
 		break;
@@ -453,4 +461,42 @@ void Intro::CreateIntroBox()
 	m_sdl_helper->ClearScreen();
 	m_sdl_helper->SetRenderTarget(nullptr);
 	SDL_SetRenderDrawColor(m_sdl_helper->m_renderer, 0, 0, 0, 0);
+}
+
+void Intro::ProcessEvents()
+{
+	switch (m_curMode)
+	{
+	case IntroMode::STORY:
+		if (m_sdl_helper->isAnyKeyHit())
+		{
+			IncrementStory();
+		}
+		break;
+	case IntroMode::FADE_LOGO:
+	case IntroMode::FADE_FLAME_1:
+	case IntroMode::FADE_FLAME_2:
+		if (m_sdl_helper->isAnyKeyHit())
+		{
+			m_newMode = U5Modes::MenuSkip;
+		}
+		break;
+	default:
+		break;
+	}
+}
+
+void Intro::GoToSelection()
+{
+	m_curMode = IntroMode::SHOW_ALL;
+}
+
+void Intro::IncrementStory()
+{
+	m_curStoryboard++;
+	if (m_curStoryboard >= 21)
+	{
+		m_curStoryboard = 0;
+		m_curMode = IntroMode::SHOW_ALL;
+	}
 }

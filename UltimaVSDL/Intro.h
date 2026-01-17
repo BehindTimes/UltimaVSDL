@@ -12,7 +12,8 @@ enum class IntroMode
 	FADE_LOGO,
 	FADE_FLAME_1,
 	FADE_FLAME_2,
-	SHOW_ALL
+	SHOW_ALL,
+	STORY
 };
 
 class Intro : public GameObject
@@ -21,9 +22,11 @@ public:
 	explicit Intro(SDL3Helper* sdl_helper, UltimaVResource* u5_resources);
 	~Intro();
 
-	void Render();
+	void Render() override;
+	void ProcessEvents() override;
 	virtual void LoadData() override;
 	void SetSDLData() override;
+	void GoToSelection();
 private:
 	void RenderLogoFadeIn();
 	void RenderFlameFadeIn1();
@@ -31,8 +34,10 @@ private:
 	void RenderFlame();
 	void RenderLogo();
 	void RenderWoD();
+	void RenderStory();
 	void RenderIntroBox();
 	void CreateIntroBox();
+	void IncrementStory();
 
 	Uint64 m_curDelayFlame;
 	Uint64 m_curLogoFade;
@@ -60,5 +65,6 @@ private:
 	uint32_t m_num_pixels;
 	uint32_t m_num_flame1_pixels;
 	uint32_t m_num_wod_pixels;
+	uint32_t m_curStoryboard;
 };
 

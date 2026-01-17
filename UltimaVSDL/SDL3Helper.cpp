@@ -27,7 +27,8 @@ SDL3Helper::SDL3Helper() :
 	m_PathFileTexture(nullptr),
 	m_LogoFadeTexture(nullptr),
 	m_WoDFadeTexture(nullptr),
-	m_Flame1FadeTexture(nullptr)
+	m_Flame1FadeTexture(nullptr),
+	m_anyKeyHit(false)
 {
 }
 
@@ -207,6 +208,7 @@ void SDL3Helper::Render()
 
 void SDL3Helper::Poll()
 {
+	m_anyKeyHit = false;
 	SDL_PollEvent(&m_event);
 	switch (m_event.type)
 	{
@@ -214,7 +216,14 @@ void SDL3Helper::Poll()
 		m_quit = true;
 		break;
 	case SDL_EVENT_KEY_DOWN:
-		m_quit = true;
+		m_anyKeyHit = true;
+		if (m_event.key.mod & SDL_KMOD_ALT)
+		{
+			if (m_event.key.key == SDLK_X)
+			{
+				m_quit = true;
+			}
+		}
 		break;
 	}
 }
@@ -555,4 +564,9 @@ Uint64 SDL3Helper::GetCurrentTick() const
 void SDL3Helper::SetRenderTarget(SDL_Texture* texture) const
 {
 	SDL_SetRenderTarget(m_renderer, texture);
+}
+
+bool SDL3Helper::isAnyKeyHit()
+{
+	return m_anyKeyHit;
 }

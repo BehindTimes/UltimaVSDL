@@ -34,9 +34,9 @@ static void MainLoop()
 
 	sdl_helper->UpdateTicks();
 
-	splash_screen = std::make_unique<SplashScreen>(sdl_helper.get(), u5_resources.get());
+	/*splash_screen = std::make_unique<SplashScreen>(sdl_helper.get(), u5_resources.get());
 	splash_screen->LoadData();
-	curObject = splash_screen.get();
+	curObject = splash_screen.get();*/
 
 	intro_screen = std::make_unique<Intro>(sdl_helper.get(), u5_resources.get());
 	intro_screen->LoadData();
@@ -59,6 +59,7 @@ static void MainLoop()
 		{
 			break;
 		}
+		curObject->ProcessEvents();
 		sdl_helper->UpdateTicks();
 		curObject->GetElapsedTime();
 
@@ -71,6 +72,12 @@ static void MainLoop()
 			case U5Modes::Menu:
 				intro_screen = std::make_unique<Intro>(sdl_helper.get(), u5_resources.get());
 				intro_screen->LoadData();
+				curObject = intro_screen.get();
+				break;
+			case U5Modes::MenuSkip:
+				intro_screen = std::make_unique<Intro>(sdl_helper.get(), u5_resources.get());
+				intro_screen->LoadData();
+				intro_screen->GoToSelection();
 				curObject = intro_screen.get();
 				break;
 			default:
