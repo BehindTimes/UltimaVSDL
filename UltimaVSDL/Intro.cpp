@@ -12,6 +12,7 @@
 #include <SDL3/SDL_rect.h>
 
 extern std::unique_ptr<U5Utils> m_utilities;
+static const int NUM_STORY = 21;
 
 Intro::Intro(SDL3Helper* sdl_helper, UltimaVResource* u5_resources) :
 	GameObject(sdl_helper, u5_resources),
@@ -29,6 +30,8 @@ Intro::Intro(SDL3Helper* sdl_helper, UltimaVResource* u5_resources) :
 	m_curStoryboard(0)
 {
 	m_clearScreen = true;
+
+	m_curMode = IntroMode::STORY;
 
 	m_logo_fade_count = static_cast<int>(m_resources->m_Image16FileData[12][0].height * m_resources->m_Image16FileData[12][0].width);
 	m_cur_logo_count = m_logo_fade_count;
@@ -400,6 +403,70 @@ void Intro::RenderIntroBox()
 
 void Intro::RenderStory()
 {
+	const int NUM_STORY_DATA = 6;
+	if (m_curStoryboard >= NUM_STORY || m_resources->m_data.story_text.size() != NUM_STORY)
+	{
+		m_curMode = IntroMode::SHOW_ALL;
+		return;
+	}
+	U5StoryText& curData = m_resources->m_data.story_text[m_curStoryboard];
+	if (curData.story_number >= NUM_STORY_DATA || curData.story_number >= m_sdl_helper->m_Image16FileTextures.size())
+	{
+		return;
+	}
+	auto& curStoryImages = m_resources->m_Image16FileData[curData.story_number + IV16_STORY1];
+	auto& curStoryTextures = m_sdl_helper->m_Image16FileTextures[curData.story_number + IV16_STORY1];
+	
+	if (curData.image_index >= curStoryImages.size() || curData.image_index >= curStoryTextures.size())
+	{
+		return;
+	}
+	auto& curImageData = curStoryImages[curData.image_index];
+	auto& curImageTexture = curStoryTextures[curData.image_index];
+
+	int window_width, window_height;
+	m_sdl_helper->GetScreenDimensions(window_width, window_height);
+	float vMult = window_height / static_cast<float>(ORIGINAL_GAME_HEIGHT);
+	float hMult = window_width / static_cast<float>(ORIGINAL_GAME_WIDTH);
+
+	m_sdl_helper->RenderTextureAt(curImageTexture, curData.picture_x * hMult, curData.picture_y * vMult, curImageData.width * hMult, curImageData.height * vMult);
+
+	if (curData.action == 4)
+	{
+		if (3 >= curStoryImages.size() || 3 >= curStoryTextures.size())
+		{
+			return;
+		}
+		auto& tempImageData = curStoryImages[3];
+		auto& tempImageTexture = curStoryTextures[3];
+		float tempx = curData.picture_x * hMult;
+		float tempy = (curData.picture_y + curImageData.height) * hMult;
+		m_sdl_helper->RenderTextureAt(tempImageTexture, tempx, tempy, tempImageData.width * hMult, tempImageData.height * vMult);
+	}
+	else if (curData.action == 5)
+	{
+		if (5 >= curStoryImages.size() || 5 >= curStoryTextures.size())
+		{
+			return;
+		}
+		auto& tempImageTexture = curStoryTextures[5];
+		auto& tempImageData = curStoryImages[5];
+		float tempx = curData.picture_x * hMult;
+		float tempy = (curData.picture_y + curImageData.height) * hMult;
+		m_sdl_helper->RenderTextureAt(tempImageTexture, tempx, tempy, tempImageData.width * hMult, tempImageData.height * vMult);
+	}
+	if (curData.action == 6)
+	{
+		if (5 >= curStoryImages.size() || 7 >= curStoryTextures.size())
+		{
+			return;
+		}
+		auto& tempImageTexture = curStoryTextures[7];
+		auto& tempImageData = curStoryImages[7];
+		float tempx = curData.picture_x * hMult;
+		float tempy = (curData.picture_y + curImageData.height) * hMult;
+		m_sdl_helper->RenderTextureAt(tempImageTexture, tempx, tempy, tempImageData.width * hMult, tempImageData.height * vMult);
+	}
 }
 
 void Intro::Render()
@@ -494,7 +561,7 @@ void Intro::GoToSelection()
 void Intro::IncrementStory()
 {
 	m_curStoryboard++;
-	if (m_curStoryboard >= 21)
+	if (m_curStoryboard >= NUM_STORY)
 	{
 		m_curStoryboard = 0;
 		m_curMode = IntroMode::SHOW_ALL;

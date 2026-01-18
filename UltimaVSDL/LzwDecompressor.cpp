@@ -1,8 +1,11 @@
 #include "LzwDecompressor.h"
+#include <cstdint>
+#include <cstdio>
+#include <vector>
 
-int LzwDecompressor::bits_read = 0;
-int LzwDecompressor::dict_contains = 0;
-int LzwDecompressor::stack_contains = 0;
+size_t LzwDecompressor::bits_read = 0;
+size_t LzwDecompressor::dict_contains = 0;
+size_t LzwDecompressor::stack_contains = 0;
 size_t LzwDecompressor::position = 0;
 std::vector<dict_entry> LzwDecompressor::dict(dict_size);
 std::vector<unsigned char> LzwDecompressor::mystack(MyStack_size);
@@ -79,7 +82,7 @@ bool LzwDecompressor::get_next_codeword(int& codeword, std::vector<unsigned char
 	unsigned char b1 = 0;
 	unsigned char b2 = 0;
 
-	int xx, xy, xz;
+	size_t xx, xy, xz;
 	xx = bits_read / 8;
 
 	b0 = source[bits_read / 8];
@@ -91,8 +94,8 @@ bool LzwDecompressor::get_next_codeword(int& codeword, std::vector<unsigned char
 	{
 		b2 = source[bits_read / 8 + 2];
 	}
-	xx = b2 << 16;
-	xy = b1 << 8;
+	xx = static_cast<size_t>(b2) << 16;
+	xy = static_cast<size_t>(b1) << 8;
 	xz = b0;
 	codeword = xx + xy + xz;
 	codeword = codeword >> (bits_read % 8);
@@ -195,7 +198,7 @@ unsigned char LzwDecompressor::Stack_gettop()
 {
 	if (!Stack_is_empty())
 	{
-		return (mystack[stack_contains - 1]);
+		return (mystack[static_cast<size_t>(stack_contains - 1)]);
 	}
 	return 0;
 }

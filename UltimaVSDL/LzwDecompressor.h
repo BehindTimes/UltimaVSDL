@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <vector>
+#include <cstdint>
 
 struct dict_entry
 {
@@ -35,9 +36,9 @@ private:
 	static void Dict_add(unsigned char root, int codeword);
 	static void Get_string(int codeword);
 
-	static int bits_read;
-	static int dict_contains;
-	static int stack_contains;
+	static size_t bits_read;
+	static size_t dict_contains;
+	static size_t stack_contains;
 	static size_t position;
 	static std::vector<dict_entry> dict;
 	static std::vector<unsigned char> mystack;

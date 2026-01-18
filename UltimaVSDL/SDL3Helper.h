@@ -32,7 +32,7 @@ public:
 	void GetScreenDimensions(int& width, int& height);
 	void TurnOnPixels(SDL_Texture* texture, std::vector<int>& vec_pixels, bool on);
 	void SetRenderTarget(SDL_Texture* texture) const;
-	bool isAnyKeyHit();
+	bool isAnyKeyHit() const;
 
 	bool m_quit;
 	SDL_Renderer* m_renderer;

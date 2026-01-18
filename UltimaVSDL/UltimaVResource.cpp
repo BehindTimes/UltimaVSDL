@@ -1,6 +1,7 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <ranges>
 
 #include "UltimaVResource.h"
 #include "LzwDecompressor.h"
@@ -25,6 +26,11 @@ void UltimaVResource::Cleanup()
 
 int UltimaVResource::LoadResources()
 {
+	// This is crucial to load first, as it has information other files will need
+	if (0 != LoadDataOvl())
+	{
+		return -1;
+	}
 	if (0 != LoadBitFiles())
 	{
 		return -1;
@@ -45,14 +51,14 @@ int UltimaVResource::LoadResources()
 	return 0;
 }
 
-uint32_t UltimaVResource::ReadInt16(std::vector<unsigned char>& data, size_t& curPos)
+uint32_t UltimaVResource::ReadInt16(std::vector<unsigned char>::iterator data, size_t& curPos)
 {
 	uint32_t retVal = (static_cast<uint32_t>(data[curPos + 1]) << 8) + static_cast<uint32_t>(data[curPos]);
 	curPos += 2;
 	return retVal;
 }
 
-uint32_t UltimaVResource::ReadInt32(std::vector<unsigned char>& data, size_t& curPos)
+uint32_t UltimaVResource::ReadInt32(std::vector<unsigned char>::iterator data, size_t& curPos)
 {
 	uint32_t retVal = (static_cast<uint32_t>(data[curPos + 3]) << 24) + (static_cast<uint32_t>(data[curPos + 2]) << 16) +
 		(static_cast<uint32_t>(data[curPos + 1]) << 8) + static_cast<uint32_t>(data[curPos]);
@@ -72,11 +78,11 @@ int UltimaVResource::ReadOffsets(std::vector<unsigned char> &data, int offsetSiz
 		uint32_t offset = 0;
 		if (offsetSize == 2)
 		{
-			offset = ReadInt16(data, curPos);
+			offset = ReadInt16(data.begin(), curPos);
 		}
 		else if (offsetSize == 4)
 		{
-			offset = ReadInt32(data, curPos);
+			offset = ReadInt32(data.begin(), curPos);
 		}
 		else
 		{
@@ -93,8 +99,8 @@ int UltimaVResource::ReadImage(std::vector<unsigned char>& data, size_t offset, 
 	{
 		return -1;
 	}
-	outImage.width = ReadInt16(data, offset);
-	outImage.height = ReadInt16(data, offset);
+	outImage.width = ReadInt16(data.begin(), offset);
+	outImage.height = ReadInt16(data.begin(), offset);
 
 	uint32_t bufWidth = 0;
 
@@ -160,7 +166,7 @@ int UltimaVResource::Parse16File(std::vector<U5ImageData>& bit_file_data, std::v
 		return -1;
 	}
 	size_t curPos = 0;
-	uint32_t numImages = ReadInt16(data, curPos);
+	uint32_t numImages = ReadInt16(data.begin(), curPos);
 	if (numImages == 0 || numImages > 32)
 	{
 		return -2;
@@ -193,7 +199,7 @@ int UltimaVResource::ParseBitFile(std::vector<U5ImageData> &bit_file_data, std::
 		return -1;
 	}
 	size_t curPos = 0;
-	uint32_t numImages = ReadInt16(data, curPos);
+	uint32_t numImages = ReadInt16(data.begin(), curPos);
 	if (numImages == 0 || numImages > 32)
 	{
 		return -2;
@@ -390,3 +396,103 @@ int UltimaVResource::Load16Images()
 
 	return 0;
 }
+
+void UltimaVResource::LoadStoryText(const std::vector<unsigned char>& buffer, size_t pos, std::vector<unsigned char>& text)
+{
+	for (size_t curPos = pos; curPos < buffer.size(); curPos++)
+	{
+		if (buffer[curPos] != 0)
+		{
+			text.push_back(buffer[curPos]);
+		}
+		else
+		{
+			return;
+		}
+	}
+}
+
+int UltimaVResource::LoadStory(std::vector<unsigned char> &data_buffer)
+{
+	const size_t NUM_DATA = 0x2a; // 42
+	const size_t NUM_STORIES = 21;
+	const size_t X_LEFT_OFFSET = 0x2fa8;
+	const size_t X_RIGHT_OFFSET = 0x2fd2;
+	const size_t STORY_OFFSET = 0x3026;
+	//const size_t INTRO_OFFSET_IN_DATA_1 = 0x2f41;
+	//const size_t INTRO_OFFSET_IN_DATA_2 = 0x2f6f;
+	const size_t STORY_IMAGE_INDEX = 0x30a8;
+	const size_t STORY_NUMBER = 0x30be;
+	const size_t STORY_PIC_X = 0x30d4;
+	const size_t STORY_PIC_Y = 0x30ea;
+	const size_t STORY_PIC_SECONDARY = 0x3100;
+
+	std::string strStoryFile("STORY.DAT");
+	std::filesystem::path file_path = GAME_DIRECTORY / strStoryFile;
+	if (!std::filesystem::exists(file_path))
+	{
+		return -1;
+	}
+	std::uintmax_t file_size = std::filesystem::file_size(file_path);
+	std::vector<unsigned char> buffer(file_size);
+	std::ifstream file(file_path, std::ios::binary);
+	file.read(reinterpret_cast<char*>(buffer.data()), static_cast<std::streamsize>(file_size));
+	file.close();
+
+	for (size_t index = 0; index < NUM_DATA; index++)
+	{
+		m_data.story_data[index].text_left_pos = data_buffer[X_LEFT_OFFSET + index];
+		//m_data.story_data[index].text_right_pos = data_buffer[index];
+		size_t temppos = X_RIGHT_OFFSET + index * 2;
+		m_data.story_data[index].text_right_pos = ReadInt16(data_buffer.begin(), temppos);
+	}
+
+	for (size_t index = 0; index < NUM_STORIES; index++)
+	{
+		size_t temppos = STORY_OFFSET + index * 2;
+		m_data.story_text[index].text_offset = ReadInt16(data_buffer.begin(), temppos);
+		if (m_data.story_text[index].text_offset >= buffer.size())
+		{
+			return -2;
+		}
+		// Action 3 overrides everything
+		if (m_data.story_text[index].text_offset == 0)
+		{
+			LoadStoryText(buffer, m_data.story_text[index].text_offset, m_data.story_text[index].text);
+		}
+		m_data.story_text[index].image_index = data_buffer[STORY_IMAGE_INDEX + index];
+		m_data.story_text[index].story_number = data_buffer[STORY_NUMBER + index];
+		m_data.story_text[index].picture_x = data_buffer[STORY_PIC_X + index];
+		m_data.story_text[index].picture_y = data_buffer[STORY_PIC_Y + index];
+		m_data.story_text[index].action = data_buffer[STORY_PIC_SECONDARY + index];
+	}
+
+	return 0;
+}
+
+int UltimaVResource::LoadDataOvl()
+{
+	std::string strStoryFile("DATA.OVL");
+	std::filesystem::path file_path = GAME_DIRECTORY / strStoryFile;
+	if (!std::filesystem::exists(file_path))
+	{
+		return -1;
+	}
+	std::uintmax_t file_size = std::filesystem::file_size(file_path);
+	std::vector<unsigned char> buffer(file_size);
+	std::ifstream file(file_path, std::ios::binary);
+	file.read(reinterpret_cast<char*>(buffer.data()), static_cast<std::streamsize>(file_size));
+	file.close();
+	// The file should be 48464 (0xbd50) bytes long, but who knows if someone will ever hack the
+	// file, so just have a basic sanity check
+	if (buffer.size() < 0xA000)
+	{
+		return -2;
+	}
+	if (0 != LoadStory(buffer))
+	{
+		return -3;
+	}
+	return 0;
+}
+

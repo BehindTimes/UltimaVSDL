@@ -17,6 +17,7 @@
 #include <SDL3/SDL_video.h>
 #include "UltimaVResource.h"
 #include "U5Enums.h"
+#include <SDL3/SDL_keycode.h>
 
 SDL3Helper::SDL3Helper() :
 	m_window(nullptr),
@@ -341,7 +342,7 @@ void SDL3Helper::CreateOutlineTexture(SDL_Texture*& texture, const U5ImageData& 
 						outline = true;
 					}
 				}
-				if (x < curData.width - 1)
+				if (x < static_cast<size_t>(curData.width) - 1)
 				{
 					if (curData.pixel_data[y * curData.width + (x + 1)] == 0)
 					{
@@ -355,7 +356,7 @@ void SDL3Helper::CreateOutlineTexture(SDL_Texture*& texture, const U5ImageData& 
 						outline = true;
 					}
 				}
-				if (y < curData.height - 1)
+				if (y < static_cast<size_t>(curData.height - 1))
 				{
 					if (curData.pixel_data[(y + 1) * curData.width + x] == 0)
 					{
@@ -566,7 +567,7 @@ void SDL3Helper::SetRenderTarget(SDL_Texture* texture) const
 	SDL_SetRenderTarget(m_renderer, texture);
 }
 
-bool SDL3Helper::isAnyKeyHit()
+bool SDL3Helper::isAnyKeyHit() const
 {
 	return m_anyKeyHit;
 }
