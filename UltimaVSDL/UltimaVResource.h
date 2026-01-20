@@ -46,6 +46,8 @@ struct U5Data
 {
 	const size_t NUM_STORIES = 21;
 	std::vector<U5StoryScreen> story_text{ NUM_STORIES };
+	std::vector<unsigned char> intro_string_1;
+	std::vector<unsigned char> intro_string_2;
 };
 
 enum class BitFileNames : uint_fast8_t

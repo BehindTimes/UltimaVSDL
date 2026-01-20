@@ -41,7 +41,8 @@ int SDL3Helper::Intialize()
 		return 3;
 	}
 
-	if (!SDL_CreateWindowAndRenderer("Ultima V - SDL", RENDER_WIDTH, RENDER_HEIGHT, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE /*| SDL_WINDOW_HIGH_PIXEL_DENSITY*/, &m_window, &m_renderer))
+	if (!SDL_CreateWindowAndRenderer("Ultima V - SDL", 640, 400, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE /*| SDL_WINDOW_HIGH_PIXEL_DENSITY*/, &m_window, &m_renderer))
+	//if (!SDL_CreateWindowAndRenderer("Ultima V - SDL", RENDER_WIDTH, RENDER_HEIGHT, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE /*| SDL_WINDOW_HIGH_PIXEL_DENSITY*/, &m_window, &m_renderer))
 	{
 		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't create window and renderer: %s", SDL_GetError());
 		return 3;
@@ -550,7 +551,8 @@ void SDL3Helper::LoadImage16FileTextures(UltimaVResource* u5_resources)
 		for (int indexPic = 0; indexPic < u5_resources->m_Image16FileData[indexBit].size(); indexPic++)
 		{
 			U5ImageData &curData = u5_resources->m_Image16FileData[indexBit][indexPic];
-			CreateTextureFromMemory(m_Image16FileTextures[indexBit][indexPic], curData);
+			unsigned char trans_color[3] = { 0,0,0 };
+			CreateTextureFromMemory(m_Image16FileTextures[indexBit][indexPic], curData, IV16_TEXT == indexBit, trans_color);
 		}
 	}
 	LoadFadeTexture(u5_resources->m_Image16FileData[12][0], m_LogoFadeTexture, false);

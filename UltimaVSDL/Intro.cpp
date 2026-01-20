@@ -11,6 +11,7 @@
 #include "ColorData.h"
 #include <SDL3/SDL_rect.h>
 #include <iostream>
+#include <string>
 
 extern std::unique_ptr<U5Utils> m_utilities;
 static const int NUM_STORY = 21;
@@ -432,9 +433,73 @@ void Intro::RenderStory()
 
 	m_sdl_helper->RenderTextureAt(curImageTexture, curData.picture_x * hMult, curData.picture_y * vMult, curImageData.width * hMult, curImageData.height * vMult);
 
+	// This is case specific handling
+	if (curData.action == 3)
+	{
+		if (curStoryImages.size() > 3)
+		{
+			const float x_offset = 24;
+			const float y_offset = 1;
+			auto& curImageData1 = curStoryImages[3];
+			auto& curImageTexture1 = curStoryTextures[3];
+			m_sdl_helper->RenderTextureAt(curImageTexture1, (curData.picture_x + x_offset) * hMult,
+				(curData.picture_y + y_offset) * vMult, curImageData1.width * hMult, curImageData1.height * vMult);
+		}
+	}
+
 	m_sdl_helper->RenderTextureAt(m_sdl_helper->m_FullScreenTexture, 0, 0, RENDER_WIDTH, RENDER_HEIGHT);
 
-	if (curData.action == 4)
+	if (curData.action == 1)
+	{
+		float title_x_pos[2] = { 0,0 };
+		float title_y_pos[2] = { 0,0 };
+		SDL_Texture* title_texture[2] = { nullptr, nullptr };
+		U5ImageData title_data[2];
+
+		switch (curData.story_number)
+		{
+		case 0:
+			title_x_pos[0] = 224;
+			title_y_pos[0] = 30;
+			title_x_pos[1] = 168;
+			title_y_pos[1] = 58;
+			title_texture[0] = m_sdl_helper->m_Image16FileTextures[IV16_TEXT][0];
+			title_texture[1] = m_sdl_helper->m_Image16FileTextures[IV16_TEXT][1];
+			title_data[0] = m_resources->m_Image16FileData[IV16_TEXT][0];
+			title_data[1] = m_resources->m_Image16FileData[IV16_TEXT][1];
+			break;
+		case 2:
+			title_x_pos[0] = 232;
+			title_y_pos[0] = 26;
+			title_x_pos[1] = 200;
+			title_y_pos[1] = 54;
+			title_texture[0] = m_sdl_helper->m_Image16FileTextures[IV16_TEXT][0];
+			title_texture[1] = m_sdl_helper->m_Image16FileTextures[IV16_TEXT][2];
+			title_data[0] = m_resources->m_Image16FileData[IV16_TEXT][0];
+			title_data[1] = m_resources->m_Image16FileData[IV16_TEXT][2];
+			break;
+		case 5:
+			title_x_pos[0] = 184;
+			title_y_pos[0] = 0;
+			title_x_pos[1] = 248;
+			title_y_pos[1] = 0;
+			title_texture[0] = m_sdl_helper->m_Image16FileTextures[IV16_TEXT][0];
+			title_texture[1] = m_sdl_helper->m_Image16FileTextures[IV16_TEXT][3];
+			title_data[0] = m_resources->m_Image16FileData[IV16_TEXT][0];
+			title_data[1] = m_resources->m_Image16FileData[IV16_TEXT][3];
+			break;
+		default:
+			break;
+		}
+		if (title_texture[0] != nullptr && title_texture[1] != nullptr)
+		{
+			m_sdl_helper->RenderTextureAt(title_texture[0], title_x_pos[0] * hMult, title_y_pos[0] * vMult,
+				title_data[0].width * hMult, title_data[0].height * vMult);
+			m_sdl_helper->RenderTextureAt(title_texture[1], title_x_pos[1] * hMult, title_y_pos[1] * vMult,
+				title_data[1].width * hMult, title_data[1].height * vMult);
+		}
+	}
+	else if (curData.action == 4)
 	{
 		if (3 >= curStoryImages.size() || 3 >= curStoryTextures.size())
 		{
@@ -458,7 +523,7 @@ void Intro::RenderStory()
 		float tempy = (curData.picture_y + curImageData.height) * hMult;
 		m_sdl_helper->RenderTextureAt(tempImageTexture, tempx, tempy, tempImageData.width * hMult, tempImageData.height * vMult);
 	}
-	if (curData.action == 6)
+	else if (curData.action == 6)
 	{
 		if (5 >= curStoryImages.size() || 7 >= curStoryTextures.size())
 		{
@@ -573,78 +638,11 @@ void Intro::IncrementStory()
 	RenderStoryTexture();
 }
 
-std::vector<std::string> Intro::GetWords(std::vector<unsigned char> characters)
-{
-	std::vector<std::string> words;
-	std::string curWord;
-	for (unsigned char c : characters)
-	{
-		if (c == 0x7b)
-		{
-			if (!curWord.empty())
-			{
-				words.push_back(curWord);
-			}
-			words.push_back("\t");
-			curWord.clear();
-		}
-		else if (c == '\n')
-		{
-			if (!curWord.empty())
-			{
-				words.push_back(curWord);
-			}
-			words.push_back("\n");
-			curWord.clear();
-		}
-		else if (c == ' ')
-		{
-			if (!curWord.empty())
-			{
-				words.push_back(curWord);
-			}
-			curWord.clear();
-		}
-		else if (c == '_')
-		{
-			continue;
-		}
-		else
-		{
-			curWord += static_cast<char>(c);
-		}
-	}
-	if (!curWord.empty())
-	{
-		words.push_back(curWord);
-	}
-	return words;
-}
-
-int Intro::GetTextExtent(std::string word)
-{
-	if (word == "\t")
-	{
-		return 28;
-	}
-	int wordlen = static_cast<int>(word.size()) - 1;
-	for (size_t index = 0; index < word.length(); index++)
-	{
-		auto& curLetter = m_resources->m_ProportionalFontData[index];
-		wordlen += curLetter.real_width;
-	}
-	return wordlen;
-}
-
 // The game wants full words, and will space those words appropriately.
 // That is unless an _ is found, at which point, if that still fits, it will cut off at that and use a -.
 int Intro::GetLine(int left, int right, size_t start_word, std::vector<unsigned char> letter_list, std::string &str_out,
 	int &num_spaces, int &final_size)
 {
-	/*if (letter_list.size() == 438)
-	{
-		int j = 0;
-	}*/
 	const int SPACE_LEN = 5;
 	auto& dash_letter = m_resources->m_ProportionalFontData[13];
 	int dash_len = dash_letter.real_width;
@@ -810,21 +808,25 @@ void Intro::RenderIntroLine(int x_left, int x_right, int y_pos, std::string str_
 void Intro::RenderStoryTexture()
 {
 	const int LINE_HEIGHT = 9;
-	//m_sdl_helper->GetScreenDimensions(m_window_width, m_window_height);
-	//float vMult = m_window_height / static_cast<float>(ORIGINAL_GAME_HEIGHT);
-	//float hMult = m_window_width / static_cast<float>(ORIGINAL_GAME_WIDTH);
 
 	m_sdl_helper->SetRenderTarget(m_sdl_helper->m_FullScreenTexture);
 	m_sdl_helper->ClearScreen();
 
 	auto& curData = m_resources->m_data.story_text[m_curStoryboard];
 
-	//int paragraphnum = 0;
-	//int temppos = curData.first_line_offset;
+	// This is a special case
+	if (curData.action == 3)
+	{
+		std::string strLine1(m_resources->m_data.intro_string_1.begin(), m_resources->m_data.intro_string_1.end());
+		RenderIntroLine(32, 47, 9, strLine1, 0, 0);
+		std::string strLine2(m_resources->m_data.intro_string_2.begin(), m_resources->m_data.intro_string_2.end());
+		RenderIntroLine(32, 47, 180, strLine2, 0, 0);
+		m_sdl_helper->SetRenderTarget(nullptr);
+		return;
+	}
+
 	int ypos = curData.text_y_pos;
 
-	//std::vector<std::string> words = GetWords(curData.text);
-	
 	// Render the first sentence
 	int x_left = curData.first_line_offset;
 	int x_right = curData.paragraph[0].text_right_pos;

@@ -491,8 +491,8 @@ void UltimaVResource::LoadStoryText(const std::vector<unsigned char>& buffer, si
 
 int UltimaVResource::LoadStory(std::vector<unsigned char> &data_buffer)
 {
-	//const size_t INTRO_OFFSET_IN_DATA_1 = 0x2f41;
-	//const size_t INTRO_OFFSET_IN_DATA_2 = 0x2f6f;
+	const size_t INTRO_OFFSET_IN_DATA_1 = 0x2f41;
+	const size_t INTRO_OFFSET_IN_DATA_2 = 0x2f6f;
 
 	const size_t NUM_STORIES = 21;
 	const size_t X_LEFT_PARAGRAPH_OFFSET = 0x2fa8;
@@ -520,13 +520,8 @@ int UltimaVResource::LoadStory(std::vector<unsigned char> &data_buffer)
 	file.read(reinterpret_cast<char*>(buffer.data()), static_cast<std::streamsize>(file_size));
 	file.close();
 
-	/*for (size_t index = 0; index < NUM_DATA; index++)
-	{
-		m_data.story_data[index].text_left_pos = data_buffer[X_LEFT_OFFSET + index];
-		//m_data.story_data[index].text_right_pos = data_buffer[index];
-		size_t temppos = X_RIGHT_OFFSET + index * 2;
-		m_data.story_data[index].text_right_pos = ReadInt16(data_buffer.begin(), temppos);
-	}*/
+	LoadStoryText(data_buffer, INTRO_OFFSET_IN_DATA_1, m_data.intro_string_1);
+	LoadStoryText(data_buffer, INTRO_OFFSET_IN_DATA_2, m_data.intro_string_2);
 
 	for (size_t index = 0; index < NUM_STORIES; index++)
 	{
