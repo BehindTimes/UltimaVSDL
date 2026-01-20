@@ -499,6 +499,12 @@ void Intro::RenderStory()
 				title_data[1].width * hMult, title_data[1].height * vMult);
 		}
 	}
+	else if (curData.action == 2)
+	{
+		float tempx = 40 * hMult;
+		float tempy = 86 * hMult;
+		m_sdl_helper->RenderTextureAt(m_sdl_helper->m_AnkhFadeTexture, tempx, tempy, CODEX_WIDTH * hMult, CODEX_HEIGHT * vMult);
+	}
 	else if (curData.action == 4)
 	{
 		if (3 >= curStoryImages.size() || 3 >= curStoryTextures.size())
@@ -577,11 +583,18 @@ void Intro::LoadData()
 	SetSDLData();
 	CreateIntroBox();
 	RenderStoryTexture();
+	CreateStreamingTextures();
 }
 
 void Intro::SetSDLData()
 {
 	GameObject::SetSDLData();
+}
+
+void Intro::CreateStreamingTextures()
+{
+	//m_sdl_helper->ClearStreamingTexture(m_sdl_helper->m_AnkhFadeTexture);
+	//m_sdl_helper->CopyTextureToStreaming(m_sdl_helper->m_AnkhFadeTexture, );
 }
 
 void Intro::CreateIntroBox()
@@ -808,11 +821,29 @@ void Intro::RenderIntroLine(int x_left, int x_right, int y_pos, std::string str_
 void Intro::RenderStoryTexture()
 {
 	const int LINE_HEIGHT = 9;
+	const size_t ANKH_LOCATION = 2;
+
+	auto& curData = m_resources->m_data.story_text[m_curStoryboard];
+
+	// This is a very specific case, where it will copy 45x34 of the third texture to fade in
+	// Now, this is only done in one place in the game, but let's stay compliant to the original engine
+	if (curData.action == 2)
+	{
+		if (m_resources->m_Image16FileData[static_cast<size_t>(IV16_STORY1 + curData.story_number)].size() > (ANKH_LOCATION) &&
+			m_sdl_helper->m_Image16FileTextures[static_cast<size_t>(IV16_STORY1 + curData.story_number)].size() > (ANKH_LOCATION))
+		{
+			auto& curTexture = m_resources->m_Image16FileData[static_cast<size_t>(IV16_STORY1 + curData.story_number)][ANKH_LOCATION];
+			if (curTexture.width >= static_cast<uint32_t>(CODEX_WIDTH) && curTexture.height >= static_cast<uint32_t>(CODEX_HEIGHT))
+			{
+				m_sdl_helper->CopyTextureToStreaming(curTexture,
+					m_sdl_helper->m_AnkhFadeTexture, CODEX_WIDTH, CODEX_HEIGHT);
+			}
+		}
+		//
+	}
 
 	m_sdl_helper->SetRenderTarget(m_sdl_helper->m_FullScreenTexture);
 	m_sdl_helper->ClearScreen();
-
-	auto& curData = m_resources->m_data.story_text[m_curStoryboard];
 
 	// This is a special case
 	if (curData.action == 3)

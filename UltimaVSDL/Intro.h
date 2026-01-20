@@ -39,6 +39,7 @@ private:
 	void RenderStoryTexture();
 	void RenderIntroBox();
 	void CreateIntroBox();
+	void CreateStreamingTextures();
 	void IncrementStory();
 	int GetLine(int left, int right, size_t start_word, std::vector<unsigned char> letter_list, std::string &str_out, int& num_spaces, int& final_size);
 	void RenderIntroLine(int x_left, int x_right, int y_pos, std::string str_line, int num_spaces, int final_size);
@@ -49,6 +50,8 @@ private:
 	Uint64 m_curWodFade;
 	int m_curFlame;
 
+	const int CODEX_WIDTH = 36; // We only copy a portion of the andh texture
+	const int CODEX_HEIGHT = 34;
 	const Uint64 FLAME_DELAY = 100;
 	const Uint64 LOGO_FADE_DELAY = 3000;
 	const Uint64 FLAME_FADE_1_DELAY = 3000;

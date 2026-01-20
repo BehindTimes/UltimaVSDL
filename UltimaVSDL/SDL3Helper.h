@@ -6,6 +6,7 @@
 #include <vector>
 #include <SDL3/SDL_render.h>
 #include <SDL3/SDL_video.h>
+#include <cstdint>
 
 enum TARGET_TEXTURE_VAL
 {
@@ -33,6 +34,8 @@ public:
 	void TurnOnPixels(SDL_Texture* texture, std::vector<int>& vec_pixels, bool on);
 	void SetRenderTarget(SDL_Texture* texture) const;
 	bool isAnyKeyHit() const;
+	void ClearStreamingTexture(SDL_Texture *texture);
+	void CopyTextureToStreaming(U5ImageData &texture, SDL_Texture *streaming_texture, uint32_t width, uint32_t height);
 
 	bool m_quit;
 	SDL_Renderer* m_renderer;
@@ -47,6 +50,7 @@ public:
 	SDL_Texture* m_Flame1FadeTexture;
 	SDL_Texture* m_WoDFadeTexture;
 	SDL_Texture* m_FullScreenTexture;
+	SDL_Texture* m_AnkhFadeTexture;
 private:
 	void LoadPathFileTexture(UltimaVResource* u5_resources);
 	void LoadBitFileTextures(UltimaVResource* u5_resources);
@@ -57,6 +61,7 @@ private:
 	void LoadFadeTexture(U5ImageData& data, SDL_Texture*& texture, bool alpha, bool has_transparent = false, unsigned char transparent_color[3] = {}) const;
 	void LoadMaskTexture(U5ImageData& data, SDL_Texture*& texture, bool alpha) const;
 	void LoadTargetTextures();
+	void LoadStreamingTextures();
 	void CreateOutlineTexture(SDL_Texture*& texture, const U5ImageData& curData, unsigned char color_data[3]) const;
 
 	SDL_Window* m_window;

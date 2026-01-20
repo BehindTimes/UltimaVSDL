@@ -18,6 +18,7 @@
 #include "UltimaVResource.h"
 #include "U5Enums.h"
 #include <SDL3/SDL_keycode.h>
+#include <cstdint>
 
 SDL3Helper::SDL3Helper() :
 	m_window(nullptr),
@@ -29,7 +30,8 @@ SDL3Helper::SDL3Helper() :
 	m_LogoFadeTexture(nullptr),
 	m_WoDFadeTexture(nullptr),
 	m_Flame1FadeTexture(nullptr),
-	m_anyKeyHit(false)
+	m_anyKeyHit(false),
+	m_AnkhFadeTexture(nullptr)
 {
 }
 
@@ -150,6 +152,12 @@ void SDL3Helper::Cleanup()
 	{
 		SDL_DestroyTexture(m_FullScreenTexture);
 		m_FullScreenTexture = nullptr;
+	}
+
+	if (m_AnkhFadeTexture)
+	{
+		SDL_DestroyTexture(m_AnkhFadeTexture);
+		m_AnkhFadeTexture = nullptr;
 	}
 
 	SDL_DestroyRenderer(m_renderer);
@@ -522,6 +530,20 @@ void SDL3Helper::LoadFadeTexture(U5ImageData& data, SDL_Texture *&texture, bool 
 	SDL_SetTextureScaleMode(texture, SDL_SCALEMODE_NEAREST);
 }
 
+void SDL3Helper::ClearStreamingTexture(SDL_Texture* texture)
+{
+	unsigned char* pixels = NULL;
+	int pitch;
+	float width, height;
+	SDL_GetTextureSize(texture, &width, &height);
+
+	SDL_LockTexture(texture, NULL, (void**)&pixels, &pitch);
+
+	memset(pixels, 0, sizeof(unsigned char) * static_cast<size_t>(width * height * 4));
+
+	SDL_UnlockTexture(texture);
+}
+
 void SDL3Helper::TurnOnPixels(SDL_Texture* texture, std::vector<int>& vec_pixels, bool on)
 {
 	unsigned char* pixels = NULL;
@@ -570,6 +592,13 @@ void SDL3Helper::LoadProportionalFontTextures(UltimaVResource* u5_resources)
 	}
 }
 
+void SDL3Helper::LoadStreamingTextures()
+{
+	m_AnkhFadeTexture = SDL_CreateTexture(m_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING,
+		36, 34);
+	SDL_SetTextureScaleMode(m_AnkhFadeTexture, SDL_SCALEMODE_NEAREST);
+}
+
 void SDL3Helper::LoadTargetTextures()
 {
 	m_TargetTextures.resize(2);
@@ -592,6 +621,7 @@ void SDL3Helper::LoadImageData(UltimaVResource *u5_resources)
 	LoadCharacterSetTextures(u5_resources);
 	LoadProportionalFontTextures(u5_resources);
 	LoadTargetTextures();
+	LoadStreamingTextures();
 }
 
 void SDL3Helper::UpdateTicks()
@@ -612,4 +642,49 @@ void SDL3Helper::SetRenderTarget(SDL_Texture* texture) const
 bool SDL3Helper::isAnyKeyHit() const
 {
 	return m_anyKeyHit;
+}
+
+void SDL3Helper::CopyTextureToStreaming(U5ImageData &texture, SDL_Texture *streaming_texture, uint32_t width, uint32_t height)
+{
+	float tex_width, tex_height;
+	SDL_GetTextureSize(streaming_texture, &tex_width, &tex_height);
+
+	// Not going to be 100% compliant here.
+	if (width < tex_width || height < tex_height ||
+		texture.width < width|| texture.height < height)
+	{
+		ClearStreamingTexture(streaming_texture);
+		return;
+	}
+
+	unsigned char* pixels = NULL;
+	int pitch;
+	ClearStreamingTexture(streaming_texture);
+	SDL_LockTexture(streaming_texture, NULL, (void**)&pixels, &pitch);
+	unsigned char color_data[3];
+
+	for (size_t y = 0; y < height; y++)
+	{
+		for (size_t x = 0; x < width; x++)
+		{
+			if (x > tex_width)
+			{
+				break;
+			}
+			unsigned char curPixel = texture.pixel_data[texture.width * y + x];
+			std::memcpy(color_data, ega_table[curPixel], sizeof(color_data));
+
+			//pixels[(y * pitch) + (x * 4)] = alpha ? 0xFF : 0x00;
+			pixels[(y * pitch + (x * 4)) + 0] = 0xFF;
+			pixels[(y * pitch + (x * 4)) + 1] = color_data[2];
+			pixels[(y * pitch + (x * 4)) + 2] = color_data[1];
+			pixels[(y * pitch + (x * 4)) + 3] = color_data[0];
+		}
+		if (y > tex_height)
+		{
+			break;
+		}
+	}
+
+	SDL_UnlockTexture(streaming_texture);
 }
