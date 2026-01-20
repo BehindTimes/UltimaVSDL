@@ -97,7 +97,7 @@ bool LzwDecompressor::get_next_codeword(int& codeword, std::vector<unsigned char
 	xx = static_cast<size_t>(b2) << 16;
 	xy = static_cast<size_t>(b1) << 8;
 	xz = b0;
-	codeword = xx + xy + xz;
+	codeword = static_cast<int>(xx + xy + xz);
 	codeword = codeword >> (bits_read % 8);
 	switch (codeword_size)
 	{

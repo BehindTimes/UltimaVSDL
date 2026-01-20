@@ -112,6 +112,15 @@ void SDL3Helper::Cleanup()
 	}
 	m_ArrowTextures.clear();
 
+	for (auto& curTexture : m_ProportionalFontTextures)
+	{
+		if (curTexture)
+		{
+			SDL_DestroyTexture(curTexture);
+		}
+	}
+	m_ProportionalFontTextures.clear();
+
 	if (m_LogoFadeTexture)
 	{
 		SDL_DestroyTexture(m_LogoFadeTexture);
@@ -134,6 +143,12 @@ void SDL3Helper::Cleanup()
 	{
 		SDL_DestroyTexture(m_PathFileTexture);
 		m_PathFileTexture = nullptr;
+	}
+
+	if (m_FullScreenTexture)
+	{
+		SDL_DestroyTexture(m_FullScreenTexture);
+		m_FullScreenTexture = nullptr;
 	}
 
 	SDL_DestroyRenderer(m_renderer);
@@ -229,7 +244,7 @@ void SDL3Helper::Poll()
 	}
 }
 
-void SDL3Helper::CreateTextureFromMemory(SDL_Texture *&texture, const U5ImageData &curData) const
+void SDL3Helper::CreateTextureFromMemory(SDL_Texture *&texture, const U5ImageData &curData, bool has_transparent, unsigned char transparent_color[3]) const
 {
 	texture = SDL_CreateTexture(m_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STATIC,
 		static_cast<int>(curData.width), static_cast<int>(curData.height));
@@ -271,9 +286,20 @@ void SDL3Helper::CreateTextureFromMemory(SDL_Texture *&texture, const U5ImageDat
 					std::memcpy(colorArray, ega_table[curByte], sizeof(colorArray));
 				}
 			}
+
+			unsigned char alpha = 0xFF;
+			if (has_transparent)
+			{
+				if (transparent_color[0] == colorArray[0] &&
+					transparent_color[1] == colorArray[1] &&
+					transparent_color[2] == colorArray[2])
+				{
+					alpha = 0;
+				}
+			}
 			
 			// ABGR
-			canvas[(y * curData.width * 4 + x * 4) + 0] = 0xFF;
+			canvas[(y * curData.width * 4 + x * 4) + 0] = alpha;
 			canvas[(y * curData.width * 4 + x * 4) + 1] = colorArray[2];
 			canvas[(y * curData.width * 4 + x * 4) + 2] = colorArray[1];
 			canvas[(y * curData.width * 4 + x * 4) + 3] = colorArray[0];
@@ -532,6 +558,16 @@ void SDL3Helper::LoadImage16FileTextures(UltimaVResource* u5_resources)
 	SDL_SetTextureColorMod(m_Flame1FadeTexture, 0, 0, 0);
 }
 
+void SDL3Helper::LoadProportionalFontTextures(UltimaVResource* u5_resources)
+{
+	m_ProportionalFontTextures.resize(u5_resources->m_ProportionalFontData.size());
+	unsigned char black[3] = { 0,0,0 };
+	for (size_t index = 0; index < u5_resources->m_ProportionalFontData.size(); index++)
+	{
+		CreateTextureFromMemory(m_ProportionalFontTextures[index], u5_resources->m_ProportionalFontData[index], true, black);
+	}
+}
+
 void SDL3Helper::LoadTargetTextures()
 {
 	m_TargetTextures.resize(2);
@@ -541,6 +577,9 @@ void SDL3Helper::LoadTargetTextures()
 	m_TargetTextures[TTV_INTROBOX_DISPLAY] = SDL_CreateTexture(m_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET,
 		19 * TILE_WIDTH, 4 * TILE_HEIGHT);
 	SDL_SetTextureScaleMode(m_TargetTextures[TTV_INTROBOX_DISPLAY], SDL_SCALEMODE_NEAREST);
+
+	m_FullScreenTexture = SDL_CreateTexture(m_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET,
+		RENDER_WIDTH, RENDER_HEIGHT);
 }
 
 void SDL3Helper::LoadImageData(UltimaVResource *u5_resources)
@@ -549,6 +588,7 @@ void SDL3Helper::LoadImageData(UltimaVResource *u5_resources)
 	LoadPathFileTexture(u5_resources);
 	LoadImage16FileTextures(u5_resources);
 	LoadCharacterSetTextures(u5_resources);
+	LoadProportionalFontTextures(u5_resources);
 	LoadTargetTextures();
 }
 

@@ -1,23 +1,34 @@
 #pragma once
 #include <vector>
 #include <cstdint>
+#include <cstring>
 
-struct U5StoryData
+struct U5StoryParagraphInfo
 {
+	U5StoryParagraphInfo() :
+		text_left_pos(0),
+		text_right_pos(0),
+		y_extent(0)
+	{
+	}
 	int text_left_pos;
 	int text_right_pos;
+	int y_extent;
 };
 
-struct U5StoryText
+struct U5StoryScreen
 {
-	U5StoryText() :
+	U5StoryScreen() :
 		text_offset(0),
 		image_index(0),
 		story_number(0),
 		picture_x(0),
 		picture_y(0),
-		action(0)
+		action(0),
+		first_line_offset(0),
+		text_y_pos(0)
 	{
+		std::memset(paragraph, 0, sizeof(U5StoryParagraphInfo));
 	}
 	size_t text_offset;
 	std::vector<unsigned char> text;
@@ -26,12 +37,15 @@ struct U5StoryText
 	int picture_x;
 	int picture_y;
 	int action;
+	int first_line_offset;
+	int text_y_pos;
+	U5StoryParagraphInfo paragraph[2];
 };
 
 struct U5Data
 {
-	std::vector<U5StoryData> story_data{ 0x2a };
-	std::vector<U5StoryText> story_text{ 21 };
+	const size_t NUM_STORIES = 21;
+	std::vector<U5StoryScreen> story_text{ NUM_STORIES };
 };
 
 enum class BitFileNames : uint_fast8_t
@@ -56,6 +70,12 @@ struct U5ImageData
 	std::vector<unsigned char> pixel_data;
 };
 
+struct U5PaddedImageData : public U5ImageData
+{
+	uint32_t real_width;
+	uint32_t real_height;
+};
+
 class UltimaVResource
 {
 public:
@@ -68,6 +88,7 @@ public:
 	std::vector<unsigned char> m_PathFileData;
 	std::vector<std::vector<U5ImageData>> m_Image16FileData;
 	std::vector<std::vector<std::vector<U5ImageData>>> m_CharacterSetsData;
+	std::vector<U5PaddedImageData> m_ProportionalFontData;
 	U5Data m_data;
 private:
 	
@@ -79,6 +100,7 @@ private:
 	int LoadStory(std::vector<unsigned char> &buffer);
 	int LoadDataOvl();
 	int LoadCharacterSets();
+	int LoadProportionalFont();
 	int ParseCharacterFile(std::vector<U5ImageData>& bit_file_data, std::vector<unsigned char>& data, int width, int height);
 	int ParseBitFile(std::vector<U5ImageData> &bit_file_data, std::vector<unsigned char> &data);
 	int Parse16File(std::vector<U5ImageData>& bit_file_data, std::vector<unsigned char>& data, int numPixelsPerByte);

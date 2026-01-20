@@ -3,6 +3,7 @@
 #include "GameObject.h"
 #include <cstdint>
 #include <vector>
+#include <string>
 #include <SDL3/SDL_stdinc.h>
 #include "SDL3Helper.h"
 #include "UltimaVResource.h"
@@ -35,9 +36,14 @@ private:
 	void RenderLogo();
 	void RenderWoD();
 	void RenderStory();
+	void RenderStoryTexture();
 	void RenderIntroBox();
 	void CreateIntroBox();
 	void IncrementStory();
+	std::vector<std::string> GetWords(std::vector<unsigned char> characters);
+	int GetTextExtent(std::string word);
+	int GetLine(int left, int right, size_t start_word, std::vector<unsigned char> letter_list, std::string &str_out, int& num_spaces, int& final_size);
+	void RenderIntroLine(int x_left, int x_right, int y_pos, std::string str_line, int num_spaces, int final_size);
 
 	Uint64 m_curDelayFlame;
 	Uint64 m_curLogoFade;

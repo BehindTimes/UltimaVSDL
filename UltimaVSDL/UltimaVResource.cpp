@@ -47,6 +47,10 @@ int UltimaVResource::LoadResources()
 	{
 		return -1;
 	}
+	if (0 != LoadProportionalFont())
+	{
+		return -1;
+	}
 
 	return 0;
 }
@@ -325,6 +329,79 @@ int UltimaVResource::LoadBitFiles()
 	return 0;
 }
 
+int UltimaVResource::LoadProportionalFont()
+{
+	std::string strStoryFile("PROPORT.PCS");
+	std::filesystem::path file_path = GAME_DIRECTORY / strStoryFile;
+	if (!std::filesystem::exists(file_path))
+	{
+		return -1;
+	}
+	std::uintmax_t file_size = std::filesystem::file_size(file_path);
+	std::vector<unsigned char> buffer(file_size);
+	std::ifstream file(file_path, std::ios::binary);
+	file.read(reinterpret_cast<char*>(buffer.data()), static_cast<std::streamsize>(file_size));
+	file.close();
+
+	std::vector<unsigned char> buffer_lzw;
+	if (!LzwDecompressor::Extract(buffer, buffer_lzw))
+	{
+		return -2;
+	}
+
+	size_t curPos = 0;
+	std::vector<uint32_t> offsets;
+
+	uint32_t num_letters = ReadInt16(buffer_lzw.begin(), curPos);
+	m_ProportionalFontData.resize(num_letters);
+	offsets.resize(num_letters);
+	
+	for (uint32_t index = 0; index < num_letters; index++)
+	{
+		if (buffer_lzw.size() <= curPos + 2)
+		{
+			return -3;
+		}
+		offsets[index] = ReadInt16(buffer_lzw.begin(), curPos);
+	}
+
+	size_t curOffset = 0;
+
+	for (uint32_t index = 0; index < num_letters; index++)
+	{
+		m_ProportionalFontData[index].height = 8;
+		m_ProportionalFontData[index].width = 8;
+		m_ProportionalFontData[index].mode = 8;
+		m_ProportionalFontData[index].pixel_data.resize(static_cast<size_t>(64));
+
+		curOffset = offsets[index];
+
+		// width + height + data
+		if (curOffset + 12 > buffer_lzw.size())
+		{
+			return -1;
+		}
+
+		m_ProportionalFontData[index].real_width = ReadInt16(buffer_lzw.begin(), curOffset);
+		m_ProportionalFontData[index].real_height = ReadInt16(buffer_lzw.begin(), curOffset);
+
+		curPos = 0;
+		for (int yIndex = 0; yIndex < 8; yIndex++)
+		{
+			unsigned char curByte = buffer_lzw[curOffset];
+			for (int bitIndex = 0; bitIndex < 8; bitIndex++)
+			{
+				unsigned char curColor = (static_cast<int>(curByte) >> ((7 - bitIndex)) & 0x1);
+				m_ProportionalFontData[index].pixel_data[curPos] = curColor;
+				curPos++;
+			}
+			curOffset++;
+		}
+	}
+
+	return 0;
+}
+
 int UltimaVResource::LoadCharacterSets()
 {
 	const int NUM_CHARACTERS = 128;
@@ -414,18 +491,22 @@ void UltimaVResource::LoadStoryText(const std::vector<unsigned char>& buffer, si
 
 int UltimaVResource::LoadStory(std::vector<unsigned char> &data_buffer)
 {
-	const size_t NUM_DATA = 0x2a; // 42
-	const size_t NUM_STORIES = 21;
-	const size_t X_LEFT_OFFSET = 0x2fa8;
-	const size_t X_RIGHT_OFFSET = 0x2fd2;
-	const size_t STORY_OFFSET = 0x3026;
 	//const size_t INTRO_OFFSET_IN_DATA_1 = 0x2f41;
 	//const size_t INTRO_OFFSET_IN_DATA_2 = 0x2f6f;
+
+	const size_t NUM_STORIES = 21;
+	const size_t X_LEFT_PARAGRAPH_OFFSET = 0x2fa8;
+	const size_t X_RIGHT_PARAGRAPH_OFFSET = 0x2fd2;
+	const size_t STORY_OFFSET = 0x3026;
+	const size_t Y_PARAGRAPH_1_EXTENT = 0x3050;
+	const size_t Y_PARAGRAPH_2_EXTENT = 0x3066;
+	const size_t X_FIRST_LINE_POS = 0x307c;
+	const size_t Y_START_POS = 0x3092;
 	const size_t STORY_IMAGE_INDEX = 0x30a8;
 	const size_t STORY_NUMBER = 0x30be;
 	const size_t STORY_PIC_X = 0x30d4;
 	const size_t STORY_PIC_Y = 0x30ea;
-	const size_t STORY_PIC_SECONDARY = 0x3100;
+	const size_t STORY_ACTION = 0x3100;
 
 	std::string strStoryFile("STORY.DAT");
 	std::filesystem::path file_path = GAME_DIRECTORY / strStoryFile;
@@ -439,13 +520,13 @@ int UltimaVResource::LoadStory(std::vector<unsigned char> &data_buffer)
 	file.read(reinterpret_cast<char*>(buffer.data()), static_cast<std::streamsize>(file_size));
 	file.close();
 
-	for (size_t index = 0; index < NUM_DATA; index++)
+	/*for (size_t index = 0; index < NUM_DATA; index++)
 	{
 		m_data.story_data[index].text_left_pos = data_buffer[X_LEFT_OFFSET + index];
 		//m_data.story_data[index].text_right_pos = data_buffer[index];
 		size_t temppos = X_RIGHT_OFFSET + index * 2;
 		m_data.story_data[index].text_right_pos = ReadInt16(data_buffer.begin(), temppos);
-	}
+	}*/
 
 	for (size_t index = 0; index < NUM_STORIES; index++)
 	{
@@ -455,16 +536,27 @@ int UltimaVResource::LoadStory(std::vector<unsigned char> &data_buffer)
 		{
 			return -2;
 		}
-		// Action 3 overrides everything
-		if (m_data.story_text[index].text_offset == 0)
-		{
-			LoadStoryText(buffer, m_data.story_text[index].text_offset, m_data.story_text[index].text);
-		}
+
+		LoadStoryText(buffer, m_data.story_text[index].text_offset, m_data.story_text[index].text);
 		m_data.story_text[index].image_index = data_buffer[STORY_IMAGE_INDEX + index];
 		m_data.story_text[index].story_number = data_buffer[STORY_NUMBER + index];
 		m_data.story_text[index].picture_x = data_buffer[STORY_PIC_X + index];
 		m_data.story_text[index].picture_y = data_buffer[STORY_PIC_Y + index];
-		m_data.story_text[index].action = data_buffer[STORY_PIC_SECONDARY + index];
+		m_data.story_text[index].action = data_buffer[STORY_ACTION + index];
+		m_data.story_text[index].text_y_pos = data_buffer[Y_START_POS + index];
+		m_data.story_text[index].first_line_offset = data_buffer[X_FIRST_LINE_POS + index];
+		m_data.story_text[index].paragraph[0].y_extent = data_buffer[Y_PARAGRAPH_1_EXTENT + index];
+		m_data.story_text[index].paragraph[1].y_extent = data_buffer[Y_PARAGRAPH_2_EXTENT + index];
+		m_data.story_text[index].paragraph[0].text_left_pos = data_buffer[X_LEFT_PARAGRAPH_OFFSET + (index * 2)];
+		m_data.story_text[index].paragraph[1].text_left_pos = data_buffer[X_LEFT_PARAGRAPH_OFFSET + (index * 2) + 1];
+		size_t curPos = X_RIGHT_PARAGRAPH_OFFSET + (index * 4);
+		auto iter = data_buffer.begin() + curPos;
+		uint32_t val = ReadInt16(data_buffer.begin(), curPos);
+		m_data.story_text[index].paragraph[0].text_right_pos = val;
+		curPos = X_RIGHT_PARAGRAPH_OFFSET + (index * 4) + 2;
+		iter = data_buffer.begin() + curPos;
+		val = ReadInt16(data_buffer.begin(), curPos);
+		m_data.story_text[index].paragraph[1].text_right_pos = val;
 	}
 
 	return 0;
