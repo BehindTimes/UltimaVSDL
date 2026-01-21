@@ -54,10 +54,17 @@ Intro::~Intro()
 
 void Intro::RenderWoD()
 {
+	float CGA_OFFSET = 0;
 	float width;
 	float height;
 
 	SDL_Texture* curTexture;
+
+	// Not sure why the Warriors of Destiny text is rendered 4 pixels over, but it is
+	if (m_resources->m_render_mode == RenderMode::CGA)
+	{
+		CGA_OFFSET = -4;
+	}
 
 	height = static_cast<float>(m_resources->m_BitFileData[2][0].height);
 	width = static_cast<float>(m_resources->m_BitFileData[2][0].width);
@@ -72,7 +79,7 @@ void Intro::RenderWoD()
 
 	x = (ORIGINAL_GAME_WIDTH - width) / 2.0f;
 	y = 64;
-	m_sdl_helper->RenderTextureAt(curTexture, x * hMult, y * vMult, width * hMult, height * vMult);
+	m_sdl_helper->RenderTextureAt(curTexture, (x + CGA_OFFSET) * hMult, y * vMult, width * hMult, height * vMult);
 }
 
 void Intro::RenderFlameFadeWoD()
@@ -206,7 +213,7 @@ void Intro::RenderFlame()
 
 void Intro::RenderIntroBox()
 {
-	const int blue = 1;
+	int blue = 1;
 
 	float x = 0;
 	float y = 15 * HALF_TILE_HEIGHT;
@@ -218,10 +225,20 @@ void Intro::RenderIntroBox()
 	curTexture = m_sdl_helper->m_TargetTextures[TTV_INTROBOX_DISPLAY];
 	m_sdl_helper->RenderTextureAt(curTexture, x, y, RENDER_WIDTH - TILE_WIDTH, TILE_HEIGHT * 4);
 
-	SDL_SetTextureColorMod(m_sdl_helper->m_CharacterSetsTextures[0][0][123], ega_table[blue][0], ega_table[blue][1], ega_table[blue][2]);
-	SDL_SetTextureColorMod(m_sdl_helper->m_CharacterSetsTextures[0][0][124], ega_table[blue][0], ega_table[blue][1], ega_table[blue][2]);
-	SDL_SetTextureColorMod(m_sdl_helper->m_CharacterSetsTextures[0][0][125], ega_table[blue][0], ega_table[blue][1], ega_table[blue][2]);
-	SDL_SetTextureColorMod(m_sdl_helper->m_CharacterSetsTextures[0][0][126], ega_table[blue][0], ega_table[blue][1], ega_table[blue][2]);
+	if (m_resources->m_render_mode == RenderMode::CGA) // CGA
+	{
+		SDL_SetTextureColorMod(m_sdl_helper->m_CharacterSetsTextures[0][0][123], cga_table[blue][0], cga_table[blue][1], cga_table[blue][2]);
+		SDL_SetTextureColorMod(m_sdl_helper->m_CharacterSetsTextures[0][0][124], cga_table[blue][0], cga_table[blue][1], cga_table[blue][2]);
+		SDL_SetTextureColorMod(m_sdl_helper->m_CharacterSetsTextures[0][0][125], cga_table[blue][0], cga_table[blue][1], cga_table[blue][2]);
+		SDL_SetTextureColorMod(m_sdl_helper->m_CharacterSetsTextures[0][0][126], cga_table[blue][0], cga_table[blue][1], cga_table[blue][2]);
+	}
+	else
+	{
+		SDL_SetTextureColorMod(m_sdl_helper->m_CharacterSetsTextures[0][0][123], ega_table[blue][0], ega_table[blue][1], ega_table[blue][2]);
+		SDL_SetTextureColorMod(m_sdl_helper->m_CharacterSetsTextures[0][0][124], ega_table[blue][0], ega_table[blue][1], ega_table[blue][2]);
+		SDL_SetTextureColorMod(m_sdl_helper->m_CharacterSetsTextures[0][0][125], ega_table[blue][0], ega_table[blue][1], ega_table[blue][2]);
+		SDL_SetTextureColorMod(m_sdl_helper->m_CharacterSetsTextures[0][0][126], ega_table[blue][0], ega_table[blue][1], ega_table[blue][2]);
+	}
 
 	m_sdl_helper->SetRenderTarget(m_sdl_helper->m_TargetTextures[TTV_INTROBOX]);
 	curTexture = m_sdl_helper->m_CharacterSetsTextures[0][0][123];
@@ -456,7 +473,15 @@ void Intro::CreateIntroBox()
 {
 	const int blue = 1;
 	m_sdl_helper->SetRenderTarget(m_sdl_helper->m_TargetTextures[TTV_INTROBOX]);
-	SDL_SetRenderDrawColor(m_sdl_helper->m_renderer, ega_table[blue][0], ega_table[blue][1], ega_table[blue][2], 0xFF);
+	if (m_resources->m_render_mode == RenderMode::CGA) // CGA
+	{
+		SDL_SetRenderDrawColor(m_sdl_helper->m_renderer, cga_table[blue][0], cga_table[blue][1], cga_table[blue][2], 0xFF);
+	}
+	else
+	{
+		SDL_SetRenderDrawColor(m_sdl_helper->m_renderer, ega_table[blue][0], ega_table[blue][1], ega_table[blue][2], 0xFF);
+	}
+	
 	//SDL_Texture* curTexture = m_sdl_helper->m_BitFileTextures[TTV_INTROBOX];
 
 	m_sdl_helper->ClearScreen();

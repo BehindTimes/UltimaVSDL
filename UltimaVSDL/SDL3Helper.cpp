@@ -31,7 +31,8 @@ SDL3Helper::SDL3Helper() :
 	m_WoDFadeTexture(nullptr),
 	m_Flame1FadeTexture(nullptr),
 	m_anyKeyHit(false),
-	m_CodexFadeTexture(nullptr)
+	m_CodexFadeTexture(nullptr),
+	m_FullScreenTexture(nullptr)
 {
 }
 
@@ -692,7 +693,15 @@ void SDL3Helper::CopyTextureToStreaming(U5ImageData &texture, SDL_Texture *strea
 				break;
 			}
 			unsigned char curPixel = texture.pixel_data[texture.width * y + x];
-			std::memcpy(color_data, ega_table[curPixel], sizeof(color_data));
+
+			if (texture.mode == 4)
+			{
+				std::memcpy(color_data, cga_table[curPixel], sizeof(color_data));
+			}
+			else
+			{
+				std::memcpy(color_data, ega_table[curPixel], sizeof(color_data));
+			}
 
 			//pixels[(y * pitch) + (x * 4)] = alpha ? 0xFF : 0x00;
 			pixels[(y * pitch + (x * 4)) + 0] = 0x00;

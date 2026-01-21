@@ -57,6 +57,12 @@ enum class BitFileNames : uint_fast8_t
 	WD = 2
 };
 
+enum class RenderMode : uint_fast8_t
+{
+	EGA,
+	CGA
+};
+
 struct U5ImageData
 {
 	U5ImageData() :
@@ -92,6 +98,7 @@ public:
 	std::vector<std::vector<std::vector<U5ImageData>>> m_CharacterSetsData;
 	std::vector<U5PaddedImageData> m_ProportionalFontData;
 	U5Data m_data;
+	RenderMode m_render_mode;
 private:
 	
 	void Cleanup();

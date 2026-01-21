@@ -9,7 +9,8 @@
 
 static const std::filesystem::path GAME_DIRECTORY("G:/source/UltimaVSDL/u5data");
 
-UltimaVResource::UltimaVResource()
+UltimaVResource::UltimaVResource() :
+	m_render_mode(RenderMode::EGA)
 {
 }
 
@@ -437,7 +438,14 @@ int UltimaVResource::LoadCharacterSets()
 
 int UltimaVResource::Load16Images()
 {
-	const std::string strExt(".16");
+	std::string strExt(".16");
+	int numPixelPerByte = 2;
+	if (m_render_mode == RenderMode::CGA)
+	{
+		strExt = std::string(".4");
+		numPixelPerByte = 4;
+	}
+
 	const std::vector<std::string> file_names = { "CREATE", "END1", "END2", "ENDSC", "STARTSC",
 			"STORY1", "STORY2", "STORY3", "STORY4", "STORY5", "STORY6", "TEXT", "ULTIMA" };
 
@@ -463,7 +471,7 @@ int UltimaVResource::Load16Images()
 		}
 		auto& curVec = m_Image16FileData[index];
 
-		if (0 != Parse16File(curVec, buffer_lzw, 2))
+		if (0 != Parse16File(curVec, buffer_lzw, numPixelPerByte))
 		{
 			return -1;
 		}

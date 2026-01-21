@@ -87,7 +87,15 @@ void SplashScreen::RenderLogo()
 		curTexture = m_sdl_helper->m_BitFileTextures[1][static_cast<size_t>(m_CurrentLogo - 1)];
 
 		int curColor = 9;
-		SDL_SetTextureColorMod(curTexture, ega_table[curColor][0], ega_table[curColor][1], ega_table[curColor][2]);
+		if (m_resources->m_render_mode == RenderMode::CGA)
+		{
+			curColor = 1;
+			SDL_SetTextureColorMod(curTexture, cga_table[curColor][0], cga_table[curColor][1], cga_table[curColor][2]);
+		}
+		else
+		{
+			SDL_SetTextureColorMod(curTexture, ega_table[curColor][0], ega_table[curColor][1], ega_table[curColor][2]);
+		}
 
 		m_sdl_helper->RenderFlipTextureAt(curTexture, x * hMult, y * vMult, width * hMult, height * vMult, (m_CurrentLogo + 1) % 2);
 	}
