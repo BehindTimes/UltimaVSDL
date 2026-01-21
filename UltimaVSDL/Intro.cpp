@@ -12,6 +12,7 @@
 #include <SDL3/SDL_rect.h>
 #include <iostream>
 #include <string>
+#include "FadeObject.h"
 
 extern std::unique_ptr<U5Utils> m_utilities;
 static const int NUM_STORY = 21;
@@ -23,29 +24,28 @@ Intro::Intro(SDL3Helper* sdl_helper, UltimaVResource* u5_resources) :
 	m_curMode(IntroMode::FADE_LOGO),
 	m_window_width(0),
 	m_window_height(0),
-	m_num_pixels(0),
-	m_num_flame1_pixels(0),
-	m_num_wod_pixels(0),
-	m_curLogoFade(0),
-	m_curFlame1Fade(0),
 	m_curWodFade(0),
 	m_curStoryboard(0)
 {
 	m_clearScreen = true;
 
-	m_curMode = IntroMode::STORY;
+	//m_curMode = IntroMode::STORY;
 
-	m_logo_fade_count = static_cast<int>(m_resources->m_Image16FileData[12][0].height * m_resources->m_Image16FileData[12][0].width);
-	m_cur_logo_count = m_logo_fade_count;
-	m_logo_fade_locations.resize(static_cast<size_t>(m_resources->m_Image16FileData[12][0].height * m_resources->m_Image16FileData[12][0].width));
+	m_LogoFade = std::make_unique<FadeObject>(sdl_helper, u5_resources);
+	m_LogoFade->SetSize(static_cast<int>(m_resources->m_Image16FileData[12][0].height * m_resources->m_Image16FileData[12][0].width));
+	m_LogoFade->SetDelay(LOGO_FADE_DELAY);
 
-	m_flame1_fade_count = static_cast<int>(m_resources->m_Image16FileData[12][1].height * m_resources->m_Image16FileData[12][1].width);
-	m_cur_flame1_fade_count = m_flame1_fade_count;
-	m_flame1_fade_locations.resize(static_cast<size_t>(m_resources->m_Image16FileData[12][1].height * m_resources->m_Image16FileData[12][1].width));
+	m_FlameFade = std::make_unique<FadeObject>(sdl_helper, u5_resources);
+	m_FlameFade->SetSize(static_cast<int>(m_resources->m_Image16FileData[12][1].height * m_resources->m_Image16FileData[12][1].width));
+	m_FlameFade->SetDelay(FLAME_FADE_DELAY);
 
-	m_wod_fade_count = static_cast<int>(m_resources->m_BitFileData[2][0].height * m_resources->m_BitFileData[2][0].width);
-	m_cur_wod_fade_count = m_wod_fade_count;
-	m_wod_fade_locations.resize(static_cast<size_t>(m_resources->m_BitFileData[2][0].height * m_resources->m_BitFileData[2][0].width));
+	m_WoDFade = std::make_unique<FadeObject>(sdl_helper, u5_resources);
+	m_WoDFade->SetSize(static_cast<size_t>(m_resources->m_BitFileData[2][0].height * m_resources->m_BitFileData[2][0].width));
+	m_WoDFade->SetDelay(WOD_FADE_DELAY);
+
+	m_CodexFade = std::make_unique<FadeObject>(sdl_helper, u5_resources);
+	m_CodexFade->SetSize(static_cast<size_t>(CODEX_WIDTH * CODEX_HEIGHT));
+	m_CodexFade->SetDelay(CODEX_FADE_DELAY);
 }
 
 Intro::~Intro()
@@ -77,145 +77,42 @@ void Intro::RenderWoD()
 
 void Intro::RenderFlameFadeWoD()
 {
-	float width;
-	float height;
+	SDL_Texture* curTexture = m_sdl_helper->m_WoDFadeTexture;
 
-	SDL_Texture* curTexture;
-	uint32_t num_pixels = 0;
-
-	m_curWodFade += m_tickElapse;
-
-	height = static_cast<float>(m_resources->m_BitFileData[2][0].height);
-	width = static_cast<float>(m_resources->m_BitFileData[2][0].width);
-
-	if (m_curWodFade > WOD_FADE_DELAY)
+	m_WoDFade->AddElapsedTime(m_tickElapse);
+	if (!m_WoDFade->IsFading())
 	{
 		m_curMode = IntroMode::SHOW_ALL;
 	}
-	else
-	{
-		uint32_t total_pixels = static_cast<uint32_t>(((m_curWodFade) / static_cast<float>(WOD_FADE_DELAY)) * m_cur_wod_fade_count);
-		num_pixels = total_pixels - m_num_wod_pixels;
-		m_num_wod_pixels = total_pixels;
-
-		if (m_wod_fade_count == 0)
-		{
-			return;
-		}
-	}
-
-	std::vector<int> vec_on;
-	curTexture = m_sdl_helper->m_WoDFadeTexture;
-
-	// Set the off pixels now
-	for (uint32_t index = 0; index < num_pixels; index++)
-	{
-		uint32_t curOnPixel = m_utilities->GetRandom(0, m_wod_fade_count);
-		if (m_wod_fade_count > 0)
-		{
-			m_wod_fade_count--;
-		}
-		else
-		{
-			break;
-		}
-		uint32_t cur_vector_index = 0;
-
-		for (size_t vector_index = 0; vector_index < m_wod_fade_locations.size(); vector_index++)
-		{
-			if (m_wod_fade_locations[vector_index] != 0)
-			{
-				continue;
-			}
-			if (cur_vector_index == curOnPixel)
-			{
-				m_wod_fade_locations[vector_index] = 1;
-				vec_on.push_back(static_cast<int>(vector_index));
-				break;
-			}
-			cur_vector_index++;
-		}
-	}
-	if (vec_on.size() > 0)
-	{
-		m_sdl_helper->TurnOnPixels(curTexture, vec_on, false);
-	}
+	m_WoDFade->ProcessFade(curTexture, false);
 }
 
 void Intro::RenderFlameFadeIn1()
 {
 	float width;
 	float height;
-
-	SDL_Texture* curTexture;
-	uint32_t num_pixels = 0;
-
-	m_curFlame1Fade += m_tickElapse;
-
 	height = static_cast<float>(m_resources->m_Image16FileData[12][1].height);
 	width = static_cast<float>(m_resources->m_Image16FileData[12][1].width);
-
-	if (m_curFlame1Fade > FLAME_FADE_1_DELAY)
-	{
-		m_curMode = IntroMode::FADE_FLAME_2;
-	}
-	else
-	{
-		uint32_t total_pixels = static_cast<uint32_t>(((m_curFlame1Fade) / static_cast<float>(FLAME_FADE_1_DELAY)) * m_cur_wod_fade_count);
-		num_pixels = total_pixels - m_num_flame1_pixels;
-		m_num_flame1_pixels = total_pixels;
-
-		if (m_flame1_fade_count == 0)
-		{
-			return;
-		}
-	}
 
 	float vMult = m_window_height / static_cast<float>(ORIGINAL_GAME_HEIGHT);
 	float hMult = m_window_width / static_cast<float>(ORIGINAL_GAME_WIDTH);
 
-	curTexture = m_sdl_helper->m_Flame1FadeTexture;
-	std::vector<int> vec_on;
+	SDL_Texture* curTexture = m_sdl_helper->m_Flame1FadeTexture;
 
-	// Set the on pixels now
-	for (uint32_t index = 0; index < num_pixels; index++)
+	m_FlameFade->AddElapsedTime(m_tickElapse);
+	if (!m_FlameFade->IsFading())
 	{
-		uint32_t curOnPixel = m_utilities->GetRandom(0, m_flame1_fade_count);
-		if (m_flame1_fade_count > 0)
-		{
-			m_flame1_fade_count--;
-		}
-		else
-		{
-			break;
-		}
-		uint32_t cur_vector_index = 0;
-
-		for (size_t vector_index = 0; vector_index < m_flame1_fade_locations.size(); vector_index++)
-		{
-			if (m_flame1_fade_locations[vector_index] != 0)
-			{
-				continue;
-			}
-			if (cur_vector_index == curOnPixel)
-			{
-				m_flame1_fade_locations[vector_index] = 1;
-				vec_on.push_back(static_cast<int>(vector_index));
-				break;
-			}
-			cur_vector_index++;
-		}
+		m_curMode = IntroMode::FADE_FLAME_2;
 	}
-	if (vec_on.size() > 0)
+	bool done = m_FlameFade->ProcessFade(curTexture, false);
+	if (done)
 	{
-		m_sdl_helper->TurnOnPixels(curTexture, vec_on, false);
+		return;
 	}
 
 	float x = (ORIGINAL_GAME_WIDTH - width) / 2.0f;
-	float y = 0;
+	float y = 64;
 
-	x = (ORIGINAL_GAME_WIDTH - width) / 2.0f;
-	y = 64;
 	m_sdl_helper->RenderTextureAt(curTexture, x * hMult, y * vMult, width * hMult, height * vMult);
 }
 
@@ -223,79 +120,31 @@ void Intro::RenderLogoFadeIn()
 {
 	float width;
 	float height;
-
-	SDL_Texture* curTexture;
-	uint32_t num_pixels = 0;
-
-	m_curLogoFade += m_tickElapse;
-
 	height = static_cast<float>(m_resources->m_Image16FileData[12][0].height);
 	width = static_cast<float>(m_resources->m_Image16FileData[12][0].width);
 
-	if (m_curLogoFade > LOGO_FADE_DELAY)
+	float vMult = m_window_height / static_cast<float>(ORIGINAL_GAME_HEIGHT);
+	float hMult = m_window_width / static_cast<float>(ORIGINAL_GAME_WIDTH);
+
+	SDL_Texture* curTexture = m_sdl_helper->m_LogoFadeTexture;
+
+	m_LogoFade->AddElapsedTime(m_tickElapse);
+	if (!m_LogoFade->IsFading())
 	{
 		m_curMode = IntroMode::FADE_FLAME_1;
 		RenderLogo();
 		return;
 	}
-	else
+	bool done = m_LogoFade->ProcessFade(curTexture);
+	if (done)
 	{
-		uint32_t total_pixels = static_cast<uint32_t>(((m_curLogoFade) / static_cast<float>(LOGO_FADE_DELAY)) * m_logo_fade_count);
-		num_pixels = total_pixels - m_num_pixels;
-		m_num_pixels = total_pixels;
-
-		if (m_cur_logo_count == 0)
-		{
-			m_num_pixels = 0;
-			RenderLogo();
-			return;
-		}
-	}
-	float vMult = m_window_height / static_cast<float>(ORIGINAL_GAME_HEIGHT);
-	float hMult = m_window_width / static_cast<float>(ORIGINAL_GAME_WIDTH);
-
-	curTexture = m_sdl_helper->m_LogoFadeTexture;
-	std::vector<int> vec_on;
-
-	// Set the on pixels now
-	for (uint32_t index = 0; index < num_pixels; index++)
-	{
-		uint32_t curOnPixel = m_utilities->GetRandom(0, m_cur_logo_count);
-		if (m_cur_logo_count > 0)
-		{
-			m_cur_logo_count--;
-		}
-		else
-		{
-			break;
-		}
-		uint32_t cur_vector_index = 0;
-		
-		for (size_t vector_index = 0; vector_index < m_logo_fade_locations.size(); vector_index++)
-		{
-			if (m_logo_fade_locations[vector_index] != 0)
-			{
-				continue;
-			}
-			if (cur_vector_index == curOnPixel)
-			{
-				m_logo_fade_locations[vector_index] = 1;
-				vec_on.push_back(static_cast<int>(vector_index));
-				break;
-			}
-			cur_vector_index++;
-		}
-	}
-	if (vec_on.size() > 0)
-	{
-		m_sdl_helper->TurnOnPixels(curTexture, vec_on, true);
+		RenderLogo();
+		return;
 	}
 
 	float x = (ORIGINAL_GAME_WIDTH - width) / 2.0f;
 	float y = 0;
 
-	x = (ORIGINAL_GAME_WIDTH - width) / 2.0f;
-	y = 0;
 	m_sdl_helper->RenderTextureAt(curTexture, x * hMult, y * vMult, width * hMult, height * vMult);
 }
 
@@ -503,7 +352,14 @@ void Intro::RenderStory()
 	{
 		float tempx = 40 * hMult;
 		float tempy = 86 * hMult;
-		m_sdl_helper->RenderTextureAt(m_sdl_helper->m_AnkhFadeTexture, tempx, tempy, CODEX_WIDTH * hMult, CODEX_HEIGHT * vMult);
+
+		m_CodexFade->AddElapsedTime(m_tickElapse, m_sdl_helper->m_CodexFadeTexture, true);
+		bool isfading = m_CodexFade->IsFading();
+		if (isfading)
+		{
+			m_CodexFade->ProcessFade(m_sdl_helper->m_CodexFadeTexture);
+		}
+		m_sdl_helper->RenderTextureAt(m_sdl_helper->m_CodexFadeTexture, tempx, tempy, CODEX_WIDTH * hMult, CODEX_HEIGHT * vMult);
 	}
 	else if (curData.action == 4)
 	{
@@ -593,8 +449,7 @@ void Intro::SetSDLData()
 
 void Intro::CreateStreamingTextures()
 {
-	//m_sdl_helper->ClearStreamingTexture(m_sdl_helper->m_AnkhFadeTexture);
-	//m_sdl_helper->CopyTextureToStreaming(m_sdl_helper->m_AnkhFadeTexture, );
+	m_CodexFade->Reset();
 }
 
 void Intro::CreateIntroBox()
@@ -628,6 +483,14 @@ void Intro::ProcessEvents()
 		if (m_sdl_helper->isAnyKeyHit())
 		{
 			m_newMode = U5Modes::MenuSkip;
+		}
+		break;
+	case IntroMode::SHOW_ALL:
+		if (m_sdl_helper->isAnyKeyHit())
+		{
+			m_sdl_helper->TurnOnAllPixels(m_sdl_helper->m_CodexFadeTexture, false);
+			m_CodexFade->Reset();
+			m_curMode = IntroMode::STORY;
 		}
 		break;
 	default:
@@ -836,7 +699,7 @@ void Intro::RenderStoryTexture()
 			if (curTexture.width >= static_cast<uint32_t>(CODEX_WIDTH) && curTexture.height >= static_cast<uint32_t>(CODEX_HEIGHT))
 			{
 				m_sdl_helper->CopyTextureToStreaming(curTexture,
-					m_sdl_helper->m_AnkhFadeTexture, CODEX_WIDTH, CODEX_HEIGHT);
+					m_sdl_helper->m_CodexFadeTexture, CODEX_WIDTH, CODEX_HEIGHT);
 			}
 		}
 		//

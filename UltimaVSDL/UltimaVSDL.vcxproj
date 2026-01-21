@@ -133,6 +133,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="FadeObject.cpp" />
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="Intro.cpp" />
     <ClCompile Include="LzwDecompressor.cpp" />
@@ -144,6 +145,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ColorData.h" />
+    <ClInclude Include="FadeObject.h" />
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="Intro.h" />
     <ClInclude Include="LzwDecompressor.h" />

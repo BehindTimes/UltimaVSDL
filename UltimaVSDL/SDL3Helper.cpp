@@ -31,7 +31,7 @@ SDL3Helper::SDL3Helper() :
 	m_WoDFadeTexture(nullptr),
 	m_Flame1FadeTexture(nullptr),
 	m_anyKeyHit(false),
-	m_AnkhFadeTexture(nullptr)
+	m_CodexFadeTexture(nullptr)
 {
 }
 
@@ -43,8 +43,8 @@ int SDL3Helper::Intialize()
 		return 3;
 	}
 
-	if (!SDL_CreateWindowAndRenderer("Ultima V - SDL", 640, 400, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE /*| SDL_WINDOW_HIGH_PIXEL_DENSITY*/, &m_window, &m_renderer))
-	//if (!SDL_CreateWindowAndRenderer("Ultima V - SDL", RENDER_WIDTH, RENDER_HEIGHT, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE /*| SDL_WINDOW_HIGH_PIXEL_DENSITY*/, &m_window, &m_renderer))
+	//if (!SDL_CreateWindowAndRenderer("Ultima V - SDL", 640, 400, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE /*| SDL_WINDOW_HIGH_PIXEL_DENSITY*/, &m_window, &m_renderer))
+	if (!SDL_CreateWindowAndRenderer("Ultima V - SDL", RENDER_WIDTH, RENDER_HEIGHT, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE /*| SDL_WINDOW_HIGH_PIXEL_DENSITY*/, &m_window, &m_renderer))
 	{
 		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't create window and renderer: %s", SDL_GetError());
 		return 3;
@@ -154,10 +154,10 @@ void SDL3Helper::Cleanup()
 		m_FullScreenTexture = nullptr;
 	}
 
-	if (m_AnkhFadeTexture)
+	if (m_CodexFadeTexture)
 	{
-		SDL_DestroyTexture(m_AnkhFadeTexture);
-		m_AnkhFadeTexture = nullptr;
+		SDL_DestroyTexture(m_CodexFadeTexture);
+		m_CodexFadeTexture = nullptr;
 	}
 
 	SDL_DestroyRenderer(m_renderer);
@@ -544,6 +544,26 @@ void SDL3Helper::ClearStreamingTexture(SDL_Texture* texture)
 	SDL_UnlockTexture(texture);
 }
 
+void SDL3Helper::TurnOnAllPixels(SDL_Texture* texture, bool on)
+{
+	unsigned char* pixels = NULL;
+	int pitch;
+	float width, height;
+	SDL_GetTextureSize(texture, &width, &height);
+
+	SDL_LockTexture(texture, NULL, (void**)&pixels, &pitch);
+
+	for (int indexY = 0; indexY < height; indexY++)
+	{
+		for (int indexX = 0; indexX < pitch; indexX += 4)
+		{
+			pixels[(indexY * pitch) + indexX] = on ? 0xFF : 0x00;
+		}
+	}
+
+	SDL_UnlockTexture(texture);
+}
+
 void SDL3Helper::TurnOnPixels(SDL_Texture* texture, std::vector<int>& vec_pixels, bool on)
 {
 	unsigned char* pixels = NULL;
@@ -594,9 +614,9 @@ void SDL3Helper::LoadProportionalFontTextures(UltimaVResource* u5_resources)
 
 void SDL3Helper::LoadStreamingTextures()
 {
-	m_AnkhFadeTexture = SDL_CreateTexture(m_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING,
+	m_CodexFadeTexture = SDL_CreateTexture(m_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING,
 		36, 34);
-	SDL_SetTextureScaleMode(m_AnkhFadeTexture, SDL_SCALEMODE_NEAREST);
+	SDL_SetTextureScaleMode(m_CodexFadeTexture, SDL_SCALEMODE_NEAREST);
 }
 
 void SDL3Helper::LoadTargetTextures()
@@ -675,7 +695,7 @@ void SDL3Helper::CopyTextureToStreaming(U5ImageData &texture, SDL_Texture *strea
 			std::memcpy(color_data, ega_table[curPixel], sizeof(color_data));
 
 			//pixels[(y * pitch) + (x * 4)] = alpha ? 0xFF : 0x00;
-			pixels[(y * pitch + (x * 4)) + 0] = 0xFF;
+			pixels[(y * pitch + (x * 4)) + 0] = 0x00;
 			pixels[(y * pitch + (x * 4)) + 1] = color_data[2];
 			pixels[(y * pitch + (x * 4)) + 2] = color_data[1];
 			pixels[(y * pitch + (x * 4)) + 3] = color_data[0];

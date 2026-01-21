@@ -32,6 +32,7 @@ public:
 	void RenderPresent() const;
 	void GetScreenDimensions(int& width, int& height);
 	void TurnOnPixels(SDL_Texture* texture, std::vector<int>& vec_pixels, bool on);
+	void TurnOnAllPixels(SDL_Texture* texture, bool on);
 	void SetRenderTarget(SDL_Texture* texture) const;
 	bool isAnyKeyHit() const;
 	void ClearStreamingTexture(SDL_Texture *texture);
@@ -50,7 +51,7 @@ public:
 	SDL_Texture* m_Flame1FadeTexture;
 	SDL_Texture* m_WoDFadeTexture;
 	SDL_Texture* m_FullScreenTexture;
-	SDL_Texture* m_AnkhFadeTexture;
+	SDL_Texture* m_CodexFadeTexture;
 private:
 	void LoadPathFileTexture(UltimaVResource* u5_resources);
 	void LoadBitFileTextures(UltimaVResource* u5_resources);
