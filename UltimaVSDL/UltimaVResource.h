@@ -2,6 +2,7 @@
 #include <vector>
 #include <cstdint>
 #include <cstring>
+#include <string>
 
 struct U5StoryParagraphInfo
 {
@@ -50,6 +51,7 @@ struct U5Data
 	std::vector<U5StoryScreen> ending_text{ NUM_ENDING };
 	std::vector<unsigned char> intro_string_1;
 	std::vector<unsigned char> intro_string_2;
+	std::vector<std::string> intro_strings;
 };
 
 enum class BitFileNames : uint_fast8_t
@@ -121,5 +123,6 @@ private:
 	int ReadOffsets(std::vector<unsigned char> &data, int offsetSize, int numOffsets, std::vector<size_t> &file_offsets, size_t &curPos);
 	int ReadImage(std::vector<unsigned char> &data, size_t offset, int numPixelsPerByte, U5ImageData& outImage);
 	void LoadStoryText(const std::vector<unsigned char>& buffer, size_t pos, std::vector<unsigned char>& text);
+	bool ReadStrings(const std::vector<unsigned char>& buffer, std::vector<std::string>& str_vec, size_t start_pos, size_t end_pos);
 };
 

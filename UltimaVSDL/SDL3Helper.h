@@ -7,6 +7,7 @@
 #include <SDL3/SDL_render.h>
 #include <SDL3/SDL_video.h>
 #include <cstdint>
+#include <string>
 
 enum TARGET_TEXTURE_VAL
 {
@@ -37,6 +38,8 @@ public:
 	bool isAnyKeyHit() const;
 	void ClearStreamingTexture(SDL_Texture *texture);
 	void CopyTextureToStreaming(U5ImageData &texture, SDL_Texture *streaming_texture, uint32_t width, uint32_t height);
+	void DrawTiledText(std::string text, int x_tile, int y_tile);
+	void DrawInvertRect(int x_tile, int y_tile, int width, int height) const;
 
 	bool m_quit;
 	SDL_Renderer* m_renderer;

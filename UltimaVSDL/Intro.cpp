@@ -12,6 +12,7 @@
 #include "FadeObject.h"
 #include "CutScene.h"
 #include <functional>
+#include <string>
 
 extern std::unique_ptr<CutScene> cutscene_screen;
 extern std::unique_ptr<U5Utils> m_utilities;
@@ -81,7 +82,7 @@ void Intro::RenderFlameFadeWoD()
 	m_WoDFade->AddElapsedTime(m_tickElapse);
 	if (!m_WoDFade->IsFading())
 	{
-		m_curMode = IntroMode::SHOW_ALL;
+		m_curMode = IntroMode::MENU;
 	}
 	m_WoDFade->ProcessFade(curTexture, false);
 }
@@ -203,6 +204,38 @@ void Intro::RenderFlame()
 	m_sdl_helper->RenderTextureAt(curTexture, x * hMult, y * vMult, width * hMult, height * vMult);
 }
 
+void Intro::RenderMenu()
+{
+	m_sdl_helper->SetRenderTarget(m_sdl_helper->m_TargetTextures[TTV_INTROBOX_DISPLAY]);
+	const int NUM_X_TILES = 40;
+	const int Y_TILE_START = 1;
+	int invertx = 0;
+	int inverty = 0;
+	int invertindex = 3;
+	int invert_width = 0;
+
+	for (int index = 0; index < 6; index++)
+	{
+		std::string curVal = m_resources->m_data.intro_strings[index];
+		if (curVal.size() > NUM_X_TILES)
+		{
+			continue;
+		}
+		int start_x_tile = (NUM_X_TILES - static_cast<int>(curVal.size())) / 2;
+		m_sdl_helper->DrawTiledText(curVal, start_x_tile, Y_TILE_START + index);
+
+		if (invertindex == index)
+		{
+			invertx = start_x_tile;
+			inverty = Y_TILE_START + index + 16;
+			invert_width = static_cast<int>(curVal.size() + 2);
+		}
+	}
+	
+	m_sdl_helper->SetRenderTarget(nullptr);
+	m_sdl_helper->DrawInvertRect(invertx, inverty, invert_width, 1);
+}
+
 void Intro::RenderIntroBox()
 {
 	int blue = 1;
@@ -255,8 +288,6 @@ void Intro::RenderIntroBox()
 	line = { RENDER_WIDTH - HALF_TILE_WIDTH, HALF_TILE_HEIGHT, LINE_THICKNESS, (TILE_HEIGHT * 4) };
 	SDL_RenderFillRect(m_sdl_helper->m_renderer, &line);
 
-	
-
 	m_sdl_helper->SetRenderTarget(nullptr);
 	SDL_SetRenderDrawColor(m_sdl_helper->m_renderer, 0, 0, 0, 0);
 }
@@ -287,6 +318,7 @@ void Intro::Render()
 		RenderLogo();
 		RenderFlame();
 		RenderIntroBox();
+		RenderMenu();
 		break;
 	}
 
@@ -337,7 +369,7 @@ void Intro::ProcessEvents()
 			m_newMode = U5Modes::MenuSkip;
 		}
 		break;
-	case IntroMode::SHOW_ALL:
+	case IntroMode::MENU:
 		if (m_sdl_helper->isAnyKeyHit())
 		{
 			m_newMode = U5Modes::Cutscene;
@@ -350,7 +382,7 @@ void Intro::ProcessEvents()
 
 void Intro::GoToSelection()
 {
-	m_curMode = IntroMode::SHOW_ALL;
+	m_curMode = IntroMode::MENU;
 }
 
 bool Intro::ChangeMode(U5Modes& newMode)
@@ -368,5 +400,5 @@ bool Intro::ChangeMode(U5Modes& newMode)
 
 void Intro::StoryOverCallback()
 {
-	m_curMode = IntroMode::SHOW_ALL;
+	m_curMode = IntroMode::MENU;
 }

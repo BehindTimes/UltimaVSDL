@@ -654,6 +654,35 @@ int UltimaVResource::LoadDataOvl()
 	{
 		return -4;
 	}
+	if (!ReadStrings(buffer, m_data.intro_strings, 0x311c, 0x3664))
+	{
+		return -5;
+	}
 	return 0;
 }
 
+bool UltimaVResource::ReadStrings(const std::vector<unsigned char>& buffer, std::vector<std::string>& str_vec, size_t start_pos, size_t end_pos)
+{
+	if (buffer.size() <= end_pos)
+	{
+		return false;
+	}
+
+	std::string strValue;
+	for (size_t index = start_pos; index <= end_pos; index++)
+	{
+		if (buffer[index] == 0)
+		{
+			if (strValue.size() > 0)
+			{
+				str_vec.push_back(strValue);
+				strValue.clear();
+			}
+		}
+		else
+		{
+			strValue += buffer[index];
+		}
+	}
+	return true;
+}

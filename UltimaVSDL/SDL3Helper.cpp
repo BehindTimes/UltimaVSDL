@@ -19,6 +19,8 @@
 #include "U5Enums.h"
 #include <SDL3/SDL_keycode.h>
 #include <cstdint>
+#include <string>
+#include <SDL3/SDL_blendmode.h>
 
 SDL3Helper::SDL3Helper() :
 	m_window(nullptr),
@@ -176,6 +178,51 @@ void SDL3Helper::GetScreenDimensions(int &width, int &height)
 void SDL3Helper::ClearScreen() const
 {
 	SDL_RenderClear(m_renderer);
+}
+
+void SDL3Helper::DrawInvertRect(int x_tile, int y_tile, int width, int height) const
+{
+	SDL_BlendMode blendmode_sub = SDL_ComposeCustomBlendMode(SDL_BLENDFACTOR_SRC_ALPHA, SDL_BLENDFACTOR_ONE, SDL_BLENDOPERATION_SUBTRACT,
+		SDL_BLENDFACTOR_ZERO, SDL_BLENDFACTOR_ONE, SDL_BLENDOPERATION_SUBTRACT);
+
+	SDL_BlendMode blendmode_add = SDL_ComposeCustomBlendMode(SDL_BLENDFACTOR_SRC_ALPHA, SDL_BLENDFACTOR_ONE, SDL_BLENDOPERATION_ADD,
+		SDL_BLENDFACTOR_ZERO, SDL_BLENDFACTOR_ONE, SDL_BLENDOPERATION_ADD);
+
+	SDL_FRect toRect{};
+	toRect.x = static_cast<float>(x_tile * HALF_TILE_HEIGHT);
+	toRect.y = static_cast<float>(y_tile * HALF_TILE_HEIGHT);
+	toRect.w = static_cast<float>(width * HALF_TILE_HEIGHT);
+	toRect.h = static_cast<float>(height * HALF_TILE_HEIGHT);
+
+	//SDL_SetRenderDrawBlendMode(m_renderer, blendmode_sub);
+	SDL_SetRenderDrawBlendMode(m_renderer, SDL_BLENDMODE_BLEND);
+	SDL_SetRenderDrawBlendMode(m_renderer, blendmode_sub);
+
+	SDL_SetRenderDrawColor(m_renderer, 255, 255, 255, 255);
+	SDL_RenderFillRect(m_renderer, &toRect);
+	SDL_SetRenderDrawColor(m_renderer, 0, 0, 0, 0);
+	SDL_SetRenderDrawBlendMode(m_renderer, SDL_BLENDMODE_NONE);
+	
+}
+
+void SDL3Helper::DrawTiledText(std::string text, int x_tile, int y_tile)
+{
+	SDL_FRect toRect{};
+	toRect.x = 0;
+	toRect.y = static_cast<float>(y_tile * HALF_TILE_HEIGHT);
+	toRect.w = HALF_TILE_WIDTH;
+	toRect.h = HALF_TILE_HEIGHT;
+	SDL_Texture* texture = nullptr;
+
+	for (size_t index = 0; index < text.size(); index++)
+	{
+		if (text[index] < 128)
+		{
+			texture = m_CharacterSetsTextures[0][0][text[index]];
+			toRect.x = (x_tile * HALF_TILE_WIDTH) + static_cast<float>(index * HALF_TILE_WIDTH);
+			SDL_RenderTexture(m_renderer, texture, NULL, &toRect);
+		}
+	}
 }
 
 void SDL3Helper::RenderTextureAt(SDL_Texture* texture, float x, float y, float width, float height) const

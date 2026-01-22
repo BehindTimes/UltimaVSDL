@@ -16,7 +16,7 @@ enum class IntroMode
 	FADE_LOGO,
 	FADE_FLAME_1,
 	FADE_FLAME_2,
-	SHOW_ALL
+	MENU
 };
 
 class Intro : public GameObject
@@ -38,6 +38,7 @@ private:
 	void RenderFlame();
 	void RenderLogo();
 	void RenderWoD();
+	void RenderMenu();
 	
 	void RenderIntroBox();
 	void CreateIntroBox();
