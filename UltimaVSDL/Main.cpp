@@ -7,6 +7,7 @@
 #include "Intro.h"
 #include "SplashScreen.h"
 #include "U5Utils.h"
+#include "CutScene.h"
 #include <SDL3/SDL_main_impl.h>
 #include "GameObject.h"
 #include "U5Enums.h"
@@ -16,6 +17,8 @@ static std::unique_ptr<SDL3Helper> sdl_helper;
 static std::unique_ptr<UltimaVResource> u5_resources;
 static std::unique_ptr<SplashScreen> splash_screen;
 static std::unique_ptr<Intro> intro_screen;
+
+std::unique_ptr<CutScene> cutscene_screen;
 std::unique_ptr<U5Utils> m_utilities;
 
 static void MainLoop()
@@ -34,12 +37,16 @@ static void MainLoop()
 
 	sdl_helper->UpdateTicks();
 
-	/*splash_screen = std::make_unique<SplashScreen>(sdl_helper.get(), u5_resources.get());
+	splash_screen = std::make_unique<SplashScreen>(sdl_helper.get(), u5_resources.get());
 	splash_screen->LoadData();
-	curObject = splash_screen.get();*/
 
 	intro_screen = std::make_unique<Intro>(sdl_helper.get(), u5_resources.get());
 	intro_screen->LoadData();
+
+	cutscene_screen = std::make_unique<CutScene>(sdl_helper.get(), u5_resources.get());
+	cutscene_screen->LoadData();
+
+	//curObject = splash_screen.get();
 	curObject = intro_screen.get();
 	
 	while (1)
@@ -66,23 +73,26 @@ static void MainLoop()
 		U5Modes new_mode;
 		if (curObject->ChangeMode(new_mode))
 		{
-			curObject = nullptr;
 			switch (new_mode)
 			{
 			case U5Modes::Menu:
-				intro_screen = std::make_unique<Intro>(sdl_helper.get(), u5_resources.get());
 				intro_screen->LoadData();
 				curObject = intro_screen.get();
 				break;
 			case U5Modes::MenuSkip:
-				intro_screen = std::make_unique<Intro>(sdl_helper.get(), u5_resources.get());
 				intro_screen->LoadData();
 				intro_screen->GoToSelection();
 				curObject = intro_screen.get();
 				break;
+			case U5Modes::Cutscene:
+				curObject->LoadData();
+				curObject = cutscene_screen.get();
+				break;
 			default:
+				curObject = nullptr;
 				break;
 			}
+			new_mode = U5Modes::None;
 		}
 	}
 }

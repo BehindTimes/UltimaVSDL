@@ -15,7 +15,7 @@ public:
 	virtual void ProcessEvents() = 0;
 	virtual void LoadData();
 	void GetElapsedTime();
-	bool ChangeMode(U5Modes &newMode) const;
+	virtual bool ChangeMode(U5Modes &newMode);
 	
 protected:
 	virtual void SetSDLData();

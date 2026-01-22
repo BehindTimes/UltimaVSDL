@@ -44,7 +44,7 @@ int SDL3Helper::Intialize()
 		return 3;
 	}
 
-	//if (!SDL_CreateWindowAndRenderer("Ultima V - SDL", 640, 400, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE /*| SDL_WINDOW_HIGH_PIXEL_DENSITY*/, &m_window, &m_renderer))
+	//if (!SDL_CreateWindowAndRenderer("Ultima V - SDL", 320, 200, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE /*| SDL_WINDOW_HIGH_PIXEL_DENSITY*/, &m_window, &m_renderer))
 	if (!SDL_CreateWindowAndRenderer("Ultima V - SDL", RENDER_WIDTH, RENDER_HEIGHT, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE /*| SDL_WINDOW_HIGH_PIXEL_DENSITY*/, &m_window, &m_renderer))
 	{
 		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't create window and renderer: %s", SDL_GetError());

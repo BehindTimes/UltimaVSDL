@@ -15,6 +15,7 @@ enum class U5Modes
 	Menu,
 	MenuSkip,
 	Game,
+	Cutscene
 };
 
 const int TILE_HEIGHT = 64;

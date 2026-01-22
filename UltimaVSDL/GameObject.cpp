@@ -33,13 +33,14 @@ void GameObject::GetElapsedTime()
 	m_tickElapse = m_curTick - m_prevTick;
 }
 
-bool GameObject::ChangeMode(U5Modes& newMode) const
+bool GameObject::ChangeMode(U5Modes& newMode)
 {
 	bool retval = false;
 	if (m_newMode != U5Modes::None)
 	{
 		newMode = m_newMode;
 		retval = true;
+		m_newMode = U5Modes::None;
 	}
 	return retval;
 }

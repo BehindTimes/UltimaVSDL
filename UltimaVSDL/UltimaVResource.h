@@ -45,7 +45,9 @@ struct U5StoryScreen
 struct U5Data
 {
 	const size_t NUM_STORIES = 21;
+	const size_t NUM_ENDING = 6;
 	std::vector<U5StoryScreen> story_text{ NUM_STORIES };
+	std::vector<U5StoryScreen> ending_text{ NUM_ENDING };
 	std::vector<unsigned char> intro_string_1;
 	std::vector<unsigned char> intro_string_2;
 };
@@ -107,6 +109,7 @@ private:
 	int LoadPathFile();
 	int Load16Images();
 	int LoadStory(std::vector<unsigned char> &buffer);
+	int LoadEnding(std::vector<unsigned char>& buffer);
 	int LoadDataOvl();
 	int LoadCharacterSets();
 	int LoadProportionalFont();

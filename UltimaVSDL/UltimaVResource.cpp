@@ -495,6 +495,69 @@ void UltimaVResource::LoadStoryText(const std::vector<unsigned char>& buffer, si
 	}
 }
 
+int UltimaVResource::LoadEnding(std::vector<unsigned char>& data_buffer)
+{
+	const size_t NUM_STORIES = 6;
+	const size_t X_LEFT_PARAGRAPH_OFFSET = 0x3db6;
+	const size_t X_RIGHT_PARAGRAPH_OFFSET = 0x3dc2;
+	const size_t STORY_OFFSET = 0x3dda;
+	const size_t Y_PARAGRAPH_1_EXTENT = 0x3de6;
+	const size_t Y_PARAGRAPH_2_EXTENT = 0x3dec;
+	const size_t X_FIRST_LINE_POS = 0x3df2;
+	const size_t Y_START_POS = 0x3df8;
+	const size_t STORY_IMAGE_INDEX = 0x3dfe;
+	const size_t STORY_NUMBER = 0x3e04;
+	const size_t STORY_PIC_X = 0x3e0a;
+	const size_t STORY_PIC_Y = 0x3e10;
+	const size_t STORY_ACTION = 0x3e16;
+
+	std::string strStoryFile("END.DAT");
+
+	std::filesystem::path file_path = GAME_DIRECTORY / strStoryFile;
+	if (!std::filesystem::exists(file_path))
+	{
+		return -1;
+	}
+	std::uintmax_t file_size = std::filesystem::file_size(file_path);
+	std::vector<unsigned char> buffer(file_size);
+	std::ifstream file(file_path, std::ios::binary);
+	file.read(reinterpret_cast<char*>(buffer.data()), static_cast<std::streamsize>(file_size));
+	file.close();
+
+	for (size_t index = 0; index < NUM_STORIES; index++)
+	{
+		size_t temppos = STORY_OFFSET + index * 2;
+		m_data.ending_text[index].text_offset = ReadInt16(data_buffer.begin(), temppos);
+		if (m_data.ending_text[index].text_offset >= buffer.size())
+		{
+			return -2;
+		}
+
+		LoadStoryText(buffer, m_data.ending_text[index].text_offset, m_data.ending_text[index].text);
+		m_data.ending_text[index].image_index = data_buffer[STORY_IMAGE_INDEX + index];
+		m_data.ending_text[index].story_number = data_buffer[STORY_NUMBER + index];
+		m_data.ending_text[index].picture_x = data_buffer[STORY_PIC_X + index];
+		m_data.ending_text[index].picture_y = data_buffer[STORY_PIC_Y + index];
+		m_data.ending_text[index].action = data_buffer[STORY_ACTION + index];
+		m_data.ending_text[index].text_y_pos = data_buffer[Y_START_POS + index];
+		m_data.ending_text[index].first_line_offset = data_buffer[X_FIRST_LINE_POS + index];
+		m_data.ending_text[index].paragraph[0].y_extent = data_buffer[Y_PARAGRAPH_1_EXTENT + index];
+		m_data.ending_text[index].paragraph[1].y_extent = data_buffer[Y_PARAGRAPH_2_EXTENT + index];
+		m_data.ending_text[index].paragraph[0].text_left_pos = data_buffer[X_LEFT_PARAGRAPH_OFFSET + (index * 2)];
+		m_data.ending_text[index].paragraph[1].text_left_pos = data_buffer[X_LEFT_PARAGRAPH_OFFSET + (index * 2) + 1];
+		size_t curPos = X_RIGHT_PARAGRAPH_OFFSET + (index * 4);
+		auto iter = data_buffer.begin() + curPos;
+		uint32_t val = ReadInt16(data_buffer.begin(), curPos);
+		m_data.ending_text[index].paragraph[0].text_right_pos = val;
+		curPos = X_RIGHT_PARAGRAPH_OFFSET + (index * 4) + 2;
+		iter = data_buffer.begin() + curPos;
+		val = ReadInt16(data_buffer.begin(), curPos);
+		m_data.ending_text[index].paragraph[1].text_right_pos = val;
+	}
+
+	return 0;
+}
+
 int UltimaVResource::LoadStory(std::vector<unsigned char> &data_buffer)
 {
 	const size_t INTRO_OFFSET_IN_DATA_1 = 0x2f41;
@@ -515,6 +578,7 @@ int UltimaVResource::LoadStory(std::vector<unsigned char> &data_buffer)
 	const size_t STORY_ACTION = 0x3100;
 
 	std::string strStoryFile("STORY.DAT");
+
 	std::filesystem::path file_path = GAME_DIRECTORY / strStoryFile;
 	if (!std::filesystem::exists(file_path))
 	{
@@ -585,6 +649,10 @@ int UltimaVResource::LoadDataOvl()
 	if (0 != LoadStory(buffer))
 	{
 		return -3;
+	}
+	if (0 != LoadEnding(buffer))
+	{
+		return -4;
 	}
 	return 0;
 }
