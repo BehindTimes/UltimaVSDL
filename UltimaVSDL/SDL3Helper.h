@@ -39,6 +39,8 @@ public:
 	void CopyTextureToStreaming(U5ImageData &texture, SDL_Texture *streaming_texture, uint32_t width, uint32_t height);
 	void DrawTiledText(std::string text, int x_tile, int y_tile);
 	void DrawInvertRect(int x_tile, int y_tile, int width, int height) const;
+	void DrawTileTexture8(SDL_Texture* texture, int x_tile, int y_tile) const;
+	void DrawTileRect(int x_tile, int y_tile) const;
 
 	bool m_quit;
 	SDL_Renderer* m_renderer;
@@ -54,6 +56,7 @@ public:
 	SDL_Texture* m_WoDFadeTexture;
 	SDL_Texture* m_FullScreenTexture;
 	SDL_Texture* m_CodexFadeTexture;
+	SDL_Texture* m_PromptTexture;
 private:
 	void LoadPathFileTexture(UltimaVResource* u5_resources);
 	void LoadBitFileTextures(UltimaVResource* u5_resources);

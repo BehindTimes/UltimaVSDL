@@ -166,6 +166,12 @@ void SDL3Helper::Cleanup()
 		m_CodexFadeTexture = nullptr;
 	}
 
+	if (m_PromptTexture)
+	{
+		SDL_DestroyTexture(m_PromptTexture);
+		m_PromptTexture = nullptr;
+	}
+
 	SDL_DestroyRenderer(m_renderer);
 	SDL_DestroyWindow(m_window);
 	SDL_Quit();
@@ -223,6 +229,31 @@ void SDL3Helper::DrawTiledText(std::string text, int x_tile, int y_tile)
 			SDL_RenderTexture(m_renderer, texture, NULL, &toRect);
 		}
 	}
+}
+
+void SDL3Helper::DrawTileRect(int x_tile, int y_tile) const
+{
+	SDL_FRect toRect{};
+	toRect.x = 0;
+	toRect.y = static_cast<float>(y_tile * HALF_TILE_HEIGHT);
+	toRect.x = static_cast<float>(x_tile * HALF_TILE_WIDTH);
+	toRect.w = HALF_TILE_WIDTH;
+	toRect.h = HALF_TILE_HEIGHT;
+	SDL_SetRenderDrawColor(m_renderer, 0, 0, 0, 0xFF);
+	SDL_RenderFillRect(m_renderer, &toRect);
+	SDL_SetRenderDrawColor(m_renderer, 0, 0, 0, 0);
+}
+
+void SDL3Helper::DrawTileTexture8(SDL_Texture* texture, int x_tile, int y_tile) const
+{
+	SDL_FRect toRect{};
+	toRect.x = 0;
+	toRect.y = static_cast<float>(y_tile * HALF_TILE_HEIGHT);
+	toRect.x = static_cast<float>(x_tile * HALF_TILE_WIDTH);
+	toRect.w = HALF_TILE_WIDTH;
+	toRect.h = HALF_TILE_HEIGHT;
+
+	SDL_RenderTexture(m_renderer, texture, NULL, &toRect);
 }
 
 void SDL3Helper::RenderTextureAt(SDL_Texture* texture, float x, float y, float width, float height) const
@@ -680,6 +711,9 @@ void SDL3Helper::LoadTargetTextures()
 
 	m_FullScreenTexture = SDL_CreateTexture(m_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET,
 		RENDER_WIDTH, RENDER_HEIGHT);
+
+	m_PromptTexture = SDL_CreateTexture(m_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET,
+		HALF_TILE_WIDTH, HALF_TILE_HEIGHT);
 }
 
 void SDL3Helper::LoadImageData(UltimaVResource *u5_resources)

@@ -239,6 +239,22 @@ void Intro::CreateMenu()
 		}
 	}
 	m_sdl_helper->DrawInvertRect(invertx - 1, inverty, invert_width, 1);
+
+	curTexture = m_sdl_helper->m_TargetTextures[TTV_INTROBOX];
+	m_sdl_helper->SetRenderTarget(curTexture);
+	m_sdl_helper->DrawTiledText(m_resources->m_data.intro_strings[12], 6, 9); // Copyright Lord British
+	m_sdl_helper->DrawTiledText(m_resources->m_data.intro_strings[13], 16, 0); // Select
+
+	m_sdl_helper->DrawTileRect(24, 0);
+	m_sdl_helper->DrawTileRect(33, 9);
+	m_sdl_helper->DrawTileRect(15, 0);
+	m_sdl_helper->DrawTileRect(5, 9);
+
+	m_sdl_helper->DrawTileTexture8(m_sdl_helper->m_ArrowTextures[0], 24, 0);
+	m_sdl_helper->DrawTileTexture8(m_sdl_helper->m_ArrowTextures[0], 33, 9);
+	m_sdl_helper->DrawTileTexture8(m_sdl_helper->m_ArrowTextures[1], 15, 0);
+	m_sdl_helper->DrawTileTexture8(m_sdl_helper->m_ArrowTextures[1], 5, 9);
+
 	m_sdl_helper->SetRenderTarget(nullptr);
 	//m_sdl_helper->DrawInvertRect(invertx, inverty, invert_width, 1);	
 }
@@ -250,6 +266,8 @@ void Intro::RenderMenu()
 	float x = HALF_TILE_HEIGHT;
 	float y = 16 * HALF_TILE_HEIGHT;
 	m_sdl_helper->RenderTextureAt(curTexture, x, y, RENDER_WIDTH - TILE_WIDTH, TILE_HEIGHT * 4);
+
+	m_sdl_helper->DrawTileTexture8(m_sdl_helper->m_CharacterSetsTextures[0][0][5 + m_curFlame], 23, 15);
 }
 
 void Intro::RenderIntroBox()

@@ -35,7 +35,7 @@ private:
 	bool m_allowProcess;
 	bool m_allowQueueKeyHit;
 
-	const Uint64 KEY_DELAY = 250;
+	const Uint64 KEY_DELAY = 100;
 	InputType m_InputType;
 	SDL_Keycode m_key_code;
 };

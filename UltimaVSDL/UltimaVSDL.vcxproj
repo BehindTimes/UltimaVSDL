@@ -133,6 +133,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="AnimationTexture.cpp" />
     <ClCompile Include="CutScene.cpp" />
     <ClCompile Include="FadeObject.cpp" />
     <ClCompile Include="GameObject.cpp" />
@@ -146,6 +147,7 @@
     <ClCompile Include="UltimaVResource.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AnimationTexture.h" />
     <ClInclude Include="ColorData.h" />
     <ClInclude Include="CutScene.h" />
     <ClInclude Include="FadeObject.h" />

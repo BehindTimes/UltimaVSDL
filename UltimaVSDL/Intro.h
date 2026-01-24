@@ -10,6 +10,7 @@
 #include "UltimaVResource.h"
 #include "FadeObject.h"
 #include "U5Enums.h"
+#include "AnimationTexture.h"
 
 enum class IntroMode
 {
