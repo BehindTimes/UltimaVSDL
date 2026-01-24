@@ -28,7 +28,12 @@ Intro::Intro(SDL3Helper* sdl_helper, UltimaVResource* u5_resources) :
 	m_window_width(0),
 	m_window_height(0),
 	m_curWodFade(0),
-	m_curMenuIndex(0)
+	m_curMenuIndex(0),
+	m_curAcknowledgementYPos(0),
+	m_curAcknowledgementXPos(0),
+	m_curAcknowledgementYDelay(0),
+	m_curAcknowledgementXDelay(0),
+	m_curAcknowledgement(AcknowlegementType::SCROLL_UP)
 {
 	m_clearScreen = true;
 
@@ -259,6 +264,11 @@ void Intro::CreateMenu()
 	//m_sdl_helper->DrawInvertRect(invertx, inverty, invert_width, 1);	
 }
 
+void Intro::RenderCursor()
+{
+	m_sdl_helper->DrawTileTexture8(m_sdl_helper->m_CharacterSetsTextures[0][0][5 + m_curFlame], 23, 15);
+}
+
 void Intro::RenderMenu()
 {
 	SDL_Texture* curTexture = m_sdl_helper->m_TargetTextures[TTV_INTROBOX_DISPLAY];
@@ -266,8 +276,6 @@ void Intro::RenderMenu()
 	float x = HALF_TILE_HEIGHT;
 	float y = 16 * HALF_TILE_HEIGHT;
 	m_sdl_helper->RenderTextureAt(curTexture, x, y, RENDER_WIDTH - TILE_WIDTH, TILE_HEIGHT * 4);
-
-	m_sdl_helper->DrawTileTexture8(m_sdl_helper->m_CharacterSetsTextures[0][0][5 + m_curFlame], 23, 15);
 }
 
 void Intro::RenderIntroBox()
@@ -278,6 +286,127 @@ void Intro::RenderIntroBox()
 	float y = 15 * HALF_TILE_HEIGHT;
 	curTexture = m_sdl_helper->m_TargetTextures[TTV_INTROBOX];
 	m_sdl_helper->RenderTextureAt(curTexture, x, y, RENDER_WIDTH, TILE_HEIGHT * 5);
+}
+
+void Intro::RenderAcknowledgements()
+{
+	const int TILE_LEFT_START = 9 * TILE_WIDTH;
+	const int TILE_RIGHT_START = 10 * TILE_WIDTH;
+	/*m_curDelayFlame += m_tickElapse;
+	if (FLAME_DELAY < m_curDelayFlame)
+	{
+		m_curDelayFlame %= FLAME_DELAY;
+		m_curFlame++;
+		m_curFlame %= 4;
+	}*/
+	float width;
+	float height;
+
+	SDL_Texture* curTexture;
+
+	float vMult = m_window_height / static_cast<float>(ORIGINAL_GAME_HEIGHT);
+	float hMult = m_window_width / static_cast<float>(ORIGINAL_GAME_WIDTH);
+
+	height = static_cast<float>(m_resources->m_Image16FileData[IV16_STARTSC][0].height);
+	width = static_cast<float>(m_resources->m_Image16FileData[IV16_STARTSC][0].width);
+
+	float yPosLeft = RENDER_HEIGHT;
+	float yPosRight = RENDER_HEIGHT;
+
+	float xPosLeft = TILE_LEFT_START;
+	float xPosRight = TILE_RIGHT_START;
+
+	switch (m_curAcknowledgement)
+	{
+	case AcknowlegementType::SCROLL_UP:
+		m_curAcknowledgementYDelay += m_tickElapse;
+		if (m_curAcknowledgementYDelay > ACKNOWLEDGEMENT_SCROLL_DELAY)
+		{
+			m_curAcknowledgement = AcknowlegementType::OPEN;
+			yPosLeft = RENDER_HEIGHT - (height * vMult);
+			yPosRight = RENDER_HEIGHT - (height * vMult);
+			m_curAcknowledgementXDelay = 0;
+			m_curAcknowledgementYDelay = 0;
+		}
+		else
+		{
+			float scroll_ratio = static_cast<float>(m_curAcknowledgementYDelay) / ACKNOWLEDGEMENT_SCROLL_DELAY;
+			yPosLeft = RENDER_HEIGHT - ((height * vMult) * scroll_ratio);
+			yPosRight = RENDER_HEIGHT - ((height * vMult) * scroll_ratio);
+		}
+		break;
+	case AcknowlegementType::SCROLL_DOWN:
+		m_curAcknowledgementYDelay += m_tickElapse;
+		if (m_curAcknowledgementYDelay > ACKNOWLEDGEMENT_SCROLL_DELAY)
+		{
+			m_curAcknowledgement = AcknowlegementType::SCROLL_UP;
+			yPosLeft = RENDER_HEIGHT;
+			yPosRight = RENDER_HEIGHT;
+			m_curAcknowledgementXDelay = 0;
+			m_curAcknowledgementYDelay = 0;
+			m_curMode = IntroMode::MENU;
+		}
+		else
+		{
+			float scroll_ratio = 1.0f - static_cast<float>(m_curAcknowledgementYDelay) / ACKNOWLEDGEMENT_SCROLL_DELAY;
+			yPosLeft = RENDER_HEIGHT - ((height * vMult) * scroll_ratio);
+			yPosRight = RENDER_HEIGHT - ((height * vMult) * scroll_ratio);
+		}
+		break;
+	case AcknowlegementType::OPEN:
+		yPosLeft = RENDER_HEIGHT - (height * vMult);
+		yPosRight = RENDER_HEIGHT - (height * vMult);
+		m_curAcknowledgementXDelay += m_tickElapse;
+		if (m_curAcknowledgementXDelay > ACKNOWLEDGEMENT_OPEN_DELAY)
+		{
+			m_curAcknowledgement = AcknowlegementType::WAIT;
+			m_curAcknowledgementXDelay = 0;
+			m_curAcknowledgementYDelay = 0;
+			xPosLeft = 0;
+			xPosRight = RENDER_WIDTH - TILE_WIDTH;
+		}
+		else
+		{
+			float scroll_ratio = static_cast<float>(m_curAcknowledgementXDelay) / ACKNOWLEDGEMENT_OPEN_DELAY;
+			xPosLeft = TILE_LEFT_START - (TILE_LEFT_START * scroll_ratio);
+			xPosRight = TILE_RIGHT_START + ((TILE_RIGHT_START - TILE_WIDTH) * scroll_ratio);
+		}
+		break;
+	case AcknowlegementType::CLOSE:
+		yPosLeft = RENDER_HEIGHT - (height * vMult);
+		yPosRight = RENDER_HEIGHT - (height * vMult);
+		m_curAcknowledgementXDelay += m_tickElapse;
+		if (m_curAcknowledgementXDelay > ACKNOWLEDGEMENT_OPEN_DELAY)
+		{
+			m_curAcknowledgement = AcknowlegementType::SCROLL_DOWN;
+			m_curAcknowledgementXDelay = 0;
+			m_curAcknowledgementYDelay = 0;
+			xPosLeft = TILE_LEFT_START;
+			xPosRight = TILE_RIGHT_START;
+		}
+		else
+		{
+			float scroll_ratio = 1.0f - static_cast<float>(m_curAcknowledgementXDelay) / ACKNOWLEDGEMENT_OPEN_DELAY;
+			xPosLeft = TILE_LEFT_START - (TILE_LEFT_START * scroll_ratio);
+			xPosRight = TILE_RIGHT_START + ((TILE_RIGHT_START - TILE_WIDTH) * scroll_ratio);
+		}
+		break;
+	case AcknowlegementType::WAIT:
+		yPosLeft = RENDER_HEIGHT - (height * vMult);
+		yPosRight = RENDER_HEIGHT - (height * vMult);
+		xPosLeft = 0;
+		xPosRight = RENDER_WIDTH - TILE_WIDTH;
+		m_curAcknowledgementXDelay = 0;
+		m_curAcknowledgementYDelay = 0;
+		break;
+	default:
+		break;
+	}
+
+	curTexture = m_sdl_helper->m_Image16FileTextures[IV16_STARTSC][0];
+	m_sdl_helper->RenderTextureAt(curTexture, xPosLeft, yPosLeft, width * hMult, height * vMult);
+	curTexture = m_sdl_helper->m_Image16FileTextures[IV16_STARTSC][2];
+	m_sdl_helper->RenderTextureAt(curTexture, xPosRight, yPosRight, width * hMult, height * vMult);
 }
 
 void Intro::Render()
@@ -302,11 +431,19 @@ void Intro::Render()
 		RenderFlameFadeWoD();
 		RenderWoD();
 		break;
+	case IntroMode::ACKNOWLEDGEMENTS:
+		RenderLogo();
+		RenderFlame();
+		RenderIntroBox();
+		RenderMenu();
+		RenderAcknowledgements();
+		break;
 	default:
 		RenderLogo();
 		RenderFlame();
 		RenderIntroBox();
 		RenderMenu();
+		RenderCursor();
 		break;
 	}
 
@@ -431,6 +568,31 @@ void Intro::ProcessEvents()
 			m_newMode = U5Modes::MenuSkip;
 		}
 		break;
+	case IntroMode::ACKNOWLEDGEMENTS:
+		if (m_input->isAnyKeyHit())
+		{
+			m_curAcknowledgementXDelay = 0;
+			m_curAcknowledgementYDelay = 0;
+
+			switch (m_curAcknowledgement)
+			{
+			case AcknowlegementType::SCROLL_UP:
+			case AcknowlegementType::OPEN:
+				m_curAcknowledgement = AcknowlegementType::WAIT;
+				break;
+			case AcknowlegementType::WAIT:
+				m_curAcknowledgement = AcknowlegementType::CLOSE;
+				break;
+			case AcknowlegementType::CLOSE:
+			case AcknowlegementType::SCROLL_DOWN:
+				m_curAcknowledgement = AcknowlegementType::SCROLL_UP;
+				m_curMode = IntroMode::MENU;
+				break;
+			default:
+				break;
+			}
+		}
+		break;
 	case IntroMode::MENU:
 		if (m_input->isAnyKeyHit())
 		{
@@ -452,9 +614,15 @@ void Intro::ProcessEvents()
 				}
 				break;
 			case SDLK_RETURN:
-				switch (m_curMenuIndex)
+				switch (static_cast<MenuChoices>(m_curMenuIndex))
 				{
-				case 3:
+				case MenuChoices::ACKNOWLEDGEMENTS:
+					m_curMode = IntroMode::ACKNOWLEDGEMENTS;
+					m_curAcknowledgement = AcknowlegementType::SCROLL_UP;
+					m_curAcknowledgementYDelay = 0;
+					m_curAcknowledgementXDelay = 0;
+					break;
+				case MenuChoices::INTRODUCTION: // Introduction
 					m_newMode = U5Modes::Cutscene;
 					break;
 				default:

@@ -12,12 +12,32 @@
 #include "U5Enums.h"
 #include "AnimationTexture.h"
 
-enum class IntroMode
+enum class IntroMode : uint_fast16_t
 {
 	FADE_LOGO,
 	FADE_FLAME_1,
 	FADE_FLAME_2,
-	MENU
+	MENU,
+	ACKNOWLEDGEMENTS
+};
+
+enum class MenuChoices :uint_fast16_t
+{
+	JOURNEY_ONWARD = 0,
+	CREATE_NEW_CHARACTER,
+	TRANSFER_CHARACTER,
+	INTRODUCTION,
+	ACKNOWLEDGEMENTS,
+	RETURN_TO_VIEW
+};
+
+enum class AcknowlegementType
+{
+	SCROLL_UP,
+	OPEN,
+	CLOSE,
+	SCROLL_DOWN,
+	WAIT
 };
 
 class Intro : public GameObject
@@ -40,6 +60,8 @@ private:
 	void RenderLogo();
 	void RenderWoD();
 	void RenderMenu();
+	void RenderCursor();
+	void RenderAcknowledgements();
 	
 	void RenderIntroBox();
 	void CreateIntroBox();
@@ -56,6 +78,8 @@ private:
 	const Uint64 LOGO_FADE_DELAY = 3000;
 	const Uint64 FLAME_FADE_DELAY = 3000;
 	const Uint64 WOD_FADE_DELAY = 3000;
+	const Uint64 ACKNOWLEDGEMENT_SCROLL_DELAY = 1000;
+	const Uint64 ACKNOWLEDGEMENT_OPEN_DELAY = 2000;
 	
 	IntroMode m_curMode;
 	int m_window_width;
@@ -65,5 +89,11 @@ private:
 	std::unique_ptr<FadeObject> m_LogoFade;
 	std::unique_ptr<FadeObject> m_FlameFade;
 	std::unique_ptr<FadeObject> m_WoDFade;
+	float m_curAcknowledgementYPos;
+	float m_curAcknowledgementXPos;
+	Uint64 m_curAcknowledgementYDelay;
+	Uint64 m_curAcknowledgementXDelay;
+
+	AcknowlegementType m_curAcknowledgement;
 };
 
