@@ -78,8 +78,8 @@ private:
 	const Uint64 LOGO_FADE_DELAY = 3000;
 	const Uint64 FLAME_FADE_DELAY = 3000;
 	const Uint64 WOD_FADE_DELAY = 3000;
-	const Uint64 ACKNOWLEDGEMENT_SCROLL_DELAY = 1000;
-	const Uint64 ACKNOWLEDGEMENT_OPEN_DELAY = 2000;
+	const Uint64 ACKNOWLEDGEMENT_SCROLL_DELAY = 500;
+	const Uint64 ACKNOWLEDGEMENT_OPEN_DELAY = 1000;
 	
 	IntroMode m_curMode;
 	int m_window_width;

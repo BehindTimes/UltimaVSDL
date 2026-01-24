@@ -292,17 +292,12 @@ void Intro::RenderAcknowledgements()
 {
 	const int TILE_LEFT_START = 9 * TILE_WIDTH;
 	const int TILE_RIGHT_START = 10 * TILE_WIDTH;
-	/*m_curDelayFlame += m_tickElapse;
-	if (FLAME_DELAY < m_curDelayFlame)
-	{
-		m_curDelayFlame %= FLAME_DELAY;
-		m_curFlame++;
-		m_curFlame %= 4;
-	}*/
+
 	float width;
 	float height;
 
 	SDL_Texture* curTexture;
+	SDL_Texture* paperTexture = nullptr;
 
 	float vMult = m_window_height / static_cast<float>(ORIGINAL_GAME_HEIGHT);
 	float hMult = m_window_width / static_cast<float>(ORIGINAL_GAME_WIDTH);
@@ -310,11 +305,18 @@ void Intro::RenderAcknowledgements()
 	height = static_cast<float>(m_resources->m_Image16FileData[IV16_STARTSC][0].height);
 	width = static_cast<float>(m_resources->m_Image16FileData[IV16_STARTSC][0].width);
 
+	float paperW = static_cast<float>(m_resources->m_Image16FileData[IV16_STARTSC][1].width);
+	float paperH = static_cast<float>(m_resources->m_Image16FileData[IV16_STARTSC][1].height);
+
 	float yPosLeft = RENDER_HEIGHT;
 	float yPosRight = RENDER_HEIGHT;
 
 	float xPosLeft = TILE_LEFT_START;
 	float xPosRight = TILE_RIGHT_START;
+
+	float paperX = 0;
+
+	float paperXLoc = 0;
 
 	switch (m_curAcknowledgement)
 	{
@@ -356,6 +358,8 @@ void Intro::RenderAcknowledgements()
 	case AcknowlegementType::OPEN:
 		yPosLeft = RENDER_HEIGHT - (height * vMult);
 		yPosRight = RENDER_HEIGHT - (height * vMult);
+		
+		paperTexture = m_sdl_helper->m_Image16FileTextures[IV16_STARTSC][1];
 		m_curAcknowledgementXDelay += m_tickElapse;
 		if (m_curAcknowledgementXDelay > ACKNOWLEDGEMENT_OPEN_DELAY)
 		{
@@ -364,18 +368,29 @@ void Intro::RenderAcknowledgements()
 			m_curAcknowledgementYDelay = 0;
 			xPosLeft = 0;
 			xPosRight = RENDER_WIDTH - TILE_WIDTH;
+			paperX = xPosLeft + TILE_WIDTH;
+			height = static_cast<float>(m_resources->m_Image16FileData[IV16_STARTSC][0].height);
+			width = static_cast<float>(m_resources->m_Image16FileData[IV16_STARTSC][0].width);
 		}
 		else
 		{
 			float scroll_ratio = static_cast<float>(m_curAcknowledgementXDelay) / ACKNOWLEDGEMENT_OPEN_DELAY;
 			xPosLeft = TILE_LEFT_START - (TILE_LEFT_START * scroll_ratio);
 			xPosRight = TILE_RIGHT_START + ((TILE_RIGHT_START - TILE_WIDTH) * scroll_ratio);
+			paperX = xPosLeft + TILE_WIDTH;
+
+			float tempW = paperW * scroll_ratio;
+			float offset = paperW - tempW;
+			offset /= 2.0f;
+			paperW = tempW;
+			paperXLoc = offset;
 		}
 		break;
 	case AcknowlegementType::CLOSE:
 		yPosLeft = RENDER_HEIGHT - (height * vMult);
 		yPosRight = RENDER_HEIGHT - (height * vMult);
 		m_curAcknowledgementXDelay += m_tickElapse;
+		
 		if (m_curAcknowledgementXDelay > ACKNOWLEDGEMENT_OPEN_DELAY)
 		{
 			m_curAcknowledgement = AcknowlegementType::SCROLL_DOWN;
@@ -386,9 +401,17 @@ void Intro::RenderAcknowledgements()
 		}
 		else
 		{
+			paperTexture = m_sdl_helper->m_Image16FileTextures[IV16_STARTSC][1];
 			float scroll_ratio = 1.0f - static_cast<float>(m_curAcknowledgementXDelay) / ACKNOWLEDGEMENT_OPEN_DELAY;
 			xPosLeft = TILE_LEFT_START - (TILE_LEFT_START * scroll_ratio);
 			xPosRight = TILE_RIGHT_START + ((TILE_RIGHT_START - TILE_WIDTH) * scroll_ratio);
+			paperX = xPosLeft + TILE_WIDTH;
+
+			float tempW = paperW * scroll_ratio;
+			float offset = paperW - tempW;
+			offset /= 2.0f;
+			paperW = tempW;
+			paperXLoc = offset;
 		}
 		break;
 	case AcknowlegementType::WAIT:
@@ -396,11 +419,21 @@ void Intro::RenderAcknowledgements()
 		yPosRight = RENDER_HEIGHT - (height * vMult);
 		xPosLeft = 0;
 		xPosRight = RENDER_WIDTH - TILE_WIDTH;
+		paperX = xPosLeft + TILE_WIDTH;
+		paperW = static_cast<float>(m_resources->m_Image16FileData[IV16_STARTSC][1].width);
+		paperH = static_cast<float>(m_resources->m_Image16FileData[IV16_STARTSC][1].height);
+		paperTexture = m_sdl_helper->m_Image16FileTextures[IV16_STARTSC][1];;
 		m_curAcknowledgementXDelay = 0;
 		m_curAcknowledgementYDelay = 0;
 		break;
 	default:
 		break;
+	}
+
+	if (paperW != 0 && paperTexture != nullptr)
+	{
+		//m_sdl_helper->RenderTextureAt(curTexture, paperX, yPosLeft, paperW * hMult, height * vMult);
+		m_sdl_helper->RenderTextureFromTo(paperTexture, paperXLoc, 0, paperW, paperH, paperX, yPosLeft, paperW * hMult, height * vMult);
 	}
 
 	curTexture = m_sdl_helper->m_Image16FileTextures[IV16_STARTSC][0];

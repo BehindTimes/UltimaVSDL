@@ -30,6 +30,8 @@ public:
 	void ClearScreen() const;
 	void RenderFlipTextureAt(SDL_Texture* texture, float x, float y, float width, float height, bool flip) const;
 	void RenderTextureAt(SDL_Texture* texture, float x, float y, float width, float height) const;
+	void RenderTextureFromTo(SDL_Texture* texture, float from_x, float from_y, float from_width, float from_height,
+		float to_x, float to_y, float to_width, float to_height) const;
 	void RenderPresent() const;
 	void GetScreenDimensions(int& width, int& height);
 	void TurnOnPixels(SDL_Texture* texture, std::vector<int>& vec_pixels, bool on);

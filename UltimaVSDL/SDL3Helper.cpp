@@ -256,6 +256,27 @@ void SDL3Helper::DrawTileTexture8(SDL_Texture* texture, int x_tile, int y_tile) 
 	SDL_RenderTexture(m_renderer, texture, NULL, &toRect);
 }
 
+void SDL3Helper::RenderTextureFromTo(SDL_Texture* texture, float from_x, float from_y, float from_width, float from_height,
+	float to_x, float to_y, float to_width, float to_height) const
+{
+	SDL_FRect fromRect{};
+	fromRect.x = static_cast<float>(from_x);
+	fromRect.y = static_cast<float>(from_y);
+	fromRect.w = static_cast<float>(from_width);
+	fromRect.h = static_cast<float>(from_height);
+
+	SDL_FRect toRect{};
+	toRect.x = static_cast<float>(to_x);
+	toRect.y = static_cast<float>(to_y);
+	toRect.w = static_cast<float>(to_width);
+	toRect.h = static_cast<float>(to_height);
+
+	if (texture)
+	{
+		SDL_RenderTexture(m_renderer, texture, &fromRect, &toRect);
+	}
+}
+
 void SDL3Helper::RenderTextureAt(SDL_Texture* texture, float x, float y, float width, float height) const
 {
 	SDL_FRect toRect{};
@@ -516,8 +537,17 @@ void SDL3Helper::LoadCharacterSetTextures(UltimaVResource* u5_resources)
 	}
 	m_ArrowTextures.resize(2);
 	m_ArrowTextures.resize(2);
-	CreateOutlineTexture(m_ArrowTextures[0], u5_resources->m_CharacterSetsData[0][0][1], ega_table[1]);
-	CreateOutlineTexture(m_ArrowTextures[1], u5_resources->m_CharacterSetsData[0][0][2], ega_table[1]);
+	if (u5_resources->m_render_mode == RenderMode::CGA)
+	{
+		CreateOutlineTexture(m_ArrowTextures[0], u5_resources->m_CharacterSetsData[0][0][1], cga_table[1]);
+		CreateOutlineTexture(m_ArrowTextures[1], u5_resources->m_CharacterSetsData[0][0][2], cga_table[1]);
+	}
+	else
+	{
+		CreateOutlineTexture(m_ArrowTextures[0], u5_resources->m_CharacterSetsData[0][0][1], ega_table[1]);
+		CreateOutlineTexture(m_ArrowTextures[1], u5_resources->m_CharacterSetsData[0][0][2], ega_table[1]);
+	}
+	
 }
 
 void SDL3Helper::LoadMaskTexture(U5ImageData& data, SDL_Texture*& texture, bool alpha) const
