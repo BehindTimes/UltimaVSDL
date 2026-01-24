@@ -35,7 +35,6 @@ public:
 	void TurnOnPixels(SDL_Texture* texture, std::vector<int>& vec_pixels, bool on);
 	void TurnOnAllPixels(SDL_Texture* texture, bool on);
 	void SetRenderTarget(SDL_Texture* texture) const;
-	bool isAnyKeyHit() const;
 	void ClearStreamingTexture(SDL_Texture *texture);
 	void CopyTextureToStreaming(U5ImageData &texture, SDL_Texture *streaming_texture, uint32_t width, uint32_t height);
 	void DrawTiledText(std::string text, int x_tile, int y_tile);
@@ -72,6 +71,5 @@ private:
 	
 	SDL_Event m_event;
 	Uint64 m_curTick;
-	bool m_anyKeyHit;
 };
 

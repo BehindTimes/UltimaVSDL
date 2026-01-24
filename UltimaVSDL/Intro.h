@@ -42,6 +42,7 @@ private:
 	
 	void RenderIntroBox();
 	void CreateIntroBox();
+	void CreateMenu();
 	
 	void StoryOverCallback();
 
@@ -58,6 +59,7 @@ private:
 	IntroMode m_curMode;
 	int m_window_width;
 	int m_window_height;
+	int m_curMenuIndex;
 
 	std::unique_ptr<FadeObject> m_LogoFade;
 	std::unique_ptr<FadeObject> m_FlameFade;

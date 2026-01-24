@@ -21,6 +21,10 @@
 #include <cstdint>
 #include <string>
 #include <SDL3/SDL_blendmode.h>
+#include <memory>
+#include "U5Input.h"
+
+extern std::unique_ptr<U5Input> m_input;
 
 SDL3Helper::SDL3Helper() :
 	m_window(nullptr),
@@ -32,7 +36,6 @@ SDL3Helper::SDL3Helper() :
 	m_LogoFadeTexture(nullptr),
 	m_WoDFadeTexture(nullptr),
 	m_Flame1FadeTexture(nullptr),
-	m_anyKeyHit(false),
 	m_CodexFadeTexture(nullptr),
 	m_FullScreenTexture(nullptr)
 {
@@ -183,10 +186,7 @@ void SDL3Helper::ClearScreen() const
 void SDL3Helper::DrawInvertRect(int x_tile, int y_tile, int width, int height) const
 {
 	SDL_BlendMode blendmode_sub = SDL_ComposeCustomBlendMode(SDL_BLENDFACTOR_SRC_ALPHA, SDL_BLENDFACTOR_ONE, SDL_BLENDOPERATION_SUBTRACT,
-		SDL_BLENDFACTOR_ZERO, SDL_BLENDFACTOR_ONE, SDL_BLENDOPERATION_SUBTRACT);
-
-	SDL_BlendMode blendmode_add = SDL_ComposeCustomBlendMode(SDL_BLENDFACTOR_SRC_ALPHA, SDL_BLENDFACTOR_ONE, SDL_BLENDOPERATION_ADD,
-		SDL_BLENDFACTOR_ZERO, SDL_BLENDFACTOR_ONE, SDL_BLENDOPERATION_ADD);
+		SDL_BLENDFACTOR_ZERO, SDL_BLENDFACTOR_ONE, SDL_BLENDOPERATION_MAXIMUM);
 
 	SDL_FRect toRect{};
 	toRect.x = static_cast<float>(x_tile * HALF_TILE_HEIGHT);
@@ -195,7 +195,7 @@ void SDL3Helper::DrawInvertRect(int x_tile, int y_tile, int width, int height) c
 	toRect.h = static_cast<float>(height * HALF_TILE_HEIGHT);
 
 	//SDL_SetRenderDrawBlendMode(m_renderer, blendmode_sub);
-	SDL_SetRenderDrawBlendMode(m_renderer, SDL_BLENDMODE_BLEND);
+	//SDL_SetRenderDrawBlendMode(m_renderer, SDL_BLENDMODE_BLEND);
 	SDL_SetRenderDrawBlendMode(m_renderer, blendmode_sub);
 
 	SDL_SetRenderDrawColor(m_renderer, 255, 255, 255, 255);
@@ -281,7 +281,7 @@ void SDL3Helper::Render()
 
 void SDL3Helper::Poll()
 {
-	m_anyKeyHit = false;
+	m_input->StartInput();
 	SDL_PollEvent(&m_event);
 	switch (m_event.type)
 	{
@@ -289,7 +289,6 @@ void SDL3Helper::Poll()
 		m_quit = true;
 		break;
 	case SDL_EVENT_KEY_DOWN:
-		m_anyKeyHit = true;
 		if (m_event.key.mod & SDL_KMOD_ALT)
 		{
 			if (m_event.key.key == SDLK_X)
@@ -297,8 +296,10 @@ void SDL3Helper::Poll()
 				m_quit = true;
 			}
 		}
+		m_input->ProcessKeyDown(m_event.key);
 		break;
 	}
+	m_input->FinishInput();
 }
 
 void SDL3Helper::CreateTextureFromMemory(SDL_Texture *&texture, const U5ImageData &curData, bool has_transparent, unsigned char transparent_color[3]) const
@@ -705,11 +706,6 @@ Uint64 SDL3Helper::GetCurrentTick() const
 void SDL3Helper::SetRenderTarget(SDL_Texture* texture) const
 {
 	SDL_SetRenderTarget(m_renderer, texture);
-}
-
-bool SDL3Helper::isAnyKeyHit() const
-{
-	return m_anyKeyHit;
 }
 
 void SDL3Helper::CopyTextureToStreaming(U5ImageData &texture, SDL_Texture *streaming_texture, uint32_t width, uint32_t height)

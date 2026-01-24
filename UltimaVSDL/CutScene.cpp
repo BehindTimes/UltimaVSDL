@@ -6,6 +6,9 @@
 #include "U5Enums.h"
 #include "UltimaVResource.h"
 #include <string>
+#include "U5Input.h"
+
+extern std::unique_ptr<U5Input> m_input;
 
 CutScene::CutScene(SDL3Helper* sdl_helper, UltimaVResource* u5_resources) :
 	GameObject(sdl_helper, u5_resources),
@@ -54,7 +57,7 @@ void CutScene::CreateStreamingTextures()
 
 void CutScene::ProcessEvents()
 {
-	if (m_sdl_helper->isAnyKeyHit())
+	if (m_input->isAnyKeyHit())
 	{
 		IncrementStory();
 	}
@@ -62,6 +65,7 @@ void CutScene::ProcessEvents()
 
 void CutScene::SetCutScreenInfo(U5Modes old_mode, std::vector<U5StoryScreen>& story, int story_id, std::function<void(void)> callback)
 {
+	m_input->SetInputType(InputType::ANY_KEY);
 	m_oldMode = old_mode;
 	m_story = story;
 	m_number_screens = static_cast<int>(story.size());

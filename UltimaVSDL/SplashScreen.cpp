@@ -6,6 +6,10 @@
 #include "U5Enums.h"
 #include "UltimaVResource.h"
 #include <cstring>
+#include "U5Input.h"
+#include <memory>
+
+extern std::unique_ptr<U5Input> m_input;
 
 SplashScreen::SplashScreen(SDL3Helper* sdl_helper, UltimaVResource* u5_resources) :
 	GameObject(sdl_helper, u5_resources),
@@ -280,6 +284,7 @@ void SplashScreen::Render()
 void SplashScreen::LoadData()
 {
 	SetSDLData();
+	m_input->SetInputType(InputType::ANY_KEY);
 }
 
 void SplashScreen::SetSDLData()
@@ -289,7 +294,7 @@ void SplashScreen::SetSDLData()
 
 void SplashScreen::ProcessEvents()
 {
-	if (m_sdl_helper->isAnyKeyHit())
+	if (m_input->isAnyKeyHit())
 	{
 		m_newMode = U5Modes::MenuSkip;
 	}

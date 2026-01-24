@@ -13,9 +13,12 @@
 #include "CutScene.h"
 #include <functional>
 #include <string>
+#include "U5Input.h"
+#include <SDL3/SDL_keycode.h>
 
 extern std::unique_ptr<CutScene> cutscene_screen;
 extern std::unique_ptr<U5Utils> m_utilities;
+extern std::unique_ptr<U5Input> m_input;
 
 Intro::Intro(SDL3Helper* sdl_helper, UltimaVResource* u5_resources) :
 	GameObject(sdl_helper, u5_resources),
@@ -24,7 +27,8 @@ Intro::Intro(SDL3Helper* sdl_helper, UltimaVResource* u5_resources) :
 	m_curMode(IntroMode::FADE_LOGO),
 	m_window_width(0),
 	m_window_height(0),
-	m_curWodFade(0)
+	m_curWodFade(0),
+	m_curMenuIndex(0)
 {
 	m_clearScreen = true;
 
@@ -204,14 +208,17 @@ void Intro::RenderFlame()
 	m_sdl_helper->RenderTextureAt(curTexture, x * hMult, y * vMult, width * hMult, height * vMult);
 }
 
-void Intro::RenderMenu()
+void Intro::CreateMenu()
 {
-	m_sdl_helper->SetRenderTarget(m_sdl_helper->m_TargetTextures[TTV_INTROBOX_DISPLAY]);
+	SDL_Texture* curTexture = m_sdl_helper->m_TargetTextures[TTV_INTROBOX_DISPLAY];
+	m_sdl_helper->SetRenderTarget(curTexture);
+	SDL_SetRenderDrawColor(m_sdl_helper->m_renderer, 0x00, 0, 0, 0xFF);
+	m_sdl_helper->ClearScreen();
 	const int NUM_X_TILES = 40;
 	const int Y_TILE_START = 1;
 	int invertx = 0;
 	int inverty = 0;
-	int invertindex = 3;
+	int invertindex = m_curMenuIndex;
 	int invert_width = 0;
 
 	for (int index = 0; index < 6; index++)
@@ -227,69 +234,32 @@ void Intro::RenderMenu()
 		if (invertindex == index)
 		{
 			invertx = start_x_tile;
-			inverty = Y_TILE_START + index + 16;
+			inverty = Y_TILE_START + index;// +16;
 			invert_width = static_cast<int>(curVal.size() + 2);
 		}
 	}
-	
+	m_sdl_helper->DrawInvertRect(invertx - 1, inverty, invert_width, 1);
 	m_sdl_helper->SetRenderTarget(nullptr);
-	m_sdl_helper->DrawInvertRect(invertx, inverty, invert_width, 1);
+	//m_sdl_helper->DrawInvertRect(invertx, inverty, invert_width, 1);	
+}
+
+void Intro::RenderMenu()
+{
+	SDL_Texture* curTexture = m_sdl_helper->m_TargetTextures[TTV_INTROBOX_DISPLAY];
+
+	float x = HALF_TILE_HEIGHT;
+	float y = 16 * HALF_TILE_HEIGHT;
+	m_sdl_helper->RenderTextureAt(curTexture, x, y, RENDER_WIDTH - TILE_WIDTH, TILE_HEIGHT * 4);
 }
 
 void Intro::RenderIntroBox()
 {
-	int blue = 1;
+	SDL_Texture* curTexture;
 
 	float x = 0;
 	float y = 15 * HALF_TILE_HEIGHT;
-	SDL_Texture* curTexture = m_sdl_helper->m_TargetTextures[TTV_INTROBOX];
-
+	curTexture = m_sdl_helper->m_TargetTextures[TTV_INTROBOX];
 	m_sdl_helper->RenderTextureAt(curTexture, x, y, RENDER_WIDTH, TILE_HEIGHT * 5);
-	x = HALF_TILE_WIDTH;
-	y = 8 * TILE_HEIGHT;
-	curTexture = m_sdl_helper->m_TargetTextures[TTV_INTROBOX_DISPLAY];
-	m_sdl_helper->RenderTextureAt(curTexture, x, y, RENDER_WIDTH - TILE_WIDTH, TILE_HEIGHT * 4);
-
-	if (m_resources->m_render_mode == RenderMode::CGA) // CGA
-	{
-		SDL_SetTextureColorMod(m_sdl_helper->m_CharacterSetsTextures[0][0][123], cga_table[blue][0], cga_table[blue][1], cga_table[blue][2]);
-		SDL_SetTextureColorMod(m_sdl_helper->m_CharacterSetsTextures[0][0][124], cga_table[blue][0], cga_table[blue][1], cga_table[blue][2]);
-		SDL_SetTextureColorMod(m_sdl_helper->m_CharacterSetsTextures[0][0][125], cga_table[blue][0], cga_table[blue][1], cga_table[blue][2]);
-		SDL_SetTextureColorMod(m_sdl_helper->m_CharacterSetsTextures[0][0][126], cga_table[blue][0], cga_table[blue][1], cga_table[blue][2]);
-	}
-	else
-	{
-		SDL_SetTextureColorMod(m_sdl_helper->m_CharacterSetsTextures[0][0][123], ega_table[blue][0], ega_table[blue][1], ega_table[blue][2]);
-		SDL_SetTextureColorMod(m_sdl_helper->m_CharacterSetsTextures[0][0][124], ega_table[blue][0], ega_table[blue][1], ega_table[blue][2]);
-		SDL_SetTextureColorMod(m_sdl_helper->m_CharacterSetsTextures[0][0][125], ega_table[blue][0], ega_table[blue][1], ega_table[blue][2]);
-		SDL_SetTextureColorMod(m_sdl_helper->m_CharacterSetsTextures[0][0][126], ega_table[blue][0], ega_table[blue][1], ega_table[blue][2]);
-	}
-
-	m_sdl_helper->SetRenderTarget(m_sdl_helper->m_TargetTextures[TTV_INTROBOX]);
-	curTexture = m_sdl_helper->m_CharacterSetsTextures[0][0][123];
-	m_sdl_helper->RenderTextureAt(curTexture, 0, 0, HALF_TILE_WIDTH, HALF_TILE_HEIGHT);
-	curTexture = m_sdl_helper->m_CharacterSetsTextures[0][0][124];
-	m_sdl_helper->RenderTextureAt(curTexture, RENDER_WIDTH - HALF_TILE_WIDTH, 0, HALF_TILE_WIDTH, HALF_TILE_HEIGHT);
-	curTexture = m_sdl_helper->m_CharacterSetsTextures[0][0][125];
-	m_sdl_helper->RenderTextureAt(curTexture, 0, HALF_TILE_HEIGHT * 9, HALF_TILE_WIDTH, HALF_TILE_HEIGHT);
-	curTexture = m_sdl_helper->m_CharacterSetsTextures[0][0][126];
-	m_sdl_helper->RenderTextureAt(curTexture, RENDER_WIDTH - HALF_TILE_WIDTH, HALF_TILE_HEIGHT * 9, HALF_TILE_WIDTH, HALF_TILE_HEIGHT);
-
-	//curTexture = m_sdl_helper->m_ArrowTextures[1];
-	//m_sdl_helper->RenderTextureAt(curTexture, 100, 0, HALF_TILE_WIDTH, HALF_TILE_HEIGHT);
-
-	SDL_SetRenderDrawColor(m_sdl_helper->m_renderer, 0xFF, 0xFF, 0xFF, 0xFF);
-	SDL_FRect line{ HALF_TILE_WIDTH - LINE_THICKNESS, HALF_TILE_HEIGHT - LINE_THICKNESS, RENDER_WIDTH - TILE_WIDTH + (2 * LINE_THICKNESS), LINE_THICKNESS };
-	SDL_RenderFillRect(m_sdl_helper->m_renderer, &line);
-	line = { HALF_TILE_WIDTH - LINE_THICKNESS, (TILE_HEIGHT * 4) + HALF_TILE_HEIGHT, RENDER_WIDTH - TILE_WIDTH + (2 * LINE_THICKNESS), LINE_THICKNESS };
-	SDL_RenderFillRect(m_sdl_helper->m_renderer, &line);
-	line = { HALF_TILE_WIDTH - LINE_THICKNESS, HALF_TILE_HEIGHT, LINE_THICKNESS, (TILE_HEIGHT * 4) };
-	SDL_RenderFillRect(m_sdl_helper->m_renderer, &line);
-	line = { RENDER_WIDTH - HALF_TILE_WIDTH, HALF_TILE_HEIGHT, LINE_THICKNESS, (TILE_HEIGHT * 4) };
-	SDL_RenderFillRect(m_sdl_helper->m_renderer, &line);
-
-	m_sdl_helper->SetRenderTarget(nullptr);
-	SDL_SetRenderDrawColor(m_sdl_helper->m_renderer, 0, 0, 0, 0);
 }
 
 void Intro::Render()
@@ -329,6 +299,9 @@ void Intro::LoadData()
 {
 	SetSDLData();
 	CreateIntroBox();
+	CreateMenu();
+	//m_input->SetInputType(InputType::ANY_KEY);
+	m_input->SetInputType(InputType::UP_DOWN_ENTER);
 }
 
 void Intro::SetSDLData()
@@ -338,6 +311,7 @@ void Intro::SetSDLData()
 
 void Intro::CreateIntroBox()
 {
+	SDL_Texture* curTexture;
 	const int blue = 1;
 	m_sdl_helper->SetRenderTarget(m_sdl_helper->m_TargetTextures[TTV_INTROBOX]);
 	if (m_resources->m_render_mode == RenderMode::CGA) // CGA
@@ -351,33 +325,56 @@ void Intro::CreateIntroBox()
 
 	m_sdl_helper->ClearScreen();
 	m_sdl_helper->SetRenderTarget(m_sdl_helper->m_TargetTextures[TTV_INTROBOX_DISPLAY]);
-	SDL_SetRenderDrawColor(m_sdl_helper->m_renderer, 0x00, 0, 0x00, 0xFF);
+	SDL_SetRenderDrawColor(m_sdl_helper->m_renderer, 0x00, 0x00, 0x00, 0xFF);
 	m_sdl_helper->ClearScreen();
+
+	float x = 0;
+	float y = 15 * HALF_TILE_HEIGHT;
+
+	if (m_resources->m_render_mode == RenderMode::CGA) // CGA
+	{
+		SDL_SetTextureColorMod(m_sdl_helper->m_CharacterSetsTextures[0][0][123], cga_table[blue][0], cga_table[blue][1], cga_table[blue][2]);
+		SDL_SetTextureColorMod(m_sdl_helper->m_CharacterSetsTextures[0][0][124], cga_table[blue][0], cga_table[blue][1], cga_table[blue][2]);
+		SDL_SetTextureColorMod(m_sdl_helper->m_CharacterSetsTextures[0][0][125], cga_table[blue][0], cga_table[blue][1], cga_table[blue][2]);
+		SDL_SetTextureColorMod(m_sdl_helper->m_CharacterSetsTextures[0][0][126], cga_table[blue][0], cga_table[blue][1], cga_table[blue][2]);
+	}
+	else
+	{
+		SDL_SetTextureColorMod(m_sdl_helper->m_CharacterSetsTextures[0][0][123], ega_table[blue][0], ega_table[blue][1], ega_table[blue][2]);
+		SDL_SetTextureColorMod(m_sdl_helper->m_CharacterSetsTextures[0][0][124], ega_table[blue][0], ega_table[blue][1], ega_table[blue][2]);
+		SDL_SetTextureColorMod(m_sdl_helper->m_CharacterSetsTextures[0][0][125], ega_table[blue][0], ega_table[blue][1], ega_table[blue][2]);
+		SDL_SetTextureColorMod(m_sdl_helper->m_CharacterSetsTextures[0][0][126], ega_table[blue][0], ega_table[blue][1], ega_table[blue][2]);
+	}
+
+	m_sdl_helper->SetRenderTarget(m_sdl_helper->m_TargetTextures[TTV_INTROBOX]);
+	curTexture = m_sdl_helper->m_CharacterSetsTextures[0][0][123];
+	m_sdl_helper->RenderTextureAt(curTexture, 0, 0, HALF_TILE_WIDTH, HALF_TILE_HEIGHT);
+	curTexture = m_sdl_helper->m_CharacterSetsTextures[0][0][124];
+	m_sdl_helper->RenderTextureAt(curTexture, RENDER_WIDTH - HALF_TILE_WIDTH, 0, HALF_TILE_WIDTH, HALF_TILE_HEIGHT);
+	curTexture = m_sdl_helper->m_CharacterSetsTextures[0][0][125];
+	m_sdl_helper->RenderTextureAt(curTexture, 0, HALF_TILE_HEIGHT * 9, HALF_TILE_WIDTH, HALF_TILE_HEIGHT);
+	curTexture = m_sdl_helper->m_CharacterSetsTextures[0][0][126];
+	m_sdl_helper->RenderTextureAt(curTexture, RENDER_WIDTH - HALF_TILE_WIDTH, HALF_TILE_HEIGHT * 9, HALF_TILE_WIDTH, HALF_TILE_HEIGHT);
+
+	SDL_SetRenderDrawColor(m_sdl_helper->m_renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+	SDL_FRect line{ HALF_TILE_WIDTH - LINE_THICKNESS, HALF_TILE_HEIGHT - LINE_THICKNESS, RENDER_WIDTH - TILE_WIDTH + (2 * LINE_THICKNESS), LINE_THICKNESS };
+	SDL_RenderFillRect(m_sdl_helper->m_renderer, &line);
+	line = { HALF_TILE_WIDTH - LINE_THICKNESS, (TILE_HEIGHT * 4) + HALF_TILE_HEIGHT, RENDER_WIDTH - TILE_WIDTH + (2 * LINE_THICKNESS), LINE_THICKNESS };
+	SDL_RenderFillRect(m_sdl_helper->m_renderer, &line);
+	line = { HALF_TILE_WIDTH - LINE_THICKNESS, HALF_TILE_HEIGHT, LINE_THICKNESS, (TILE_HEIGHT * 4) };
+	SDL_RenderFillRect(m_sdl_helper->m_renderer, &line);
+	line = { RENDER_WIDTH - HALF_TILE_WIDTH, HALF_TILE_HEIGHT, LINE_THICKNESS, (TILE_HEIGHT * 4) };
+	SDL_RenderFillRect(m_sdl_helper->m_renderer, &line);
+
+	x = HALF_TILE_WIDTH;
+	y = HALF_TILE_HEIGHT;
+
+	line = { HALF_TILE_WIDTH, HALF_TILE_HEIGHT, RENDER_WIDTH - TILE_WIDTH, (TILE_HEIGHT * 4) };
+	SDL_SetRenderDrawColor(m_sdl_helper->m_renderer, 0, 0, 0, 0xFF);
+	SDL_RenderFillRect(m_sdl_helper->m_renderer, &line);
+
 	m_sdl_helper->SetRenderTarget(nullptr);
 	SDL_SetRenderDrawColor(m_sdl_helper->m_renderer, 0, 0, 0, 0);
-}
-
-void Intro::ProcessEvents()
-{
-	switch (m_curMode)
-	{
-	case IntroMode::FADE_LOGO:
-	case IntroMode::FADE_FLAME_1:
-	case IntroMode::FADE_FLAME_2:
-		if (m_sdl_helper->isAnyKeyHit())
-		{
-			m_newMode = U5Modes::MenuSkip;
-		}
-		break;
-	case IntroMode::MENU:
-		if (m_sdl_helper->isAnyKeyHit())
-		{
-			m_newMode = U5Modes::Cutscene;
-		}
-		break;
-	default:
-		break;
-	}
 }
 
 void Intro::GoToSelection()
@@ -400,5 +397,59 @@ bool Intro::ChangeMode(U5Modes& newMode)
 
 void Intro::StoryOverCallback()
 {
+	m_input->SetInputType(InputType::UP_DOWN_ENTER);
 	m_curMode = IntroMode::MENU;
+}
+
+void Intro::ProcessEvents()
+{
+	switch (m_curMode)
+	{
+	case IntroMode::FADE_LOGO:
+	case IntroMode::FADE_FLAME_1:
+	case IntroMode::FADE_FLAME_2:
+		if (m_input->isAnyKeyHit())
+		{
+			m_newMode = U5Modes::MenuSkip;
+		}
+		break;
+	case IntroMode::MENU:
+		if (m_input->isAnyKeyHit())
+		{
+			SDL_Keycode curKey = m_input->GetKeyCode();
+			switch (curKey)
+			{
+			case SDLK_UP:
+				m_curMenuIndex--;
+				if (m_curMenuIndex < 0)
+				{
+					m_curMenuIndex = 5;
+				}
+				break;
+			case SDLK_DOWN:
+				m_curMenuIndex++;
+				if (m_curMenuIndex > 5)
+				{
+					m_curMenuIndex = 0;
+				}
+				break;
+			case SDLK_RETURN:
+				switch (m_curMenuIndex)
+				{
+				case 3:
+					m_newMode = U5Modes::Cutscene;
+					break;
+				default:
+					break;
+				}
+				break;
+			default:
+				break;
+			}
+			CreateMenu();
+		}
+		break;
+	default:
+		break;
+	}
 }
