@@ -6,12 +6,15 @@
 #include <cstdint>
 #include <string>
 #include <vector>
-
+#include <cstring>
+ 
 static const std::filesystem::path GAME_DIRECTORY("G:/source/UltimaVSDL/u5data");
 
 UltimaVResource::UltimaVResource() :
 	m_render_mode(RenderMode::EGA)
 {
+	std::memset(m_CutsceneMap, 0, sizeof(m_CutsceneMap));
+	std::memset(m_DemoMap, 0, sizeof(m_DemoMap));
 }
 
 UltimaVResource::~UltimaVResource()
@@ -27,6 +30,10 @@ int UltimaVResource::LoadResources()
 {
 	// This is crucial to load first, as it has information other files will need
 	if (0 != LoadDataOvl())
+	{
+		return -1;
+	}
+	if (0 != LoadTiles())
 	{
 		return -1;
 	}
@@ -47,6 +54,10 @@ int UltimaVResource::LoadResources()
 		return -1;
 	}
 	if (0 != LoadProportionalFont())
+	{
+		return -1;
+	}
+	if (0 != LoadMiscMaps())
 	{
 		return -1;
 	}
@@ -627,6 +638,32 @@ int UltimaVResource::LoadStory(std::vector<unsigned char> &data_buffer)
 	return 0;
 }
 
+bool UltimaVResource::ReadStrings(const std::vector<unsigned char>& buffer, std::vector<std::string>& str_vec, size_t start_pos, size_t end_pos)
+{
+	if (buffer.size() <= end_pos)
+	{
+		return false;
+	}
+
+	std::string strValue;
+	for (size_t index = start_pos; index <= end_pos; index++)
+	{
+		if (buffer[index] == 0)
+		{
+			if (strValue.size() > 0)
+			{
+				str_vec.push_back(strValue);
+				strValue.clear();
+			}
+		}
+		else
+		{
+			strValue += buffer[index];
+		}
+	}
+	return true;
+}
+
 int UltimaVResource::LoadDataOvl()
 {
 	std::string strStoryFile("DATA.OVL");
@@ -658,31 +695,146 @@ int UltimaVResource::LoadDataOvl()
 	{
 		return -5;
 	}
+	/*if (!ReadStrings(buffer, m_data.intro_strings, 0x750a, 0xa459))
+	{
+		return -5;
+	}*/
 	return 0;
 }
 
-bool UltimaVResource::ReadStrings(const std::vector<unsigned char>& buffer, std::vector<std::string>& str_vec, size_t start_pos, size_t end_pos)
+int UltimaVResource::LoadTiles()
 {
-	if (buffer.size() <= end_pos)
+	int bitInc;
+	std::string strExt;
+	int numPixelsPerByte;
+	int modnum;
+	if (m_render_mode == RenderMode::CGA)
 	{
-		return false;
+		strExt = std::string(".4");
+		numPixelsPerByte = 4;
+		bitInc = 2;
+		modnum = 0b11;
 	}
-
-	std::string strValue;
-	for (size_t index = start_pos; index <= end_pos; index++)
+	else
 	{
-		if (buffer[index] == 0)
+		strExt = std::string(".16");
+		numPixelsPerByte = 2;
+		bitInc = 4;
+		modnum = 0b1111;
+	}
+	std::string strStoryFile = std::string("TILES") + strExt;
+	std::filesystem::path file_path = GAME_DIRECTORY / strStoryFile;
+	if (!std::filesystem::exists(file_path))
+	{
+		return -1;
+	}
+	std::uintmax_t file_size = std::filesystem::file_size(file_path);
+	std::vector<unsigned char> buffer(file_size);
+	std::ifstream file(file_path, std::ios::binary);
+	file.read(reinterpret_cast<char*>(buffer.data()), static_cast<std::streamsize>(file_size));
+	file.close();
+
+	std::vector<unsigned char> buffer_lzw;
+	if (!LzwDecompressor::Extract(buffer, buffer_lzw))
+	{
+		return -2;
+	}
+	// Verify file size.  This is the path for base textures, not custom ones
+	if (m_render_mode == RenderMode::CGA)
+	{
+		if (buffer_lzw.size() != 0x8000)
 		{
-			if (strValue.size() > 0)
+			return -3;
+		}
+	}
+	else
+	{
+		if (buffer_lzw.size() != 0x10000)
+		{
+			return -3;
+		}
+	}
+	const size_t NUM_TILES = 256;
+	const size_t TILE_WIDTH = 16;
+	const size_t TILE_HEIGHT = 16;
+	for (size_t index = 0; index < NUM_TILES; index++)
+	{
+		m_Tiles.emplace_back();
+		m_Tiles.back().pixel_data.resize(TILE_WIDTH * TILE_HEIGHT);
+		m_Tiles.back().mode = numPixelsPerByte;
+		m_Tiles.back().width = TILE_WIDTH;
+		m_Tiles.back().height = TILE_HEIGHT;
+		size_t curPos = index * (TILE_WIDTH / numPixelsPerByte) * TILE_HEIGHT;
+
+		for (size_t indexY = 0; indexY < TILE_HEIGHT; indexY++)
+		{
+			for (size_t indexX = 0; indexX < TILE_WIDTH / numPixelsPerByte; indexX++)
 			{
-				str_vec.push_back(strValue);
-				strValue.clear();
+				unsigned char curByte = buffer_lzw[curPos];
+				for (int bitIndex = 0; bitIndex < 8; bitIndex += bitInc)
+				{
+					int curColor = (static_cast<int>(curByte) >> ((8 - bitInc) - bitIndex)) & modnum;
+					if (indexX * numPixelsPerByte + (bitIndex / bitInc) < m_Tiles.back().width)
+					{
+						m_Tiles.back().pixel_data[static_cast<size_t>(indexY * m_Tiles.back().width + indexX * numPixelsPerByte + (bitIndex / bitInc))] = static_cast<unsigned char>(curColor);
+					}
+				}
+				curPos++;
 			}
 		}
-		else
+	}
+	
+	return 0;
+}
+
+int UltimaVResource::LoadMiscMaps()
+{
+	std::string strStoryFile("MISCMAPS.DAT");
+	std::filesystem::path file_path = GAME_DIRECTORY / strStoryFile;
+	if (!std::filesystem::exists(file_path))
+	{
+		return -1;
+	}
+	std::uintmax_t file_size = std::filesystem::file_size(file_path);
+	std::vector<unsigned char> buffer(file_size);
+	std::ifstream file(file_path, std::ios::binary);
+	file.read(reinterpret_cast<char*>(buffer.data()), static_cast<std::streamsize>(file_size));
+	file.close();
+
+	// Invalid file
+	if(buffer.size() < 0x4C0)
+	{
+		return -2;
+	}
+
+	const size_t CUTSCENE_PITCH = 16;
+	const size_t CUTSCENE_SIZE = CUTSCENE_HEIGHT * CUTSCENE_PITCH;
+
+	for (size_t index = 0; index < NUM_CUTSCENES; index++)
+	{
+		for (size_t indexRow = 0; indexRow < CUTSCENE_HEIGHT; indexRow++)
 		{
-			strValue += buffer[index];
+			for (size_t indexCol = 0; indexCol < CUTSCENE_WIDTH; indexCol++)
+			{
+				m_CutsceneMap[index][indexCol][indexRow] = buffer[(CUTSCENE_SIZE * index) + (indexRow * CUTSCENE_PITCH) + indexCol];
+			}
 		}
 	}
-	return true;
+
+	const size_t DEMO_PITCH = 32;
+	const size_t DEMO_SIZE = DEMO_HEIGHT * DEMO_PITCH;
+	const size_t DEMO_START = 0x2C0;
+
+	for (size_t index = 0; index < NUM_DEMOS; index++)
+	{
+		for (size_t indexRow = 0; indexRow < DEMO_HEIGHT; indexRow++)
+		{
+			for (size_t indexCol = 0; indexCol < DEMO_WIDTH; indexCol++)
+			{
+				m_DemoMap[index][indexCol][indexRow] = buffer[DEMO_START + (DEMO_SIZE * index) + (indexRow * DEMO_PITCH) + indexCol];
+			}
+		}
+	}
+
+	return 0;
 }

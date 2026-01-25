@@ -35,8 +35,9 @@ bool LzwDecompressor::Extract(std::vector<unsigned char>& buffer, std::vector<un
             return false;
         }
         out_data = destination_buffer;
+		return true;
 	}
-	return true;
+	return false;
 }
 
 uint32_t LzwDecompressor::read4(std::vector<unsigned char>& file_bytes)

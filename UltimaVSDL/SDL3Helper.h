@@ -42,6 +42,7 @@ public:
 	void DrawTiledText(std::string text, int x_tile, int y_tile);
 	void DrawInvertRect(int x_tile, int y_tile, int width, int height) const;
 	void DrawTileTexture8(SDL_Texture* texture, int x_tile, int y_tile) const;
+	void DrawTileTexture(SDL_Texture* texture, int x_tile, int y_tile) const;
 	void DrawTileRect(int x_tile, int y_tile) const;
 
 	bool m_quit;
@@ -52,6 +53,7 @@ public:
 	std::vector<std::vector<std::vector<SDL_Texture*>>> m_CharacterSetsTextures;
 	std::vector<SDL_Texture*> m_ArrowTextures;
 	std::vector<SDL_Texture*> m_ProportionalFontTextures;
+	std::vector<SDL_Texture*> m_TileTextures;
 	SDL_Texture* m_PathFileTexture;
 	SDL_Texture* m_LogoFadeTexture;
 	SDL_Texture* m_Flame1FadeTexture;
@@ -60,6 +62,7 @@ public:
 	SDL_Texture* m_CodexFadeTexture;
 	SDL_Texture* m_PromptTexture;
 private:
+	void LoadTileTextures(UltimaVResource* u5_resources);
 	void LoadPathFileTexture(UltimaVResource* u5_resources);
 	void LoadBitFileTextures(UltimaVResource* u5_resources);
 	void LoadCharacterSetTextures(UltimaVResource* u5_resources);

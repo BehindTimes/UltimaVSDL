@@ -37,7 +37,8 @@ SDL3Helper::SDL3Helper() :
 	m_WoDFadeTexture(nullptr),
 	m_Flame1FadeTexture(nullptr),
 	m_CodexFadeTexture(nullptr),
-	m_FullScreenTexture(nullptr)
+	m_FullScreenTexture(nullptr),
+	m_PromptTexture(nullptr)
 {
 }
 
@@ -64,6 +65,15 @@ int SDL3Helper::Intialize()
 
 void SDL3Helper::Cleanup()
 {
+	for (auto& curTexture : m_TileTextures)
+	{
+		if (curTexture)
+		{
+			SDL_DestroyTexture(curTexture);
+		}
+	}
+	m_TileTextures.clear();
+
 	for (auto& curBit : m_BitFileTextures)
 	{
 		for (auto& curTexture : curBit)
@@ -252,6 +262,18 @@ void SDL3Helper::DrawTileTexture8(SDL_Texture* texture, int x_tile, int y_tile) 
 	toRect.x = static_cast<float>(x_tile * HALF_TILE_WIDTH);
 	toRect.w = HALF_TILE_WIDTH;
 	toRect.h = HALF_TILE_HEIGHT;
+
+	SDL_RenderTexture(m_renderer, texture, NULL, &toRect);
+}
+
+void SDL3Helper::DrawTileTexture(SDL_Texture* texture, int x_tile, int y_tile) const
+{
+	SDL_FRect toRect{};
+	toRect.x = 0;
+	toRect.y = static_cast<float>(y_tile * RENDER_TILE_HEIGHT);
+	toRect.x = static_cast<float>(x_tile * RENDER_TILE_WIDTH);
+	toRect.w = RENDER_TILE_WIDTH;
+	toRect.h = RENDER_TILE_HEIGHT;
 
 	SDL_RenderTexture(m_renderer, texture, NULL, &toRect);
 }
@@ -712,6 +734,16 @@ void SDL3Helper::LoadImage16FileTextures(UltimaVResource* u5_resources)
 	SDL_SetTextureColorMod(m_Flame1FadeTexture, 0, 0, 0);
 }
 
+void SDL3Helper::LoadTileTextures(UltimaVResource* u5_resources)
+{
+	m_TileTextures.resize(u5_resources->m_Tiles.size());
+	for (int indexPic = 0; indexPic < u5_resources->m_Tiles.size(); indexPic++)
+	{
+		U5ImageData& curData = u5_resources->m_Tiles[indexPic];
+		CreateTextureFromMemory(m_TileTextures[indexPic], curData);
+	}
+}
+
 void SDL3Helper::LoadProportionalFontTextures(UltimaVResource* u5_resources)
 {
 	m_ProportionalFontTextures.resize(u5_resources->m_ProportionalFontData.size());
@@ -733,10 +765,10 @@ void SDL3Helper::LoadTargetTextures()
 {
 	m_TargetTextures.resize(2);
 	m_TargetTextures[TTV_INTROBOX] = SDL_CreateTexture(m_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET,
-		20 * TILE_WIDTH, 5 * TILE_HEIGHT);
+		20 * RENDER_TILE_WIDTH, 5 * RENDER_TILE_HEIGHT);
 	SDL_SetTextureScaleMode(m_TargetTextures[TTV_INTROBOX], SDL_SCALEMODE_NEAREST);
 	m_TargetTextures[TTV_INTROBOX_DISPLAY] = SDL_CreateTexture(m_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET,
-		19 * TILE_WIDTH, 4 * TILE_HEIGHT);
+		19 * RENDER_TILE_WIDTH, 4 * RENDER_TILE_HEIGHT);
 	SDL_SetTextureScaleMode(m_TargetTextures[TTV_INTROBOX_DISPLAY], SDL_SCALEMODE_NEAREST);
 
 	m_FullScreenTexture = SDL_CreateTexture(m_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET,
@@ -750,6 +782,7 @@ void SDL3Helper::LoadImageData(UltimaVResource *u5_resources)
 {
 	LoadBitFileTextures(u5_resources);
 	LoadPathFileTexture(u5_resources);
+	LoadTileTextures(u5_resources);
 	LoadImage16FileTextures(u5_resources);
 	LoadCharacterSetTextures(u5_resources);
 	LoadProportionalFontTextures(u5_resources);

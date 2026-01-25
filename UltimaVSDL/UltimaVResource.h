@@ -88,6 +88,13 @@ struct U5PaddedImageData : public U5ImageData
 	uint32_t real_height;
 };
 
+const size_t NUM_CUTSCENES = 4;
+const size_t NUM_DEMOS = 4;
+const size_t CUTSCENE_WIDTH = 11;
+const size_t CUTSCENE_HEIGHT = 11;
+const size_t DEMO_WIDTH = 19;
+const size_t DEMO_HEIGHT = 4;
+
 class UltimaVResource
 {
 public:
@@ -101,8 +108,11 @@ public:
 	std::vector<std::vector<U5ImageData>> m_Image16FileData;
 	std::vector<std::vector<std::vector<U5ImageData>>> m_CharacterSetsData;
 	std::vector<U5PaddedImageData> m_ProportionalFontData;
+	std::vector<U5ImageData> m_Tiles;
 	U5Data m_data;
 	RenderMode m_render_mode;
+	int m_CutsceneMap[NUM_CUTSCENES][CUTSCENE_WIDTH][CUTSCENE_HEIGHT];
+	int m_DemoMap[NUM_DEMOS][DEMO_WIDTH][DEMO_HEIGHT];
 private:
 	
 	void Cleanup();
@@ -115,6 +125,8 @@ private:
 	int LoadDataOvl();
 	int LoadCharacterSets();
 	int LoadProportionalFont();
+	int LoadMiscMaps();
+	int LoadTiles();
 	int ParseCharacterFile(std::vector<U5ImageData>& bit_file_data, std::vector<unsigned char>& data, int width, int height);
 	int ParseBitFile(std::vector<U5ImageData> &bit_file_data, std::vector<unsigned char> &data);
 	int Parse16File(std::vector<U5ImageData>& bit_file_data, std::vector<unsigned char>& data, int numPixelsPerByte);

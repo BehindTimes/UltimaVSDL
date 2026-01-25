@@ -18,7 +18,8 @@ enum class IntroMode : uint_fast16_t
 	FADE_FLAME_1,
 	FADE_FLAME_2,
 	MENU,
-	ACKNOWLEDGEMENTS
+	ACKNOWLEDGEMENTS,
+	DEMO
 };
 
 enum class MenuChoices :uint_fast16_t
@@ -60,6 +61,7 @@ private:
 	void RenderLogo();
 	void RenderWoD();
 	void RenderMenu();
+	void RenderDemo();
 	void RenderCursor();
 	void RenderAcknowledgements();
 	

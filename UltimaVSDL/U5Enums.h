@@ -18,8 +18,8 @@ enum class U5Modes
 	Cutscene
 };
 
-const int TILE_HEIGHT = 64;
-const int TILE_WIDTH = 64;
+const int RENDER_TILE_HEIGHT = 64;
+const int RENDER_TILE_WIDTH = 64;
 const int HALF_TILE_HEIGHT = 32;
 const int HALF_TILE_WIDTH = 32;
 

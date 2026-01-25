@@ -24,7 +24,7 @@ Intro::Intro(SDL3Helper* sdl_helper, UltimaVResource* u5_resources) :
 	GameObject(sdl_helper, u5_resources),
 	m_curDelayFlame(0),
 	m_curFlame(0),
-	m_curMode(IntroMode::FADE_LOGO),
+	m_curMode(IntroMode::DEMO),
 	m_window_width(0),
 	m_window_height(0),
 	m_curWodFade(0),
@@ -91,7 +91,8 @@ void Intro::RenderFlameFadeWoD()
 	m_WoDFade->AddElapsedTime(m_tickElapse);
 	if (!m_WoDFade->IsFading())
 	{
-		m_curMode = IntroMode::MENU;
+		//GoToSelection();
+		m_curMode = IntroMode::DEMO;
 	}
 	m_WoDFade->ProcessFade(curTexture, false);
 }
@@ -275,7 +276,7 @@ void Intro::RenderMenu()
 
 	float x = HALF_TILE_HEIGHT;
 	float y = 16 * HALF_TILE_HEIGHT;
-	m_sdl_helper->RenderTextureAt(curTexture, x, y, RENDER_WIDTH - TILE_WIDTH, TILE_HEIGHT * 4);
+	m_sdl_helper->RenderTextureAt(curTexture, x, y, RENDER_WIDTH - RENDER_TILE_WIDTH, RENDER_TILE_HEIGHT * 4);
 }
 
 void Intro::RenderIntroBox()
@@ -285,13 +286,31 @@ void Intro::RenderIntroBox()
 	float x = 0;
 	float y = 15 * HALF_TILE_HEIGHT;
 	curTexture = m_sdl_helper->m_TargetTextures[TTV_INTROBOX];
-	m_sdl_helper->RenderTextureAt(curTexture, x, y, RENDER_WIDTH, TILE_HEIGHT * 5);
+	m_sdl_helper->RenderTextureAt(curTexture, x, y, RENDER_WIDTH, RENDER_TILE_HEIGHT * 5);
+}
+
+void Intro::RenderDemo()
+{
+	SDL_Texture* curTexture = m_sdl_helper->m_TargetTextures[TTV_INTROBOX_DISPLAY];
+
+	m_sdl_helper->SetRenderTarget(curTexture);
+	for (int i = 0; i < 4; i++)
+	{
+		for (int j = 0; j < 19; j++)
+		{
+			m_sdl_helper->DrawTileTexture(m_sdl_helper->m_TileTextures[m_resources->m_DemoMap[3][j][i]], j, i);
+		}
+	}
+	m_sdl_helper->SetRenderTarget(nullptr);
+	float x = HALF_TILE_HEIGHT;
+	float y = 16 * HALF_TILE_HEIGHT;
+	m_sdl_helper->RenderTextureAt(curTexture, x, y, RENDER_WIDTH - RENDER_TILE_WIDTH, RENDER_TILE_HEIGHT * 4);
 }
 
 void Intro::RenderAcknowledgements()
 {
-	const int TILE_LEFT_START = 9 * TILE_WIDTH;
-	const int TILE_RIGHT_START = 10 * TILE_WIDTH;
+	const int TILE_LEFT_START = 9 * RENDER_TILE_WIDTH;
+	const int TILE_RIGHT_START = 10 * RENDER_TILE_WIDTH;
 
 	float width;
 	float height;
@@ -346,7 +365,7 @@ void Intro::RenderAcknowledgements()
 			yPosRight = RENDER_HEIGHT;
 			m_curAcknowledgementXDelay = 0;
 			m_curAcknowledgementYDelay = 0;
-			m_curMode = IntroMode::MENU;
+			GoToSelection();
 		}
 		else
 		{
@@ -367,8 +386,8 @@ void Intro::RenderAcknowledgements()
 			m_curAcknowledgementXDelay = 0;
 			m_curAcknowledgementYDelay = 0;
 			xPosLeft = 0;
-			xPosRight = RENDER_WIDTH - TILE_WIDTH;
-			paperX = xPosLeft + TILE_WIDTH;
+			xPosRight = RENDER_WIDTH - RENDER_TILE_WIDTH;
+			paperX = xPosLeft + RENDER_TILE_WIDTH;
 			height = static_cast<float>(m_resources->m_Image16FileData[IV16_STARTSC][0].height);
 			width = static_cast<float>(m_resources->m_Image16FileData[IV16_STARTSC][0].width);
 		}
@@ -376,8 +395,8 @@ void Intro::RenderAcknowledgements()
 		{
 			float scroll_ratio = static_cast<float>(m_curAcknowledgementXDelay) / ACKNOWLEDGEMENT_OPEN_DELAY;
 			xPosLeft = TILE_LEFT_START - (TILE_LEFT_START * scroll_ratio);
-			xPosRight = TILE_RIGHT_START + ((TILE_RIGHT_START - TILE_WIDTH) * scroll_ratio);
-			paperX = xPosLeft + TILE_WIDTH;
+			xPosRight = TILE_RIGHT_START + ((TILE_RIGHT_START - RENDER_TILE_WIDTH) * scroll_ratio);
+			paperX = xPosLeft + RENDER_TILE_WIDTH;
 
 			float tempW = paperW * scroll_ratio;
 			float offset = paperW - tempW;
@@ -404,8 +423,8 @@ void Intro::RenderAcknowledgements()
 			paperTexture = m_sdl_helper->m_Image16FileTextures[IV16_STARTSC][1];
 			float scroll_ratio = 1.0f - static_cast<float>(m_curAcknowledgementXDelay) / ACKNOWLEDGEMENT_OPEN_DELAY;
 			xPosLeft = TILE_LEFT_START - (TILE_LEFT_START * scroll_ratio);
-			xPosRight = TILE_RIGHT_START + ((TILE_RIGHT_START - TILE_WIDTH) * scroll_ratio);
-			paperX = xPosLeft + TILE_WIDTH;
+			xPosRight = TILE_RIGHT_START + ((TILE_RIGHT_START - RENDER_TILE_WIDTH) * scroll_ratio);
+			paperX = xPosLeft + RENDER_TILE_WIDTH;
 
 			float tempW = paperW * scroll_ratio;
 			float offset = paperW - tempW;
@@ -418,8 +437,8 @@ void Intro::RenderAcknowledgements()
 		yPosLeft = RENDER_HEIGHT - (height * vMult);
 		yPosRight = RENDER_HEIGHT - (height * vMult);
 		xPosLeft = 0;
-		xPosRight = RENDER_WIDTH - TILE_WIDTH;
-		paperX = xPosLeft + TILE_WIDTH;
+		xPosRight = RENDER_WIDTH - RENDER_TILE_WIDTH;
+		paperX = xPosLeft + RENDER_TILE_WIDTH;
 		paperW = static_cast<float>(m_resources->m_Image16FileData[IV16_STARTSC][1].width);
 		paperH = static_cast<float>(m_resources->m_Image16FileData[IV16_STARTSC][1].height);
 		paperTexture = m_sdl_helper->m_Image16FileTextures[IV16_STARTSC][1];;
@@ -471,6 +490,12 @@ void Intro::Render()
 		RenderMenu();
 		RenderAcknowledgements();
 		break;
+	case IntroMode::DEMO:
+		RenderLogo();
+		RenderFlame();
+		RenderIntroBox();
+		RenderDemo();
+		break;
 	default:
 		RenderLogo();
 		RenderFlame();
@@ -487,7 +512,7 @@ void Intro::LoadData()
 {
 	SetSDLData();
 	CreateIntroBox();
-	CreateMenu();
+	//CreateMenu();
 	//m_input->SetInputType(InputType::ANY_KEY);
 	m_input->SetInputType(InputType::UP_DOWN_ENTER);
 }
@@ -545,19 +570,19 @@ void Intro::CreateIntroBox()
 	m_sdl_helper->RenderTextureAt(curTexture, RENDER_WIDTH - HALF_TILE_WIDTH, HALF_TILE_HEIGHT * 9, HALF_TILE_WIDTH, HALF_TILE_HEIGHT);
 
 	SDL_SetRenderDrawColor(m_sdl_helper->m_renderer, 0xFF, 0xFF, 0xFF, 0xFF);
-	SDL_FRect line{ HALF_TILE_WIDTH - LINE_THICKNESS, HALF_TILE_HEIGHT - LINE_THICKNESS, RENDER_WIDTH - TILE_WIDTH + (2 * LINE_THICKNESS), LINE_THICKNESS };
+	SDL_FRect line{ HALF_TILE_WIDTH - LINE_THICKNESS, HALF_TILE_HEIGHT - LINE_THICKNESS, RENDER_WIDTH - RENDER_TILE_WIDTH + (2 * LINE_THICKNESS), LINE_THICKNESS };
 	SDL_RenderFillRect(m_sdl_helper->m_renderer, &line);
-	line = { HALF_TILE_WIDTH - LINE_THICKNESS, (TILE_HEIGHT * 4) + HALF_TILE_HEIGHT, RENDER_WIDTH - TILE_WIDTH + (2 * LINE_THICKNESS), LINE_THICKNESS };
+	line = { HALF_TILE_WIDTH - LINE_THICKNESS, (RENDER_TILE_HEIGHT * 4) + HALF_TILE_HEIGHT, RENDER_WIDTH - RENDER_TILE_WIDTH + (2 * LINE_THICKNESS), LINE_THICKNESS };
 	SDL_RenderFillRect(m_sdl_helper->m_renderer, &line);
-	line = { HALF_TILE_WIDTH - LINE_THICKNESS, HALF_TILE_HEIGHT, LINE_THICKNESS, (TILE_HEIGHT * 4) };
+	line = { HALF_TILE_WIDTH - LINE_THICKNESS, HALF_TILE_HEIGHT, LINE_THICKNESS, (RENDER_TILE_HEIGHT * 4) };
 	SDL_RenderFillRect(m_sdl_helper->m_renderer, &line);
-	line = { RENDER_WIDTH - HALF_TILE_WIDTH, HALF_TILE_HEIGHT, LINE_THICKNESS, (TILE_HEIGHT * 4) };
+	line = { RENDER_WIDTH - HALF_TILE_WIDTH, HALF_TILE_HEIGHT, LINE_THICKNESS, (RENDER_TILE_HEIGHT * 4) };
 	SDL_RenderFillRect(m_sdl_helper->m_renderer, &line);
 
 	x = HALF_TILE_WIDTH;
 	y = HALF_TILE_HEIGHT;
 
-	line = { HALF_TILE_WIDTH, HALF_TILE_HEIGHT, RENDER_WIDTH - TILE_WIDTH, (TILE_HEIGHT * 4) };
+	line = { HALF_TILE_WIDTH, HALF_TILE_HEIGHT, RENDER_WIDTH - RENDER_TILE_WIDTH, (RENDER_TILE_HEIGHT * 4) };
 	SDL_SetRenderDrawColor(m_sdl_helper->m_renderer, 0, 0, 0, 0xFF);
 	SDL_RenderFillRect(m_sdl_helper->m_renderer, &line);
 
@@ -568,6 +593,7 @@ void Intro::CreateIntroBox()
 void Intro::GoToSelection()
 {
 	m_curMode = IntroMode::MENU;
+	CreateMenu();
 }
 
 bool Intro::ChangeMode(U5Modes& newMode)
@@ -586,7 +612,7 @@ bool Intro::ChangeMode(U5Modes& newMode)
 void Intro::StoryOverCallback()
 {
 	m_input->SetInputType(InputType::UP_DOWN_ENTER);
-	m_curMode = IntroMode::MENU;
+	GoToSelection();
 }
 
 void Intro::ProcessEvents()
@@ -596,6 +622,7 @@ void Intro::ProcessEvents()
 	case IntroMode::FADE_LOGO:
 	case IntroMode::FADE_FLAME_1:
 	case IntroMode::FADE_FLAME_2:
+	case IntroMode::DEMO:
 		if (m_input->isAnyKeyHit())
 		{
 			m_newMode = U5Modes::MenuSkip;
@@ -619,7 +646,7 @@ void Intro::ProcessEvents()
 			case AcknowlegementType::CLOSE:
 			case AcknowlegementType::SCROLL_DOWN:
 				m_curAcknowledgement = AcknowlegementType::SCROLL_UP;
-				m_curMode = IntroMode::MENU;
+				GoToSelection();
 				break;
 			default:
 				break;
