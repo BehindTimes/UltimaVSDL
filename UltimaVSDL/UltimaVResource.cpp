@@ -758,7 +758,7 @@ int UltimaVResource::LoadTiles()
 			return -3;
 		}
 	}
-	const size_t NUM_TILES = 256;
+	const size_t NUM_TILES = 512;
 	const size_t TILE_WIDTH = 16;
 	const size_t TILE_HEIGHT = 16;
 	for (size_t index = 0; index < NUM_TILES; index++)

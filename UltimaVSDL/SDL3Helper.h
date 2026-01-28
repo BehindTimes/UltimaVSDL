@@ -61,6 +61,7 @@ public:
 	SDL_Texture* m_WoDFadeTexture;
 	SDL_Texture* m_FullScreenTexture;
 	SDL_Texture* m_CodexFadeTexture;
+	SDL_Texture* m_TileFadeTexture;
 	SDL_Texture* m_PromptTexture;
 private:
 	void LoadTileTextures(UltimaVResource* u5_resources);

@@ -38,7 +38,8 @@ SDL3Helper::SDL3Helper() :
 	m_Flame1FadeTexture(nullptr),
 	m_CodexFadeTexture(nullptr),
 	m_FullScreenTexture(nullptr),
-	m_PromptTexture(nullptr)
+	m_PromptTexture(nullptr),
+	m_TileFadeTexture(nullptr)
 {
 }
 
@@ -180,6 +181,12 @@ void SDL3Helper::Cleanup()
 	{
 		SDL_DestroyTexture(m_PromptTexture);
 		m_PromptTexture = nullptr;
+	}
+
+	if (m_TileFadeTexture)
+	{
+		SDL_DestroyTexture(m_TileFadeTexture);
+		m_TileFadeTexture = nullptr;
 	}
 
 	SDL_DestroyRenderer(m_renderer);
@@ -759,6 +766,10 @@ void SDL3Helper::LoadStreamingTextures()
 	m_CodexFadeTexture = SDL_CreateTexture(m_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING,
 		36, 34);
 	SDL_SetTextureScaleMode(m_CodexFadeTexture, SDL_SCALEMODE_NEAREST);
+
+	m_TileFadeTexture = SDL_CreateTexture(m_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING,
+		ORIGINAL_TILE_WIDTH, ORIGINAL_TILE_HEIGHT);
+	SDL_SetTextureScaleMode(m_TileFadeTexture, SDL_SCALEMODE_NEAREST);
 }
 
 void SDL3Helper::LoadTargetTextures()

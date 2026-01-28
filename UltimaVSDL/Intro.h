@@ -44,9 +44,27 @@ enum class AcknowlegementType
 
 struct DemoCharacter
 {
+	DemoCharacter() :
+		tile(0),
+		x(0),
+		y(0),
+		isFade(false),
+		isVisible(true)
+	{
+	}
+	DemoCharacter(int _tile, int _x, int _y) :
+		tile(_tile),
+		x(_x),
+		y(_y),
+		isFade(false),
+		isVisible(true)
+	{
+	}
 	int tile;
 	int x;
 	int y;
+	bool isFade;
+	bool isVisible;
 };
 
 class Intro : public GameObject
@@ -95,6 +113,7 @@ private:
 
 	const Uint64 SCRIPT_TICK = 200;
 	const Uint64 SCREEN_OPEN_DELAY = SCRIPT_TICK * 12;
+	const Uint64 TILE_FADE_DELAY = SCRIPT_TICK * 3;
 	
 	IntroMode m_curMode;
 	int m_window_width;
@@ -108,13 +127,20 @@ private:
 	std::unique_ptr<FadeObject> m_LogoFade;
 	std::unique_ptr<FadeObject> m_FlameFade;
 	std::unique_ptr<FadeObject> m_WoDFade;
+	std::unique_ptr<FadeObject> m_DemoTileFade;
 	float m_curAcknowledgementYPos;
 	float m_curAcknowledgementXPos;
 	Uint64 m_curAcknowledgementYDelay;
 	Uint64 m_curAcknowledgementXDelay;
 	Uint64 m_curInstructionDelay;
+	Uint64 m_curDelayTime;
 	bool m_demo_screen_open;
+	bool m_fadeIn;
 	Uint64 m_curScreenOpenDelay;
+	int m_DemoMap[DEMO_WIDTH][DEMO_HEIGHT];
+	int m_DemoFadeTileNum;
+	int m_numLoops;
+	int m_loopPos;
 
 	AcknowlegementType m_curAcknowledgement;
 	std::map<int, DemoCharacter> m_map_demo_char;

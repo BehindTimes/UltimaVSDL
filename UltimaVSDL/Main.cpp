@@ -49,8 +49,8 @@ static void MainLoop()
 	cutscene_screen = std::make_unique<CutScene>(sdl_helper.get(), u5_resources.get());
 	cutscene_screen->LoadData();
 
-	//curObject = splash_screen.get();
-	curObject = intro_screen.get();
+	curObject = splash_screen.get();
+	//curObject = intro_screen.get();
 	curObject->LoadData();
 	
 	while (1)

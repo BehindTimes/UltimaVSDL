@@ -15,6 +15,7 @@
 #include <string>
 #include "U5Input.h"
 #include <SDL3/SDL_keycode.h>
+#include <cstring>
 
 extern std::unique_ptr<CutScene> cutscene_screen;
 extern std::unique_ptr<U5Utils> m_utilities;
@@ -24,7 +25,7 @@ Intro::Intro(SDL3Helper* sdl_helper, UltimaVResource* u5_resources) :
 	GameObject(sdl_helper, u5_resources),
 	m_curDelayFlame(0),
 	m_curFlame(0),
-	m_curMode(IntroMode::MENU),
+	m_curMode(IntroMode::FADE_LOGO),
 	m_window_width(0),
 	m_window_height(0),
 	m_curWodFade(0),
@@ -39,7 +40,13 @@ Intro::Intro(SDL3Helper* sdl_helper, UltimaVResource* u5_resources) :
 	m_demoBackground(-1),
 	m_demo_screen_open(false),
 	m_curScreenOpenDelay(0),
-	m_smoothDemoOpen(true)
+	m_smoothDemoOpen(false),
+	m_DemoMap{},
+	m_curDelayTime(1),
+	m_DemoFadeTileNum(-1),
+	m_fadeIn(true),
+	m_numLoops(0),
+	m_loopPos(0)
 {
 	m_clearScreen = true;
 
@@ -53,7 +60,11 @@ Intro::Intro(SDL3Helper* sdl_helper, UltimaVResource* u5_resources) :
 
 	m_WoDFade = std::make_unique<FadeObject>(sdl_helper, u5_resources);
 	m_WoDFade->SetSize(static_cast<size_t>(m_resources->m_BitFileData[2][0].height * m_resources->m_BitFileData[2][0].width));
-	m_WoDFade->SetDelay(WOD_FADE_DELAY);	
+	m_WoDFade->SetDelay(WOD_FADE_DELAY);
+
+	m_DemoTileFade = std::make_unique<FadeObject>(sdl_helper, u5_resources);
+	m_DemoTileFade->SetSize(static_cast<size_t>(m_resources->m_Tiles[0].height * m_resources->m_Tiles[0].width));
+	m_DemoTileFade->SetDelay(TILE_FADE_DELAY);
 }
 
 Intro::~Intro()
@@ -233,6 +244,9 @@ void Intro::CreateDemo()
 	m_curScreenOpenDelay = 0;
 	m_demo_screen_open = false;
 	m_demoBackground = -1;
+	m_curInstructionDelay = 0;
+	m_curDelayTime = 1;
+	m_DemoFadeTileNum = -1;
 }
 
 void Intro::CreateMenu()
@@ -310,51 +324,15 @@ void Intro::RenderIntroBox()
 	m_sdl_helper->RenderTextureAt(curTexture, x, y, RENDER_WIDTH, RENDER_TILE_HEIGHT * 5);
 }
 
-void Intro::ProcessDemoScript()
-{
-	SDL_Texture* curTexture;
-	if (m_resources->m_IntroInstructions.size() <= m_demoInstructionNum)
-	{
-		return;
-	}
-	IntroScriptInstruction curInstruction = m_resources->m_IntroInstructions[m_demoInstructionNum];
-	switch (curInstruction.instruction)
-	{
-	case 6:
-		m_demoBackground = curInstruction.data[0];
-		m_demo_screen_open = true;
-		m_curScreenOpenDelay = 0;
-		m_demoInstructionNum++;
-		CreateIntroBox();
-		curTexture = m_sdl_helper->m_TargetTextures[TTV_INTROBOX];
-		if (m_demoBackground >= 0 && m_demoBackground <= 3)
-		{
-			int xpos = static_cast<int>(20 - ((m_resources->m_data.intro_demo_string[m_demoBackground].size() + 1) / 2));
-			m_sdl_helper->SetRenderTarget(curTexture);
-			m_sdl_helper->DrawTiledText(m_resources->m_data.intro_demo_string[m_demoBackground], xpos, 9);
-
-			m_sdl_helper->DrawTileRect(xpos + static_cast<int>(m_resources->m_data.intro_demo_string[m_demoBackground].size()), 9);
-			m_sdl_helper->DrawTileRect(xpos - 1, 9);
-
-			m_sdl_helper->DrawTileTexture8(m_sdl_helper->m_ArrowTextures[0], xpos + static_cast<int>(m_resources->m_data.intro_demo_string[m_demoBackground].size()), 9);
-			m_sdl_helper->DrawTileTexture8(m_sdl_helper->m_ArrowTextures[1], xpos - 1, 9);
-			m_sdl_helper->SetRenderTarget(nullptr);
-		}
-		break;
-	default:
-		break;
-	}
-}
-
 void Intro::RenderDemo()
 {
 	SDL_Texture* dispTexture = m_sdl_helper->m_TargetTextures[TTV_INTROBOX_DISPLAY];
 	SDL_Texture* curTexture = m_sdl_helper->m_TargetTextures[TTV_INTRO_RENDER];
+	SDL_Texture* fadeTexture = m_sdl_helper->m_TileFadeTexture;
 
 	m_curInstructionDelay += m_tickElapse;
-	if (SCRIPT_TICK < m_curInstructionDelay)
+	if (m_curDelayTime > 0 && m_curDelayTime < m_curInstructionDelay)
 	{
-		m_curInstructionDelay %= SCRIPT_TICK;
 		ProcessDemoScript();
 	}
 	if (m_demo_screen_open)
@@ -363,6 +341,26 @@ void Intro::RenderDemo()
 		if (m_curScreenOpenDelay > SCREEN_OPEN_DELAY)
 		{
 			m_demo_screen_open = false;
+		}
+	}
+	if (m_DemoFadeTileNum >= 0)
+	{
+		m_DemoTileFade->AddElapsedTime(m_tickElapse);
+		if (!m_DemoTileFade->IsFading())
+		{
+			if (m_map_demo_char.contains(m_DemoFadeTileNum))
+			{
+				m_map_demo_char[m_DemoFadeTileNum].isFade = false;
+				if (!m_fadeIn)
+				{
+					m_map_demo_char[m_DemoFadeTileNum].isVisible = false;
+				}
+			}
+			m_DemoFadeTileNum = -1;
+		}
+		else
+		{
+			m_DemoTileFade->ProcessFade(fadeTexture, m_fadeIn);
 		}
 	}
 
@@ -375,11 +373,32 @@ void Intro::RenderDemo()
 		return;
 	}
 	m_sdl_helper->SetRenderTarget(curTexture);
+	// Render the base map
 	for (int i = 0; i < 4; i++)
 	{
 		for (int j = 0; j < 19; j++)
 		{
-			m_sdl_helper->DrawTileTexture(m_sdl_helper->m_TileTextures[m_resources->m_DemoMap[m_demoBackground][j][i]], j, i);
+			m_sdl_helper->DrawTileTexture(m_sdl_helper->m_TileTextures[m_DemoMap[j][i]], j, i);
+		}
+	}
+	// Render the tiles to draw above
+	for (auto& curTile : m_map_demo_char)
+	{
+		int curTextureNum = 0x100;
+		if (curTile.second.tile >= 0 && curTile.second.tile < 0x100)
+		{
+			curTextureNum += curTile.second.tile;
+		}
+		if (curTile.second.isVisible)
+		{
+			if (curTile.second.isFade)
+			{
+				m_sdl_helper->DrawTileTexture(m_sdl_helper->m_TileFadeTexture, curTile.second.x, curTile.second.y);
+			}
+			else
+			{
+				m_sdl_helper->DrawTileTexture(m_sdl_helper->m_TileTextures[curTextureNum], curTile.second.x, curTile.second.y);
+			}
 		}
 	}
 	m_sdl_helper->SetRenderTarget(dispTexture);
@@ -404,7 +423,6 @@ void Intro::RenderDemo()
 			start_x = ((RENDER_WIDTH - RENDER_TILE_WIDTH) / 2.0f) - (final_width / 2.0f);
 			m_sdl_helper->RenderTextureFromTo(curTexture, start_x, 0, final_width, RENDER_TILE_HEIGHT * 4, start_x, 0, final_width, RENDER_TILE_HEIGHT * 4);
 		}
-		//m_sdl_helper->RenderTextureAt(curTexture, 0, 0, RENDER_WIDTH - RENDER_TILE_WIDTH, RENDER_TILE_HEIGHT * 2);
 	}
 	else
 	{
@@ -622,7 +640,11 @@ void Intro::LoadData()
 {
 	SetSDLData();
 	CreateIntroBox();
-	CreateMenu();
+	m_sdl_helper->SetRenderTarget(m_sdl_helper->m_TargetTextures[TTV_INTROBOX_DISPLAY]);
+	SDL_SetRenderDrawColor(m_sdl_helper->m_renderer, 0x00, 0x00, 0x00, 0xFF);
+	m_sdl_helper->ClearScreen();
+	m_sdl_helper->SetRenderTarget(nullptr);
+	//CreateMenu();
 	//m_input->SetInputType(InputType::ANY_KEY);
 	m_input->SetInputType(InputType::UP_DOWN_ENTER);
 }
@@ -647,9 +669,9 @@ void Intro::CreateIntroBox()
 	}
 
 	m_sdl_helper->ClearScreen();
-	m_sdl_helper->SetRenderTarget(m_sdl_helper->m_TargetTextures[TTV_INTROBOX_DISPLAY]);
-	SDL_SetRenderDrawColor(m_sdl_helper->m_renderer, 0x00, 0x00, 0x00, 0xFF);
-	m_sdl_helper->ClearScreen();
+	//m_sdl_helper->SetRenderTarget(m_sdl_helper->m_TargetTextures[TTV_INTROBOX_DISPLAY]);
+	//SDL_SetRenderDrawColor(m_sdl_helper->m_renderer, 0x00, 0x00, 0x00, 0xFF);
+	//m_sdl_helper->ClearScreen();
 
 	float x = 0;
 	float y = 15 * HALF_TILE_HEIGHT;
@@ -669,7 +691,7 @@ void Intro::CreateIntroBox()
 		SDL_SetTextureColorMod(m_sdl_helper->m_CharacterSetsTextures[0][0][126], ega_table[blue][0], ega_table[blue][1], ega_table[blue][2]);
 	}
 
-	m_sdl_helper->SetRenderTarget(m_sdl_helper->m_TargetTextures[TTV_INTROBOX]);
+	//m_sdl_helper->SetRenderTarget(m_sdl_helper->m_TargetTextures[TTV_INTROBOX]);
 	curTexture = m_sdl_helper->m_CharacterSetsTextures[0][0][123];
 	m_sdl_helper->RenderTextureAt(curTexture, 0, 0, HALF_TILE_WIDTH, HALF_TILE_HEIGHT);
 	curTexture = m_sdl_helper->m_CharacterSetsTextures[0][0][124];
@@ -810,5 +832,201 @@ void Intro::ProcessEvents()
 		break;
 	default:
 		break;
+	}
+}
+
+void Intro::ProcessDemoScript()
+{
+	SDL_Texture* curTexture;
+	int char_num;
+	if (m_resources->m_IntroInstructions.size() <= m_demoInstructionNum)
+	{
+		m_curInstructionDelay = 0;
+		return;
+	}
+
+	bool done = false;
+	while (!done)
+	{
+		IntroScriptInstruction curInstruction = m_resources->m_IntroInstructions[m_demoInstructionNum];
+		switch (curInstruction.instruction)
+		{
+		case 0x0:
+			m_map_demo_char[curInstruction.data[0]] = DemoCharacter(curInstruction.data[1], curInstruction.data[2], curInstruction.data[3]);
+			m_demoInstructionNum++;
+			break;
+		case 0x01:
+			char_num = curInstruction.data[0];
+			m_map_demo_char.erase(char_num);
+			m_demoInstructionNum++;
+			break;
+		case 0x2: // Move character and run next instruction
+			m_demoInstructionNum++;
+			m_curDelayTime = SCRIPT_TICK * 2;
+			m_curInstructionDelay = 0;
+			char_num = curInstruction.data[0];
+			if (m_map_demo_char.contains(char_num))
+			{
+				// Fortunately, because they are based on bytes, they can never exceed an int value
+				switch (curInstruction.data[1])
+				{
+				case 0: // Up
+					m_map_demo_char[char_num].y--;
+					break;
+				case 1: // Right
+					m_map_demo_char[char_num].x++;
+					break;
+				case 2: // Down
+					m_map_demo_char[char_num].y++;
+					break;
+				case 3: // Left
+					m_map_demo_char[char_num].x--;
+					break;
+				default:
+					break;
+				}
+			}
+			break;
+		case 0x3:
+			m_demoInstructionNum++;
+			done = true;
+			m_curDelayTime = SCRIPT_TICK * curInstruction.data[0];
+			m_curInstructionDelay = 0;
+			if (0)
+			{
+				if (curInstruction.data[0] > 5)
+				{
+					m_curDelayTime = SCRIPT_TICK * 5; // Just for debug purposes to speed things up
+				}
+			}
+			break;
+		case 0x6:
+			m_demoBackground = curInstruction.data[0];
+			m_demo_screen_open = true;
+			m_curScreenOpenDelay = 0;
+			m_demoInstructionNum++;
+			CreateIntroBox();
+			curTexture = m_sdl_helper->m_TargetTextures[TTV_INTROBOX];
+			if (m_demoBackground >= 0 && m_demoBackground <= 3)
+			{
+				int xpos = static_cast<int>(20 - ((m_resources->m_data.intro_demo_string[m_demoBackground].size() + 1) / 2));
+				m_sdl_helper->SetRenderTarget(curTexture);
+				m_sdl_helper->DrawTiledText(m_resources->m_data.intro_demo_string[m_demoBackground], xpos, 9);
+
+				m_sdl_helper->DrawTileRect(xpos + static_cast<int>(m_resources->m_data.intro_demo_string[m_demoBackground].size()), 9);
+				m_sdl_helper->DrawTileRect(xpos - 1, 9);
+
+				m_sdl_helper->DrawTileTexture8(m_sdl_helper->m_ArrowTextures[0], xpos + static_cast<int>(m_resources->m_data.intro_demo_string[m_demoBackground].size()), 9);
+				m_sdl_helper->DrawTileTexture8(m_sdl_helper->m_ArrowTextures[1], xpos - 1, 9);
+				m_sdl_helper->SetRenderTarget(nullptr);
+				std::memcpy(m_DemoMap, m_resources->m_DemoMap[m_demoBackground], sizeof(int) * DEMO_WIDTH * DEMO_HEIGHT);
+			}
+			else
+			{
+				std::memset(m_DemoMap, 0, sizeof(int) * DEMO_WIDTH * DEMO_HEIGHT);
+			}
+			break;
+		case 0x07: // Fade in
+			char_num = curInstruction.data[0];
+			m_demoInstructionNum++;
+			m_curDelayTime = TILE_FADE_DELAY;
+			m_curInstructionDelay = 0;
+			m_fadeIn = true;
+			if (m_map_demo_char.contains(char_num))
+			{
+				m_DemoTileFade->Reset();
+				m_map_demo_char[char_num].isFade = true;
+				m_DemoFadeTileNum = char_num;
+				int curTextureNum = 0x100;
+				if (m_map_demo_char[char_num].tile >= 0 && m_map_demo_char[char_num].tile < 0x100)
+				{
+					curTextureNum += m_map_demo_char[char_num].tile;
+				}
+				m_sdl_helper->CopyTextureToStreaming(m_resources->m_Tiles[curTextureNum],
+					m_sdl_helper->m_TileFadeTexture, ORIGINAL_TILE_WIDTH, ORIGINAL_TILE_HEIGHT);
+			}
+			done = true;
+			break;
+		case 0x08: // Fade out
+			char_num = curInstruction.data[0];
+			m_demoInstructionNum++;
+			m_curDelayTime = TILE_FADE_DELAY;
+			m_curInstructionDelay = 0;
+			m_fadeIn = false;
+			if (m_map_demo_char.contains(char_num))
+			{
+				m_DemoTileFade->Reset();
+				m_map_demo_char[char_num].isFade = true;
+				m_DemoFadeTileNum = char_num;
+				int curTextureNum = 0x100;
+				if (m_map_demo_char[char_num].tile >= 0 && m_map_demo_char[char_num].tile < 0x100)
+				{
+					//m_map_demo_char[char_num].isVisible = false;
+					curTextureNum += m_map_demo_char[char_num].tile;
+				}
+				m_sdl_helper->CopyTextureToStreaming(m_resources->m_Tiles[curTextureNum],
+					m_sdl_helper->m_TileFadeTexture, ORIGINAL_TILE_WIDTH, ORIGINAL_TILE_HEIGHT);
+				m_sdl_helper->TurnOnAllPixels(m_sdl_helper->m_TileFadeTexture, true);
+			}
+			done = true;
+			break;
+		case 0xA: // Load tile
+			m_demoInstructionNum++;
+			m_DemoMap[curInstruction.data[1]][curInstruction.data[2]] = curInstruction.data[0];
+			break;
+		case 0xC: // Clear variables
+			m_DemoFadeTileNum = -1;
+			m_map_demo_char.clear();
+			m_demoInstructionNum++;
+			break;
+		case 0xD: // Move character
+			m_demoInstructionNum++;
+			done = true;
+			m_curDelayTime = SCRIPT_TICK * 2;
+			m_curInstructionDelay = 0;
+			char_num = curInstruction.data[0];
+			if (m_map_demo_char.contains(char_num))
+			{
+				// Fortunately, because they are based on bytes, they can never exceed an int value
+				switch (curInstruction.data[1])
+				{
+				case 0: // Up
+					m_map_demo_char[char_num].y--;
+					break;
+				case 1: // Right
+					m_map_demo_char[char_num].x++;
+					break;
+				case 2: // Down
+					m_map_demo_char[char_num].y++;
+					break;
+				case 3: // Left
+					m_map_demo_char[char_num].x--;
+					break;
+				default:
+					break;
+				}
+			}
+			break;
+		case 0xE: // Loop.  We could be better and have a stack to allow multiple loops, but the game doesn't do this, nor does the script have any loops in loops
+			m_demoInstructionNum++;
+			m_loopPos = m_demoInstructionNum;
+			m_numLoops = curInstruction.data[0];
+			break;
+		case 0xF:
+			m_numLoops--;
+			if (m_numLoops <= 0)
+			{
+				m_demoInstructionNum++;
+			}
+			else
+			{
+				m_demoInstructionNum = m_loopPos;
+			}
+			break;
+		default:
+			done = true;
+			m_curInstructionDelay = SCRIPT_TICK;
+			break;
+		}
 	}
 }

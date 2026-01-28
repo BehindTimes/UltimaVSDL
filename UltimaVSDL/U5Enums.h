@@ -8,6 +8,9 @@ const int RENDER_HEIGHT = 800;
 
 const int LINE_THICKNESS = 4;
 
+const int ORIGINAL_TILE_WIDTH = 16;
+const int ORIGINAL_TILE_HEIGHT = 16;
+
 enum class U5Modes
 {
 	None,
