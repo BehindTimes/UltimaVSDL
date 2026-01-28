@@ -54,6 +54,16 @@ struct U5Data
 	std::vector<std::string> intro_strings;
 };
 
+struct IntroScriptInstruction {
+	IntroScriptInstruction() :
+		instruction(0),
+		data{ 0,0,0,0 }
+	{
+	}
+	unsigned char instruction;
+	unsigned char data[4];
+};
+
 enum class BitFileNames : uint_fast8_t
 {
 	BRITISH = 0,
@@ -109,6 +119,7 @@ public:
 	std::vector<std::vector<std::vector<U5ImageData>>> m_CharacterSetsData;
 	std::vector<U5PaddedImageData> m_ProportionalFontData;
 	std::vector<U5ImageData> m_Tiles;
+	std::vector<IntroScriptInstruction> m_IntroInstructions;
 	U5Data m_data;
 	RenderMode m_render_mode;
 	int m_CutsceneMap[NUM_CUTSCENES][CUTSCENE_WIDTH][CUTSCENE_HEIGHT];

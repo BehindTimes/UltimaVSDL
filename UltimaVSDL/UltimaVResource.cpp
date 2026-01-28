@@ -836,5 +836,54 @@ int UltimaVResource::LoadMiscMaps()
 		}
 	}
 
+	const size_t DEMO_INSTRUCTION_START = 0x4C0;
+	for (size_t index = DEMO_INSTRUCTION_START; index < buffer.size(); index++)
+	{
+		IntroScriptInstruction curInstruction;
+		if (buffer[index] > 0xF)
+		{
+			return -1;
+		}
+		curInstruction.instruction = buffer[index];
+		size_t variable_count = 0;
+		switch (curInstruction.instruction)
+		{
+		case 0: //Set character
+			variable_count = 4;
+			break;
+		case 2: // Move character with next instruction
+		case 4: // Open moongate
+		case 0xB: // Shoot
+		case 0xD: // Move character
+			variable_count = 2;
+			break;
+		case 1:
+		case 3: // Set delay
+		case 6: // Set map
+		case 7: // Fade In
+		case 8: // Fade Out
+		case 0xE: // Loop
+			variable_count = 1;
+			break;
+		case 0xA: // Load Tile
+			variable_count = 3;
+			break;
+		default:
+			variable_count = 0;
+			break;
+		}
+		// Exceeded file size
+		if (index + variable_count >= buffer.size())
+		{
+			return -2;
+		}
+		for (size_t tempIndex = 1; tempIndex <= variable_count; tempIndex++)
+		{
+			curInstruction.data[tempIndex - 1] = buffer[index + tempIndex];
+		}
+		index += variable_count;
+		m_IntroInstructions.push_back(curInstruction);
+	}
+
 	return 0;
 }

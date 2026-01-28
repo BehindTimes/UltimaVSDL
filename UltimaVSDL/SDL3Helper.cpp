@@ -59,7 +59,7 @@ int SDL3Helper::Intialize()
 
 	SDL_SetRenderLogicalPresentation(m_renderer, RENDER_WIDTH, RENDER_HEIGHT, SDL_LOGICAL_PRESENTATION_LETTERBOX);
 
-	//SDL_SetWindowFullscreen(m_window, true);
+	SDL_SetWindowFullscreen(m_window, true);
 	return 0;
 }
 
@@ -763,13 +763,16 @@ void SDL3Helper::LoadStreamingTextures()
 
 void SDL3Helper::LoadTargetTextures()
 {
-	m_TargetTextures.resize(2);
+	m_TargetTextures.resize(3);
 	m_TargetTextures[TTV_INTROBOX] = SDL_CreateTexture(m_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET,
 		20 * RENDER_TILE_WIDTH, 5 * RENDER_TILE_HEIGHT);
 	SDL_SetTextureScaleMode(m_TargetTextures[TTV_INTROBOX], SDL_SCALEMODE_NEAREST);
 	m_TargetTextures[TTV_INTROBOX_DISPLAY] = SDL_CreateTexture(m_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET,
 		19 * RENDER_TILE_WIDTH, 4 * RENDER_TILE_HEIGHT);
 	SDL_SetTextureScaleMode(m_TargetTextures[TTV_INTROBOX_DISPLAY], SDL_SCALEMODE_NEAREST);
+	m_TargetTextures[TTV_INTRO_RENDER] = SDL_CreateTexture(m_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET,
+		19 * RENDER_TILE_WIDTH, 4 * RENDER_TILE_HEIGHT);
+	SDL_SetTextureScaleMode(m_TargetTextures[TTV_INTRO_RENDER], SDL_SCALEMODE_NEAREST);
 
 	m_FullScreenTexture = SDL_CreateTexture(m_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET,
 		RENDER_WIDTH, RENDER_HEIGHT);

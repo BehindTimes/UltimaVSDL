@@ -24,7 +24,7 @@ Intro::Intro(SDL3Helper* sdl_helper, UltimaVResource* u5_resources) :
 	GameObject(sdl_helper, u5_resources),
 	m_curDelayFlame(0),
 	m_curFlame(0),
-	m_curMode(IntroMode::DEMO),
+	m_curMode(IntroMode::MENU),
 	m_window_width(0),
 	m_window_height(0),
 	m_curWodFade(0),
@@ -33,7 +33,13 @@ Intro::Intro(SDL3Helper* sdl_helper, UltimaVResource* u5_resources) :
 	m_curAcknowledgementXPos(0),
 	m_curAcknowledgementYDelay(0),
 	m_curAcknowledgementXDelay(0),
-	m_curAcknowledgement(AcknowlegementType::SCROLL_UP)
+	m_curAcknowledgement(AcknowlegementType::SCROLL_UP),
+	m_demoInstructionNum(0),
+	m_curInstructionDelay(0),
+	m_demoBackground(-1),
+	m_demo_screen_open(false),
+	m_curScreenOpenDelay(0),
+	m_smoothDemoOpen(false)
 {
 	m_clearScreen = true;
 
@@ -92,7 +98,7 @@ void Intro::RenderFlameFadeWoD()
 	if (!m_WoDFade->IsFading())
 	{
 		//GoToSelection();
-		m_curMode = IntroMode::DEMO;
+		CreateDemo();
 	}
 	m_WoDFade->ProcessFade(curTexture, false);
 }
@@ -214,6 +220,21 @@ void Intro::RenderFlame()
 	m_sdl_helper->RenderTextureAt(curTexture, x * hMult, y * vMult, width * hMult, height * vMult);
 }
 
+void Intro::CreateDemo()
+{
+	m_curMode = IntroMode::DEMO;
+	SDL_Texture* curTexture = m_sdl_helper->m_TargetTextures[TTV_INTRO_RENDER];
+	m_sdl_helper->SetRenderTarget(curTexture);
+	SDL_SetRenderDrawColor(m_sdl_helper->m_renderer, 0x00, 0, 0, 0xFF);
+	m_sdl_helper->ClearScreen();
+	m_sdl_helper->SetRenderTarget(nullptr);
+	m_demoInstructionNum = 0;
+	m_curInstructionDelay = 0;
+	m_curScreenOpenDelay = 0;
+	m_demo_screen_open = false;
+	m_demoBackground = -1;
+}
+
 void Intro::CreateMenu()
 {
 	SDL_Texture* curTexture = m_sdl_helper->m_TargetTextures[TTV_INTROBOX_DISPLAY];
@@ -267,7 +288,7 @@ void Intro::CreateMenu()
 
 void Intro::RenderCursor()
 {
-	m_sdl_helper->DrawTileTexture8(m_sdl_helper->m_CharacterSetsTextures[0][0][5 + m_curFlame], 23, 15);
+	m_sdl_helper->DrawTileTexture8(m_sdl_helper->m_CharacterSetsTextures[0][0][static_cast<size_t>(5 + m_curFlame)], 23, 15);
 }
 
 void Intro::RenderMenu()
@@ -289,22 +310,95 @@ void Intro::RenderIntroBox()
 	m_sdl_helper->RenderTextureAt(curTexture, x, y, RENDER_WIDTH, RENDER_TILE_HEIGHT * 5);
 }
 
+void Intro::ProcessDemoScript()
+{
+	if (m_resources->m_IntroInstructions.size() <= m_demoInstructionNum)
+	{
+		return;
+	}
+	IntroScriptInstruction curInstruction = m_resources->m_IntroInstructions[m_demoInstructionNum];
+	switch (curInstruction.instruction)
+	{
+	case 6:
+		m_demoBackground = curInstruction.data[0];
+		m_demo_screen_open = true;
+		m_curScreenOpenDelay = 0;
+		m_demoInstructionNum++;
+		break;
+	default:
+		break;
+	}
+}
+
 void Intro::RenderDemo()
 {
-	SDL_Texture* curTexture = m_sdl_helper->m_TargetTextures[TTV_INTROBOX_DISPLAY];
+	SDL_Texture* dispTexture = m_sdl_helper->m_TargetTextures[TTV_INTROBOX_DISPLAY];
+	SDL_Texture* curTexture = m_sdl_helper->m_TargetTextures[TTV_INTRO_RENDER];
 
+	m_curInstructionDelay += m_tickElapse;
+	if (SCRIPT_TICK < m_curInstructionDelay)
+	{
+		m_curInstructionDelay %= SCRIPT_TICK;
+		ProcessDemoScript();
+	}
+	if (m_demo_screen_open)
+	{
+		m_curScreenOpenDelay += m_tickElapse;
+		if (m_curScreenOpenDelay > SCREEN_OPEN_DELAY)
+		{
+			m_demo_screen_open = false;
+		}
+	}
+
+	if (m_demoBackground < 0 || m_demoBackground > 3)
+	{
+		m_sdl_helper->SetRenderTarget(nullptr);
+		float x = HALF_TILE_HEIGHT;
+		float y = 16 * HALF_TILE_HEIGHT;
+		m_sdl_helper->RenderTextureAt(dispTexture, x, y, RENDER_WIDTH - RENDER_TILE_WIDTH, RENDER_TILE_HEIGHT * 4);
+		return;
+	}
 	m_sdl_helper->SetRenderTarget(curTexture);
 	for (int i = 0; i < 4; i++)
 	{
 		for (int j = 0; j < 19; j++)
 		{
-			m_sdl_helper->DrawTileTexture(m_sdl_helper->m_TileTextures[m_resources->m_DemoMap[3][j][i]], j, i);
+			m_sdl_helper->DrawTileTexture(m_sdl_helper->m_TileTextures[m_resources->m_DemoMap[m_demoBackground][j][i]], j, i);
 		}
 	}
+	m_sdl_helper->SetRenderTarget(dispTexture);
+	if (m_demo_screen_open)
+	{
+		float ratio = static_cast<float>(m_curScreenOpenDelay) / SCREEN_OPEN_DELAY;
+		float final_width = (RENDER_WIDTH - RENDER_TILE_WIDTH) * ratio;
+		float start_x;
+		if (m_smoothDemoOpen)
+		{
+			start_x = ((RENDER_WIDTH - RENDER_TILE_WIDTH) / 2.0f) - (final_width / 2.0f);
+			m_sdl_helper->RenderTextureFromTo(curTexture, start_x, 0, final_width, RENDER_TILE_HEIGHT * 4, start_x, 0, final_width, RENDER_TILE_HEIGHT * 4);
+		}
+		else
+		{
+			int numTiles = static_cast<int>(final_width / (RENDER_TILE_WIDTH));
+			if (numTiles % 2 == 0)
+			{
+				numTiles--;
+			}
+			final_width = static_cast<float>(numTiles * RENDER_TILE_WIDTH);
+			start_x = ((RENDER_WIDTH - RENDER_TILE_WIDTH) / 2.0f) - (final_width / 2.0f);
+			m_sdl_helper->RenderTextureFromTo(curTexture, start_x, 0, final_width, RENDER_TILE_HEIGHT * 4, start_x, 0, final_width, RENDER_TILE_HEIGHT * 4);
+		}
+		//m_sdl_helper->RenderTextureAt(curTexture, 0, 0, RENDER_WIDTH - RENDER_TILE_WIDTH, RENDER_TILE_HEIGHT * 2);
+	}
+	else
+	{
+		m_sdl_helper->RenderTextureAt(curTexture, 0, 0, RENDER_WIDTH - RENDER_TILE_WIDTH, RENDER_TILE_HEIGHT * 4);
+	}
+	
 	m_sdl_helper->SetRenderTarget(nullptr);
 	float x = HALF_TILE_HEIGHT;
 	float y = 16 * HALF_TILE_HEIGHT;
-	m_sdl_helper->RenderTextureAt(curTexture, x, y, RENDER_WIDTH - RENDER_TILE_WIDTH, RENDER_TILE_HEIGHT * 4);
+	m_sdl_helper->RenderTextureAt(dispTexture, x, y, RENDER_WIDTH - RENDER_TILE_WIDTH, RENDER_TILE_HEIGHT * 4);
 }
 
 void Intro::RenderAcknowledgements()
@@ -512,7 +606,7 @@ void Intro::LoadData()
 {
 	SetSDLData();
 	CreateIntroBox();
-	//CreateMenu();
+	CreateMenu();
 	//m_input->SetInputType(InputType::ANY_KEY);
 	m_input->SetInputType(InputType::UP_DOWN_ENTER);
 }
@@ -684,6 +778,9 @@ void Intro::ProcessEvents()
 					break;
 				case MenuChoices::INTRODUCTION: // Introduction
 					m_newMode = U5Modes::Cutscene;
+					break;
+				case MenuChoices::RETURN_TO_VIEW:
+					CreateDemo();
 					break;
 				default:
 					break;

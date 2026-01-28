@@ -11,6 +11,7 @@
 #include "FadeObject.h"
 #include "U5Enums.h"
 #include "AnimationTexture.h"
+#include <map>
 
 enum class IntroMode : uint_fast16_t
 {
@@ -41,6 +42,13 @@ enum class AcknowlegementType
 	WAIT
 };
 
+struct DemoCharacter
+{
+	int tile;
+	int x;
+	int y;
+};
+
 class Intro : public GameObject
 {
 public:
@@ -68,6 +76,8 @@ private:
 	void RenderIntroBox();
 	void CreateIntroBox();
 	void CreateMenu();
+	void CreateDemo();
+	void ProcessDemoScript();
 	
 	void StoryOverCallback();
 
@@ -82,11 +92,18 @@ private:
 	const Uint64 WOD_FADE_DELAY = 3000;
 	const Uint64 ACKNOWLEDGEMENT_SCROLL_DELAY = 500;
 	const Uint64 ACKNOWLEDGEMENT_OPEN_DELAY = 1000;
+
+	const Uint64 SCRIPT_TICK = 200;
+	const Uint64 SCREEN_OPEN_DELAY = SCRIPT_TICK * 12;
 	
 	IntroMode m_curMode;
 	int m_window_width;
 	int m_window_height;
 	int m_curMenuIndex;
+	int m_demoInstructionNum;
+
+	int m_demoBackground;
+	bool m_smoothDemoOpen;
 
 	std::unique_ptr<FadeObject> m_LogoFade;
 	std::unique_ptr<FadeObject> m_FlameFade;
@@ -95,7 +112,11 @@ private:
 	float m_curAcknowledgementXPos;
 	Uint64 m_curAcknowledgementYDelay;
 	Uint64 m_curAcknowledgementXDelay;
+	Uint64 m_curInstructionDelay;
+	bool m_demo_screen_open;
+	Uint64 m_curScreenOpenDelay;
 
 	AcknowlegementType m_curAcknowledgement;
+	std::map<int, DemoCharacter> m_map_demo_char;
 };
 
