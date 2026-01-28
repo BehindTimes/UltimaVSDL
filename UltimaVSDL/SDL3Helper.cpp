@@ -59,7 +59,7 @@ int SDL3Helper::Intialize()
 
 	SDL_SetRenderLogicalPresentation(m_renderer, RENDER_WIDTH, RENDER_HEIGHT, SDL_LOGICAL_PRESENTATION_LETTERBOX);
 
-	SDL_SetWindowFullscreen(m_window, true);
+	//SDL_SetWindowFullscreen(m_window, true);
 	return 0;
 }
 

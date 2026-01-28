@@ -51,6 +51,7 @@ struct U5Data
 	std::vector<U5StoryScreen> ending_text{ NUM_ENDING };
 	std::vector<unsigned char> intro_string_1;
 	std::vector<unsigned char> intro_string_2;
+	std::vector<std::string> intro_demo_string;
 	std::vector<std::string> intro_strings;
 };
 

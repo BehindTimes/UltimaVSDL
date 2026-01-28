@@ -39,7 +39,7 @@ Intro::Intro(SDL3Helper* sdl_helper, UltimaVResource* u5_resources) :
 	m_demoBackground(-1),
 	m_demo_screen_open(false),
 	m_curScreenOpenDelay(0),
-	m_smoothDemoOpen(false)
+	m_smoothDemoOpen(true)
 {
 	m_clearScreen = true;
 
@@ -312,6 +312,7 @@ void Intro::RenderIntroBox()
 
 void Intro::ProcessDemoScript()
 {
+	SDL_Texture* curTexture;
 	if (m_resources->m_IntroInstructions.size() <= m_demoInstructionNum)
 	{
 		return;
@@ -324,6 +325,21 @@ void Intro::ProcessDemoScript()
 		m_demo_screen_open = true;
 		m_curScreenOpenDelay = 0;
 		m_demoInstructionNum++;
+		CreateIntroBox();
+		curTexture = m_sdl_helper->m_TargetTextures[TTV_INTROBOX];
+		if (m_demoBackground >= 0 && m_demoBackground <= 3)
+		{
+			int xpos = static_cast<int>(20 - ((m_resources->m_data.intro_demo_string[m_demoBackground].size() + 1) / 2));
+			m_sdl_helper->SetRenderTarget(curTexture);
+			m_sdl_helper->DrawTiledText(m_resources->m_data.intro_demo_string[m_demoBackground], xpos, 9);
+
+			m_sdl_helper->DrawTileRect(xpos + static_cast<int>(m_resources->m_data.intro_demo_string[m_demoBackground].size()), 9);
+			m_sdl_helper->DrawTileRect(xpos - 1, 9);
+
+			m_sdl_helper->DrawTileTexture8(m_sdl_helper->m_ArrowTextures[0], xpos + static_cast<int>(m_resources->m_data.intro_demo_string[m_demoBackground].size()), 9);
+			m_sdl_helper->DrawTileTexture8(m_sdl_helper->m_ArrowTextures[1], xpos - 1, 9);
+			m_sdl_helper->SetRenderTarget(nullptr);
+		}
 		break;
 	default:
 		break;
