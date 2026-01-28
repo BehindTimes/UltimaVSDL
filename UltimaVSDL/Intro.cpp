@@ -247,6 +247,7 @@ void Intro::CreateDemo()
 	m_curInstructionDelay = 0;
 	m_curDelayTime = 1;
 	m_DemoFadeTileNum = -1;
+	m_moongate.m_showMoongate = MoongateStatus::CLOSED;
 }
 
 void Intro::CreateMenu()
@@ -343,6 +344,23 @@ void Intro::RenderDemo()
 			m_demo_screen_open = false;
 		}
 	}
+	if (m_moongate.m_showMoongate == MoongateStatus::OPENING)
+	{
+		m_moongate.m_curMoongateDelay += m_tickElapse;
+		if (m_moongate.m_curMoongateDelay > DemoMoongate::MOONGATE_DELAY)
+		{
+			m_moongate.m_showMoongate = MoongateStatus::OPENED;
+		}
+	}
+	else if (m_moongate.m_showMoongate == MoongateStatus::CLOSING)
+	{
+		m_moongate.m_curMoongateDelay += m_tickElapse;
+		if (m_moongate.m_curMoongateDelay > DemoMoongate::MOONGATE_DELAY)
+		{
+			m_moongate.m_showMoongate = MoongateStatus::CLOSED;
+		}
+	}
+
 	if (m_DemoFadeTileNum >= 0)
 	{
 		m_DemoTileFade->AddElapsedTime(m_tickElapse);
@@ -381,6 +399,30 @@ void Intro::RenderDemo()
 			m_sdl_helper->DrawTileTexture(m_sdl_helper->m_TileTextures[m_DemoMap[j][i]], j, i);
 		}
 	}
+
+	// Render the moongate if available
+	if (m_moongate.m_showMoongate == MoongateStatus::OPENING)
+	{
+		float ratio = static_cast<float>(m_moongate.m_curMoongateDelay) / DemoMoongate::MOONGATE_DELAY;
+		m_sdl_helper->RenderTextureFromTo(m_sdl_helper->m_TileTextures[m_moongate.TILE_NUM], 0, 0,
+			ORIGINAL_TILE_WIDTH, ORIGINAL_TILE_HEIGHT * ratio, m_moongate.x * static_cast<float>(RENDER_TILE_WIDTH),
+			static_cast<float>(m_moongate.y * RENDER_TILE_HEIGHT) + (RENDER_TILE_HEIGHT * (1 - ratio)), RENDER_TILE_WIDTH, RENDER_TILE_HEIGHT * ratio);
+	}
+	else if (m_moongate.m_showMoongate == MoongateStatus::CLOSING)
+	{
+		float ratio = 1.0f - (static_cast<float>(m_moongate.m_curMoongateDelay) / DemoMoongate::MOONGATE_DELAY);
+		if (ratio > 0)
+		{
+			m_sdl_helper->RenderTextureFromTo(m_sdl_helper->m_TileTextures[m_moongate.TILE_NUM], 0, 0,
+				ORIGINAL_TILE_WIDTH, ORIGINAL_TILE_HEIGHT * ratio, m_moongate.x * static_cast<float>(RENDER_TILE_WIDTH),
+				static_cast<float>(m_moongate.y * RENDER_TILE_HEIGHT) + (RENDER_TILE_HEIGHT * (1 - ratio)), RENDER_TILE_WIDTH, RENDER_TILE_HEIGHT * ratio);
+		}
+	}
+	else if (m_moongate.m_showMoongate == MoongateStatus::OPENED)
+	{
+		m_sdl_helper->DrawTileTexture(m_sdl_helper->m_TileTextures[m_moongate.TILE_NUM], m_moongate.x, m_moongate.y);
+	}
+
 	// Render the tiles to draw above
 	for (auto& curTile : m_map_demo_char)
 	{
@@ -887,18 +929,36 @@ void Intro::ProcessDemoScript()
 				}
 			}
 			break;
-		case 0x3:
+		case 0x3: // Delay
 			m_demoInstructionNum++;
 			done = true;
 			m_curDelayTime = SCRIPT_TICK * curInstruction.data[0];
 			m_curInstructionDelay = 0;
-			if (0)
+			if (1)
 			{
 				if (curInstruction.data[0] > 5)
 				{
 					m_curDelayTime = SCRIPT_TICK * 5; // Just for debug purposes to speed things up
 				}
 			}
+			break;
+		case 0x4: // Show moongate
+			m_demoInstructionNum++;
+			m_curDelayTime = DemoMoongate::MOONGATE_DELAY;
+			m_curInstructionDelay = 0;
+			m_moongate.m_curMoongateDelay = 0;
+			done = true;
+			m_moongate.m_showMoongate = MoongateStatus::OPENING;
+			m_moongate.x = curInstruction.data[0];
+			m_moongate.y = curInstruction.data[1];
+			break;
+		case 0x5: // Hide moongate
+			m_demoInstructionNum++;
+			m_curDelayTime = DemoMoongate::MOONGATE_DELAY;
+			m_curInstructionDelay = 0;
+			m_moongate.m_curMoongateDelay = 0;
+			done = true;
+			m_moongate.m_showMoongate = MoongateStatus::CLOSING;
 			break;
 		case 0x6:
 			m_demoBackground = curInstruction.data[0];
@@ -970,12 +1030,19 @@ void Intro::ProcessDemoScript()
 			}
 			done = true;
 			break;
+		case 0x9: // Reset
+			m_demoInstructionNum = 0;
+			break;
 		case 0xA: // Load tile
 			m_demoInstructionNum++;
 			m_DemoMap[curInstruction.data[1]][curInstruction.data[2]] = curInstruction.data[0];
 			break;
+		case 0xB: // Attack!
+			m_demoInstructionNum++;
+			break;
 		case 0xC: // Clear variables
 			m_DemoFadeTileNum = -1;
+			m_moongate.m_showMoongate = MoongateStatus::CLOSED;
 			m_map_demo_char.clear();
 			m_demoInstructionNum++;
 			break;

@@ -42,6 +42,32 @@ enum class AcknowlegementType
 	WAIT
 };
 
+enum class MoongateStatus
+{
+	CLOSED,
+	CLOSING,
+	OPENING,
+	OPENED
+};
+
+struct DemoMoongate
+{
+	static const Uint64 MOONGATE_DELAY = 1000;
+	static const int TILE_NUM = 0xDC;
+
+	DemoMoongate() :
+		m_showMoongate(MoongateStatus::CLOSED),
+		x(0),
+		y(0),
+		m_curMoongateDelay(0)
+	{
+	}
+	MoongateStatus m_showMoongate;
+	int x;
+	int y;
+	Uint64 m_curMoongateDelay;
+};
+
 struct DemoCharacter
 {
 	DemoCharacter() :
@@ -137,10 +163,12 @@ private:
 	bool m_demo_screen_open;
 	bool m_fadeIn;
 	Uint64 m_curScreenOpenDelay;
+	
 	int m_DemoMap[DEMO_WIDTH][DEMO_HEIGHT];
 	int m_DemoFadeTileNum;
 	int m_numLoops;
 	int m_loopPos;
+	DemoMoongate m_moongate;
 
 	AcknowlegementType m_curAcknowledgement;
 	std::map<int, DemoCharacter> m_map_demo_char;
