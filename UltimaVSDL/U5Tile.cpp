@@ -53,6 +53,7 @@ SDL_Texture* U5Tile::GetTexture()
 {
 	switch (m_textureType)
 	{
+	case TextureType::NPC:
 	case TextureType::ROTATING:
 	{
 		if (m_cur_texture_in_rotation >= m_textures_in_rotation.size())
@@ -95,6 +96,25 @@ void U5Tile::CreateRotationTextures(std::vector<int> textures, Uint64 animation_
 {
 	m_textureType = TextureType::ROTATING;
 	m_textures_in_rotation = textures;
+	m_animatingMaxValue = animation_speed;
+	m_cur_texture_in_rotation = m_id;
+
+	std::vector<int>::iterator it = std::find(m_textures_in_rotation.begin(), m_textures_in_rotation.end(), m_id);
+	if (it == m_textures_in_rotation.end())
+	{
+		m_cur_texture_in_rotation = 0;
+	}
+	m_cur_texture_in_rotation = std::distance(m_textures_in_rotation.begin(), it);
+}
+
+void U5Tile::CreateNPCRotationTextures(Uint64 animation_speed)
+{
+	m_textureType = TextureType::NPC;
+	int startPos = m_id - (m_id % 4);
+	for (int index = 0; index < 4; index++)
+	{
+		m_textures_in_rotation.emplace_back(startPos + index);
+	}
 	m_animatingMaxValue = animation_speed;
 	m_cur_texture_in_rotation = m_id;
 
@@ -221,6 +241,37 @@ void U5Tile::UpdateTime(Uint64 elapsedTime)
 			if (m_cur_texture_in_rotation >= m_textures_in_rotation.size())
 			{
 				m_cur_texture_in_rotation = 0;
+			}
+		}
+		break;
+	case TextureType::NPC:
+		m_animatingCurValue += elapsedTime;
+		if (m_animatingCurValue >= m_animatingMaxValue)
+		{
+			m_animatingCurValue %= m_animatingMaxValue;
+			if (m_textures_in_rotation.size() == 0)
+			{
+				return;
+			}
+			int val = m_utilities->GetRandom(0, 2);
+			if (val == 0)
+			{
+				if (m_cur_texture_in_rotation == 0)
+				{
+					m_cur_texture_in_rotation = static_cast<int>(m_textures_in_rotation.size() - 1);
+				}
+				else
+				{
+					m_cur_texture_in_rotation--;
+				}
+			}
+			else if (val == 1)
+			{
+				m_cur_texture_in_rotation++;
+				if (m_cur_texture_in_rotation >= m_textures_in_rotation.size())
+				{
+					m_cur_texture_in_rotation = 0;
+				}
 			}
 		}
 		break;

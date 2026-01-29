@@ -75,7 +75,8 @@ struct DemoCharacter
 		x(0),
 		y(0),
 		isFade(false),
-		isVisible(true)
+		isVisible(true),
+		m_curNPCDelay(0)
 	{
 	}
 	DemoCharacter(int _tile, int _x, int _y) :
@@ -83,7 +84,8 @@ struct DemoCharacter
 		x(_x),
 		y(_y),
 		isFade(false),
-		isVisible(true)
+		isVisible(true),
+		m_curNPCDelay(0)
 	{
 	}
 	int tile;
@@ -91,6 +93,7 @@ struct DemoCharacter
 	int y;
 	bool isFade;
 	bool isVisible;
+	Uint64 m_curNPCDelay;
 };
 
 class Intro : public GameObject

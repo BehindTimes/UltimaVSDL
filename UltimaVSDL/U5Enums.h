@@ -47,3 +47,4 @@ const int WATERFALL_ANIMATE = 200;
 const int CLOCK_ANIMATE = 200;
 const int WATER_ANIMATE = 2000;
 const int FIRE_ANIMATE = 100;
+const int NPC_ANIMATE = 250;

@@ -840,6 +840,16 @@ void SDL3Helper::LoadTileTextures(UltimaVResource* u5_resources)
 	m_TileTextures[189].CreateFireTexture(&u5_resources->m_Tiles[205], FIRE_ANIMATE, u5_resources->m_render_mode);
 	m_TileTextures[190].CreateFireTexture(&u5_resources->m_Tiles[206], FIRE_ANIMATE, u5_resources->m_render_mode);
 	m_TileTextures[191].CreateFireTexture(&u5_resources->m_Tiles[207], FIRE_ANIMATE, u5_resources->m_render_mode);
+
+	/*// Create NPC tile rotation here
+	for (int i = 303; i < 512; i++)
+	{
+		if (i >= 435 && i <= 438)
+		{
+			continue;
+		}
+		m_TileTextures[i].CreateNPCRotationTextures(NPC_ANIMATE);
+	}*/
 }
 
 void SDL3Helper::LoadProportionalFontTextures(UltimaVResource* u5_resources)
@@ -989,8 +999,8 @@ void SDL3Helper::DrawLineManual(std::vector<std::pair<int, int>> m_rect, int ste
 
 void SDL3Helper::AnimateTiles(Uint64 elapsed_time)
 {
-	for (auto& curTile : m_TileTextures)
+	for(size_t index = 0; index < 256; index++)
 	{
-		curTile.UpdateTime(elapsed_time);
+		m_TileTextures[index].UpdateTime(elapsed_time);
 	}
 }

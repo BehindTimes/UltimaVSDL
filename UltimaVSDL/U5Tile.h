@@ -12,7 +12,8 @@ enum class TextureType
 	SCROLLING,
 	MASKED,
 	ROTATING,
-	FIRE
+	FIRE,
+	NPC
 };
 
 class U5Tile
@@ -26,6 +27,7 @@ public:
 	void CreateMaskTexture(int id, SDL3Helper* sdlHelper, U5ImageData* data, U5ImageData* mask, int underlying_texture);
 	void CreateFireTexture(U5ImageData* mask, Uint64 animation_speed, RenderMode render_mode);
 	void CreateRotationTextures(std::vector<int> textures, Uint64 animation_speed);
+	void CreateNPCRotationTextures(Uint64 animation_speed);
 	void CreateScrollingTexture(Uint64 animation_speed);
 	void UpdateTime(Uint64 elapsedTime);
 private:

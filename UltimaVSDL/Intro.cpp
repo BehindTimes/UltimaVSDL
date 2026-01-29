@@ -255,7 +255,7 @@ void Intro::CreateDemo()
 	m_moongate.m_showMoongate = MoongateStatus::CLOSED;
 
 	//m_demoInstructionNum = 90;
-	//m_demoInstructionNum = 180;
+	m_demoInstructionNum = 180;
 }
 
 void Intro::CreateMenu()
@@ -515,6 +515,48 @@ void Intro::RenderDemo()
 	m_sdl_helper->RenderTextureAt(dispTexture, x, y, RENDER_WIDTH - RENDER_TILE_WIDTH, RENDER_TILE_HEIGHT * 4);
 
 	m_sdl_helper->AnimateTiles(m_tickElapse);
+
+	// Control the NPC animations individually
+	for (auto& curNPC : m_map_demo_char)
+	{
+		if (curNPC.second.tile >= 52)
+		{
+			if (curNPC.second.tile >= 180 && curNPC.second.tile <= 183)
+			{
+				return;
+			}
+			curNPC.second.m_curNPCDelay += m_tickElapse;
+			bool changeTile = false;
+			if (curNPC.second.m_curNPCDelay >= NPC_ANIMATE)
+			{
+				curNPC.second.m_curNPCDelay %= NPC_ANIMATE;
+				changeTile = true;
+			}
+			if (changeTile)
+			{
+				int startTile = curNPC.second.tile - (curNPC.second.tile % 4);
+				int endTile = startTile + 3;
+
+				int val = m_utilities->GetRandom(0, 2);
+				if (val == 0)
+				{
+					curNPC.second.tile--;
+					if (curNPC.second.tile < startTile)
+					{
+						curNPC.second.tile = startTile;
+					}
+				}
+				else if (val == 1)
+				{
+					curNPC.second.tile++;
+					if (curNPC.second.tile > endTile)
+					{
+						curNPC.second.tile = endTile;
+					}
+				}
+			}
+		}
+	}
 }
 
 void Intro::RenderAcknowledgements()
