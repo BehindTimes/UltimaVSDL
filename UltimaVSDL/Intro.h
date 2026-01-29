@@ -137,9 +137,10 @@ private:
 	const Uint64 ACKNOWLEDGEMENT_SCROLL_DELAY = 500;
 	const Uint64 ACKNOWLEDGEMENT_OPEN_DELAY = 1000;
 
-	const Uint64 SCRIPT_TICK = 200;
-	const Uint64 SCREEN_OPEN_DELAY = SCRIPT_TICK * 12;
-	const Uint64 TILE_FADE_DELAY = SCRIPT_TICK * 3;
+	const Uint64 SCRIPT_TICK = 70;
+	const Uint64 SCREEN_OPEN_DELAY = SCRIPT_TICK * 24;
+	const Uint64 TILE_FADE_DELAY = SCRIPT_TICK * 12;
+	const Uint64 ZAP_DELAY = 500;
 	
 	IntroMode m_curMode;
 	int m_window_width;
@@ -169,6 +170,8 @@ private:
 	int m_numLoops;
 	int m_loopPos;
 	DemoMoongate m_moongate;
+	bool m_isZap;
+	int m_playerHit;
 
 	AcknowlegementType m_curAcknowledgement;
 	std::map<int, DemoCharacter> m_map_demo_char;

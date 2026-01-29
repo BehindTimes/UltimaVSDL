@@ -23,6 +23,7 @@
 #include <SDL3/SDL_blendmode.h>
 #include <memory>
 #include "U5Input.h"
+#include <utility>
 
 extern std::unique_ptr<U5Input> m_input;
 
@@ -870,4 +871,28 @@ void SDL3Helper::CopyTextureToStreaming(U5ImageData &texture, SDL_Texture *strea
 	}
 
 	SDL_UnlockTexture(streaming_texture);
+}
+
+void SDL3Helper::DrawLineManual(std::vector<std::pair<int, int>> m_rect, int step, bool isHorz, int xPos, int yPos)
+{
+	SDL_FRect toRect{};
+	toRect.x = static_cast<float>(xPos);
+	toRect.y = static_cast<float>(yPos);
+
+	SDL_SetRenderDrawColor(m_renderer, 255, 255, 255, 255);
+
+	for (auto& curPair : m_rect)
+	{
+		toRect.w = static_cast<float>(curPair.first);
+		toRect.h = static_cast<float>(curPair.second);
+		SDL_RenderFillRect(m_renderer, &toRect);
+
+		if (isHorz)
+		{
+			toRect.x += curPair.first;
+			toRect.y += step;
+		}
+		
+	}
+	SDL_SetRenderDrawColor(m_renderer, 0, 0, 0, 0);
 }

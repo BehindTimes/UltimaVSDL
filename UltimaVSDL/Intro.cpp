@@ -16,6 +16,8 @@
 #include "U5Input.h"
 #include <SDL3/SDL_keycode.h>
 #include <cstring>
+#include <SDL3/SDL_stdinc.h>
+#include <iostream>
 
 extern std::unique_ptr<CutScene> cutscene_screen;
 extern std::unique_ptr<U5Utils> m_utilities;
@@ -46,7 +48,9 @@ Intro::Intro(SDL3Helper* sdl_helper, UltimaVResource* u5_resources) :
 	m_DemoFadeTileNum(-1),
 	m_fadeIn(true),
 	m_numLoops(0),
-	m_loopPos(0)
+	m_loopPos(0),
+	m_isZap(false),
+	m_playerHit(-1)
 {
 	m_clearScreen = true;
 
@@ -247,7 +251,10 @@ void Intro::CreateDemo()
 	m_curInstructionDelay = 0;
 	m_curDelayTime = 1;
 	m_DemoFadeTileNum = -1;
+	m_playerHit = -1;
 	m_moongate.m_showMoongate = MoongateStatus::CLOSED;
+
+	//m_demoInstructionNum = 90;
 }
 
 void Intro::CreateMenu()
@@ -334,6 +341,10 @@ void Intro::RenderDemo()
 	m_curInstructionDelay += m_tickElapse;
 	if (m_curDelayTime > 0 && m_curDelayTime < m_curInstructionDelay)
 	{
+		if (m_isZap)
+		{
+			m_isZap = false;
+		}
 		ProcessDemoScript();
 	}
 	if (m_demo_screen_open)
@@ -443,6 +454,32 @@ void Intro::RenderDemo()
 			}
 		}
 	}
+	// Draw the Shadowlord zap here
+	if (m_isZap)
+	{
+		const Uint64 ZAP_TIME = 100;
+		const Uint64 HIT_DELAY = 50;
+		Uint64 curTime = m_curInstructionDelay;
+		int zap_num = static_cast<int>(m_curInstructionDelay / ZAP_TIME);
+		Uint64 tempTime = curTime - (zap_num * ZAP_TIME);
+
+		if (zap_num < HIT_DELAY)
+		{
+			if (tempTime < 50)
+			{
+				if (m_map_demo_char.contains(m_playerHit))
+				{
+					//std::cout << zap_num << std::endl;
+					m_sdl_helper->DrawLineManual({ {8,8}, {12,8}, {12,8}, {8,8} }, 4, true, 480 + (36 * zap_num), 92 + (12 * zap_num));
+					if (zap_num == 4)
+					{
+						m_sdl_helper->DrawTileTexture(m_sdl_helper->m_TileTextures[0], m_map_demo_char[m_playerHit].x, m_map_demo_char[m_playerHit].y);
+					}
+				}
+			}
+		}
+	}
+
 	m_sdl_helper->SetRenderTarget(dispTexture);
 	if (m_demo_screen_open)
 	{
@@ -904,7 +941,7 @@ void Intro::ProcessDemoScript()
 			break;
 		case 0x2: // Move character and run next instruction
 			m_demoInstructionNum++;
-			m_curDelayTime = SCRIPT_TICK * 2;
+			m_curDelayTime = SCRIPT_TICK * 6;
 			m_curInstructionDelay = 0;
 			char_num = curInstruction.data[0];
 			if (m_map_demo_char.contains(char_num))
@@ -934,7 +971,7 @@ void Intro::ProcessDemoScript()
 			done = true;
 			m_curDelayTime = SCRIPT_TICK * curInstruction.data[0];
 			m_curInstructionDelay = 0;
-			if (1)
+			if (0)
 			{
 				if (curInstruction.data[0] > 5)
 				{
@@ -1039,17 +1076,23 @@ void Intro::ProcessDemoScript()
 			break;
 		case 0xB: // Attack!
 			m_demoInstructionNum++;
+			m_curDelayTime = ZAP_DELAY;
+			m_curInstructionDelay = 0;
+			m_isZap = true;
+			m_playerHit = curInstruction.data[1];
+			done = true;
 			break;
 		case 0xC: // Clear variables
 			m_DemoFadeTileNum = -1;
 			m_moongate.m_showMoongate = MoongateStatus::CLOSED;
 			m_map_demo_char.clear();
+			m_playerHit = -1;
 			m_demoInstructionNum++;
 			break;
 		case 0xD: // Move character
 			m_demoInstructionNum++;
 			done = true;
-			m_curDelayTime = SCRIPT_TICK * 2;
+			m_curDelayTime = SCRIPT_TICK * 6;
 			m_curInstructionDelay = 0;
 			char_num = curInstruction.data[0];
 			if (m_map_demo_char.contains(char_num))

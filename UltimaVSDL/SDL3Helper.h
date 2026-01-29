@@ -8,6 +8,7 @@
 #include <SDL3/SDL_video.h>
 #include <cstdint>
 #include <string>
+#include <utility>
 
 enum TARGET_TEXTURE_VAL
 {
@@ -45,6 +46,7 @@ public:
 	void DrawTileTexture8(SDL_Texture* texture, int x_tile, int y_tile) const;
 	void DrawTileTexture(SDL_Texture* texture, int x_tile, int y_tile) const;
 	void DrawTileRect(int x_tile, int y_tile) const;
+	void DrawLineManual(std::vector<std::pair<int, int>> m_rect, int step, bool isHorz, int xPos, int yPos);
 
 	bool m_quit;
 	SDL_Renderer* m_renderer;
