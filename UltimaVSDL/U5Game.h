@@ -3,6 +3,12 @@
 #include "UltimaVResource.h"
 #include "SDL3Helper.h"
 
+enum class GameLocation
+{
+	Dungeon,
+	World
+};
+
 class U5Game : public GameObject
 {
 public:
@@ -16,5 +22,8 @@ public:
 private:
 	int m_window_width;
 	int m_window_height;
+
+	void DrawBorder();
+	GameLocation m_location;
 };
 

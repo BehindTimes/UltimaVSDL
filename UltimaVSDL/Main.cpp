@@ -54,8 +54,9 @@ static void MainLoop()
 	m_game = std::make_unique<U5Game>(sdl_helper.get(), u5_resources.get());
 	m_game->LoadData();
 
+	curObject = m_game.get();
 	//curObject = splash_screen.get();
-	curObject = intro_screen.get();
+	//curObject = intro_screen.get();
 	curObject->LoadData();
 	
 	while (1)

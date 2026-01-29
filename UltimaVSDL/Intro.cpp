@@ -946,6 +946,7 @@ void Intro::ProcessEvents()
 					break;
 				case MenuChoices::JOURNEY_ONWARD:
 					m_newMode = U5Modes::Game;
+					break;
 				default:
 					break;
 				}

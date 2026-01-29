@@ -255,6 +255,33 @@ void SDL3Helper::DrawTileRect(int x_tile, int y_tile) const
 	SDL_SetRenderDrawColor(m_renderer, 0, 0, 0, 0);
 }
 
+void SDL3Helper::DrawTileRect(int x_tile, int y_tile, int num_x, int num_y, unsigned char color, RenderMode mode) const
+{
+	unsigned char color_array[3];
+
+	if (mode == RenderMode::EGA)
+	{
+		std::memcpy(color_array, ega_table[color], sizeof(color_array));
+	}
+	else if (mode == RenderMode::CGA)
+	{
+		std::memcpy(color_array, cga_table[color], sizeof(color_array));
+	}
+	else
+	{
+		return;
+	}
+	SDL_FRect toRect{};
+	toRect.x = 0;
+	toRect.y = static_cast<float>(y_tile * HALF_TILE_HEIGHT);
+	toRect.x = static_cast<float>(x_tile * HALF_TILE_WIDTH);
+	toRect.w = static_cast<float>(HALF_TILE_WIDTH * num_x);
+	toRect.h = static_cast<float>(HALF_TILE_HEIGHT * num_y);
+	SDL_SetRenderDrawColor(m_renderer, color_array[0], color_array[1], color_array[2], 0xFF);
+	SDL_RenderFillRect(m_renderer, &toRect);
+	SDL_SetRenderDrawColor(m_renderer, 0, 0, 0, 0);
+}
+
 void SDL3Helper::DrawTileTexture8(SDL_Texture* texture, int x_tile, int y_tile) const
 {
 	SDL_FRect toRect{};
