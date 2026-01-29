@@ -6,18 +6,28 @@
 #include <SDL3/SDL_stdinc.h>
 #include <algorithm>
 #include <iterator>
+#include <memory>
+#include "U5Utils.h"
+#include "ColorData.h"
+#include <cstring>
+#include <SDL3/SDL_pixels.h>
+#include <SDL3/SDL_surface.h>
+
+extern std::unique_ptr<U5Utils> m_utilities;
 
 U5Tile::U5Tile() :
 	m_texture(nullptr),
 	m_render_texture(nullptr),
 	m_data(nullptr),
+	m_data_mask(nullptr),
 	m_textureType(TextureType::SINGLE),
 	m_sdl_helper(nullptr),
 	m_secondaryTexture(-1),
 	m_animatingMaxValue(0),
 	m_animatingCurValue(0),
 	m_cur_texture_in_rotation(0),
-	m_id(-1)
+	m_id(-1),
+	m_render_mode(RenderMode::EGA)
 {
 }
 
@@ -55,6 +65,8 @@ SDL_Texture* U5Tile::GetTexture()
 	case TextureType::MASKED:
 		return m_render_texture;
 	case TextureType::SCROLLING:
+		return m_render_texture;
+	case TextureType::FIRE:
 		return m_render_texture;
 	default:
 		return m_texture;
@@ -104,6 +116,98 @@ void U5Tile::CreateScrollingTexture(Uint64 animation_speed)
 	SDL_SetTextureScaleMode(m_render_texture, SDL_SCALEMODE_NEAREST);
 }
 
+void U5Tile::CreateFireTexture(U5ImageData* mask, Uint64 animation_speed, RenderMode render_mode)
+{
+	m_textureType = TextureType::FIRE;
+	m_animatingMaxValue = animation_speed;
+	m_data_mask = mask;
+	m_render_mode = render_mode;
+
+	m_render_texture = SDL_CreateTexture(m_sdl_helper->m_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING,
+		static_cast<int>(m_data->width), static_cast<int>(m_data->height));
+	SDL_SetTextureScaleMode(m_render_texture, SDL_SCALEMODE_NEAREST);
+	m_sdl_helper->CopyTextureToStreaming(*m_data, m_render_texture, m_data->width, m_data->height, true);
+}
+
+void U5Tile::UpdateFireTexture()
+{
+	unsigned char* pixels = NULL;
+	int pitch;
+	unsigned char colorArray[3] = {};
+	unsigned char blackArray[3] = { 0, 0, 0 };
+	unsigned char color1Array[3] = {};
+	unsigned char color2Array[3] = {};
+	unsigned char magentaArray[3] = { 0xAA,0x00,0xAA };
+
+	SDL_LockTexture(m_render_texture, NULL, (void**)&pixels, &pitch);
+
+	size_t curPos = 0;
+	for (size_t indexY = 0; indexY < m_data->height; indexY++)
+	{
+		for (size_t indexX = 0; indexX < m_data->width; indexX++)
+		{
+			if (m_data_mask->pixel_data[curPos] != 0)
+			{
+				int val = m_utilities->GetRandom(0, 1);
+				if (m_render_mode == RenderMode::EGA)
+				{
+					// If the colors are the same, alternate between on and off.
+					// If the main texture is black, use the mask texture
+					// color, otherwise alternate between bright and dark red
+					if (m_data_mask->pixel_data[curPos] == m_data->pixel_data[curPos])
+					{
+						std::memcpy(colorArray, ega_table[m_data->pixel_data[curPos]], sizeof(colorArray));
+
+						// ABGR
+						pixels[((indexY * pitch) + (indexX * 4)) + 1] = val ? colorArray[2] : blackArray[2];
+						pixels[((indexY * pitch) + (indexX * 4)) + 2] = val ? colorArray[1] : blackArray[1];
+						pixels[((indexY * pitch) + (indexX * 4)) + 3] = val ? colorArray[0] : blackArray[0];
+					}
+					else if (m_data->pixel_data[curPos] == 0)
+					{
+						std::memcpy(colorArray, ega_table[m_data_mask->pixel_data[curPos]], sizeof(colorArray));
+						pixels[((indexY * pitch) + (indexX * 4)) + 1] = val ? colorArray[2] : blackArray[2];
+						pixels[((indexY * pitch) + (indexX * 4)) + 2] = val ? colorArray[1] : blackArray[1];
+						pixels[((indexY * pitch) + (indexX * 4)) + 3] = val ? colorArray[0] : blackArray[0];
+					}
+					else
+					{
+						std::memcpy(color1Array, ega_table[m_data->pixel_data[curPos]], sizeof(color1Array));
+						if (m_data->pixel_data[curPos] < 8)
+						{
+							std::memcpy(color2Array, ega_table[m_data->pixel_data[curPos] + 8], sizeof(color2Array));
+						}
+						else
+						{
+							std::memcpy(color2Array, ega_table[m_data->pixel_data[curPos] - 8], sizeof(color2Array));
+						}
+
+						pixels[((indexY * pitch) + (indexX * 4)) + 1] = val ? color1Array[2] : color2Array[2];
+						pixels[((indexY * pitch) + (indexX * 4)) + 2] = val ? color1Array[1] : color2Array[1];
+						pixels[((indexY * pitch) + (indexX * 4)) + 3] = val ? color1Array[0] : color2Array[0];
+					}
+				}
+				else if (m_render_mode == RenderMode::CGA)
+				{
+					// Alternate between on and off.  The mask actually has multiple
+					// colors, but unlike EGA, it doesn't change.  I wonder if this
+					// is a mistake.
+					if (m_data->pixel_data[curPos] == 2 || m_data_mask->pixel_data[curPos] == 3)
+					{
+						// ABGR
+						pixels[((indexY * pitch) + (indexX * 4)) + 1] = val ? magentaArray[2] : blackArray[2];
+						pixels[((indexY * pitch) + (indexX * 4)) + 2] = val ? magentaArray[1] : blackArray[1];
+						pixels[((indexY * pitch) + (indexX * 4)) + 3] = val ? magentaArray[0] : blackArray[0];
+					}
+				}
+			}
+			curPos++;
+		}
+	}
+
+	SDL_UnlockTexture(m_render_texture);
+}
+
 void U5Tile::UpdateTime(Uint64 elapsedTime)
 {
 	switch (m_textureType)
@@ -118,6 +222,14 @@ void U5Tile::UpdateTime(Uint64 elapsedTime)
 			{
 				m_cur_texture_in_rotation = 0;
 			}
+		}
+		break;
+	case TextureType::FIRE:
+		m_animatingCurValue += elapsedTime;
+		if (m_animatingCurValue >= m_animatingMaxValue)
+		{
+			m_animatingCurValue %= m_animatingMaxValue;
+			UpdateFireTexture();
 		}
 		break;
 	case TextureType::MASKED:

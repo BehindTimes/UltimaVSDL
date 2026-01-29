@@ -254,7 +254,8 @@ void Intro::CreateDemo()
 	m_playerHit = -1;
 	m_moongate.m_showMoongate = MoongateStatus::CLOSED;
 
-	m_demoInstructionNum = 90;
+	//m_demoInstructionNum = 90;
+	//m_demoInstructionNum = 180;
 }
 
 void Intro::CreateMenu()

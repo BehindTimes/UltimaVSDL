@@ -41,7 +41,7 @@ public:
 	void TurnOnAllPixels(SDL_Texture* texture, bool on);
 	void SetRenderTarget(SDL_Texture* texture) const;
 	void ClearStreamingTexture(SDL_Texture *texture);
-	void CopyTextureToStreaming(U5ImageData &texture, SDL_Texture *streaming_texture, uint32_t width, uint32_t height);
+	void CopyTextureToStreaming(U5ImageData &texture, SDL_Texture *streaming_texture, uint32_t width, uint32_t height, bool hasAlpha = false);
 	void DrawTiledText(std::string text, int x_tile, int y_tile);
 	void DrawInvertRect(int x_tile, int y_tile, int width, int height) const;
 	void DrawTileTexture8(SDL_Texture* texture, int x_tile, int y_tile) const;

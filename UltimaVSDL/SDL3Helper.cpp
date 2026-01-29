@@ -828,6 +828,18 @@ void SDL3Helper::LoadTileTextures(UltimaVResource* u5_resources)
 	m_TileTextures[1].CreateScrollingTexture(WATER_ANIMATE);
 	m_TileTextures[2].CreateScrollingTexture(WATER_ANIMATE);
 	m_TileTextures[3].CreateScrollingTexture(WATER_ANIMATE);
+
+	//m_TileTextures[188].CreateScrollingTexture(WATER_ANIMATE);
+
+	m_TileTextures[176].CreateFireTexture(&u5_resources->m_Tiles[192], FIRE_ANIMATE, u5_resources->m_render_mode);
+	m_TileTextures[177].CreateFireTexture(&u5_resources->m_Tiles[193], FIRE_ANIMATE, u5_resources->m_render_mode);
+	m_TileTextures[178].CreateFireTexture(&u5_resources->m_Tiles[194], FIRE_ANIMATE, u5_resources->m_render_mode);
+	m_TileTextures[179].CreateFireTexture(&u5_resources->m_Tiles[195], FIRE_ANIMATE, u5_resources->m_render_mode);
+
+	m_TileTextures[188].CreateFireTexture(&u5_resources->m_Tiles[204], FIRE_ANIMATE, u5_resources->m_render_mode);
+	m_TileTextures[189].CreateFireTexture(&u5_resources->m_Tiles[205], FIRE_ANIMATE, u5_resources->m_render_mode);
+	m_TileTextures[190].CreateFireTexture(&u5_resources->m_Tiles[206], FIRE_ANIMATE, u5_resources->m_render_mode);
+	m_TileTextures[191].CreateFireTexture(&u5_resources->m_Tiles[207], FIRE_ANIMATE, u5_resources->m_render_mode);
 }
 
 void SDL3Helper::LoadProportionalFontTextures(UltimaVResource* u5_resources)
@@ -898,7 +910,7 @@ void SDL3Helper::SetRenderTarget(SDL_Texture* texture) const
 	SDL_SetRenderTarget(m_renderer, texture);
 }
 
-void SDL3Helper::CopyTextureToStreaming(U5ImageData &texture, SDL_Texture *streaming_texture, uint32_t width, uint32_t height)
+void SDL3Helper::CopyTextureToStreaming(U5ImageData &texture, SDL_Texture *streaming_texture, uint32_t width, uint32_t height, bool hasAlpha)
 {
 	float tex_width, tex_height;
 	SDL_GetTextureSize(streaming_texture, &tex_width, &tex_height);
@@ -937,7 +949,7 @@ void SDL3Helper::CopyTextureToStreaming(U5ImageData &texture, SDL_Texture *strea
 			}
 
 			//pixels[(y * pitch) + (x * 4)] = alpha ? 0xFF : 0x00;
-			pixels[(y * pitch + (x * 4)) + 0] = 0x00;
+			pixels[(y * pitch + (x * 4)) + 0] = hasAlpha ? 0xFF : 0x00;
 			pixels[(y * pitch + (x * 4)) + 1] = color_data[2];
 			pixels[(y * pitch + (x * 4)) + 2] = color_data[1];
 			pixels[(y * pitch + (x * 4)) + 3] = color_data[0];
