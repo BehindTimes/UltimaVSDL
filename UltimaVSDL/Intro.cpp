@@ -254,7 +254,7 @@ void Intro::CreateDemo()
 	m_playerHit = -1;
 	m_moongate.m_showMoongate = MoongateStatus::CLOSED;
 
-	//m_demoInstructionNum = 90;
+	m_demoInstructionNum = 90;
 }
 
 void Intro::CreateMenu()
@@ -407,7 +407,7 @@ void Intro::RenderDemo()
 	{
 		for (int j = 0; j < 19; j++)
 		{
-			m_sdl_helper->DrawTileTexture(m_sdl_helper->m_TileTextures[m_DemoMap[j][i]], j, i);
+			m_sdl_helper->DrawTileTexture(m_sdl_helper->m_TileTextures[m_DemoMap[j][i]].GetTexture(), j, i);
 		}
 	}
 
@@ -415,7 +415,7 @@ void Intro::RenderDemo()
 	if (m_moongate.m_showMoongate == MoongateStatus::OPENING)
 	{
 		float ratio = static_cast<float>(m_moongate.m_curMoongateDelay) / DemoMoongate::MOONGATE_DELAY;
-		m_sdl_helper->RenderTextureFromTo(m_sdl_helper->m_TileTextures[m_moongate.TILE_NUM], 0, 0,
+		m_sdl_helper->RenderTextureFromTo(m_sdl_helper->m_TileTextures[m_moongate.TILE_NUM].GetTexture(), 0, 0,
 			ORIGINAL_TILE_WIDTH, ORIGINAL_TILE_HEIGHT * ratio, m_moongate.x * static_cast<float>(RENDER_TILE_WIDTH),
 			static_cast<float>(m_moongate.y * RENDER_TILE_HEIGHT) + (RENDER_TILE_HEIGHT * (1 - ratio)), RENDER_TILE_WIDTH, RENDER_TILE_HEIGHT * ratio);
 	}
@@ -424,14 +424,14 @@ void Intro::RenderDemo()
 		float ratio = 1.0f - (static_cast<float>(m_moongate.m_curMoongateDelay) / DemoMoongate::MOONGATE_DELAY);
 		if (ratio > 0)
 		{
-			m_sdl_helper->RenderTextureFromTo(m_sdl_helper->m_TileTextures[m_moongate.TILE_NUM], 0, 0,
+			m_sdl_helper->RenderTextureFromTo(m_sdl_helper->m_TileTextures[m_moongate.TILE_NUM].GetTexture(), 0, 0,
 				ORIGINAL_TILE_WIDTH, ORIGINAL_TILE_HEIGHT * ratio, m_moongate.x * static_cast<float>(RENDER_TILE_WIDTH),
 				static_cast<float>(m_moongate.y * RENDER_TILE_HEIGHT) + (RENDER_TILE_HEIGHT * (1 - ratio)), RENDER_TILE_WIDTH, RENDER_TILE_HEIGHT * ratio);
 		}
 	}
 	else if (m_moongate.m_showMoongate == MoongateStatus::OPENED)
 	{
-		m_sdl_helper->DrawTileTexture(m_sdl_helper->m_TileTextures[m_moongate.TILE_NUM], m_moongate.x, m_moongate.y);
+		m_sdl_helper->DrawTileTexture(m_sdl_helper->m_TileTextures[m_moongate.TILE_NUM].GetTexture(), m_moongate.x, m_moongate.y);
 	}
 
 	// Render the tiles to draw above
@@ -450,7 +450,7 @@ void Intro::RenderDemo()
 			}
 			else
 			{
-				m_sdl_helper->DrawTileTexture(m_sdl_helper->m_TileTextures[curTextureNum], curTile.second.x, curTile.second.y);
+				m_sdl_helper->DrawTileTexture(m_sdl_helper->m_TileTextures[curTextureNum].GetTexture(), curTile.second.x, curTile.second.y);
 			}
 		}
 	}
@@ -473,7 +473,7 @@ void Intro::RenderDemo()
 					m_sdl_helper->DrawLineManual({ {8,8}, {12,8}, {12,8}, {8,8} }, 4, true, 480 + (36 * zap_num), 92 + (12 * zap_num));
 					if (zap_num == 4)
 					{
-						m_sdl_helper->DrawTileTexture(m_sdl_helper->m_TileTextures[0], m_map_demo_char[m_playerHit].x, m_map_demo_char[m_playerHit].y);
+						m_sdl_helper->DrawTileTexture(m_sdl_helper->m_TileTextures[0].GetTexture(), m_map_demo_char[m_playerHit].x, m_map_demo_char[m_playerHit].y);
 					}
 				}
 			}
@@ -512,6 +512,8 @@ void Intro::RenderDemo()
 	float x = HALF_TILE_HEIGHT;
 	float y = 16 * HALF_TILE_HEIGHT;
 	m_sdl_helper->RenderTextureAt(dispTexture, x, y, RENDER_WIDTH - RENDER_TILE_WIDTH, RENDER_TILE_HEIGHT * 4);
+
+	m_sdl_helper->AnimateTiles(m_tickElapse);
 }
 
 void Intro::RenderAcknowledgements()

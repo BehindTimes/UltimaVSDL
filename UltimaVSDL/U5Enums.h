@@ -42,3 +42,7 @@ enum IMAGE_16_VAL
 	IV16_TEXT,
 	IV16_ULTIMA
 };
+
+const int WATERFALL_ANIMATE = 200;
+const int CLOCK_ANIMATE = 200;
+const int WATER_ANIMATE = 2000;

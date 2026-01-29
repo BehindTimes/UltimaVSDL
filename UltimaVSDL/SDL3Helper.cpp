@@ -67,13 +67,6 @@ int SDL3Helper::Intialize()
 
 void SDL3Helper::Cleanup()
 {
-	for (auto& curTexture : m_TileTextures)
-	{
-		if (curTexture)
-		{
-			SDL_DestroyTexture(curTexture);
-		}
-	}
 	m_TileTextures.clear();
 
 	for (auto& curBit : m_BitFileTextures)
@@ -382,6 +375,70 @@ void SDL3Helper::Poll()
 		break;
 	}
 	m_input->FinishInput();
+}
+
+void SDL3Helper::CreateTextureFromMemoryWithMask(SDL_Texture*& texture, SDL_Texture*& render_texture, const U5ImageData& curData, const U5ImageData& maskData) const
+{
+	texture = SDL_CreateTexture(m_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STATIC,
+		static_cast<int>(curData.width), static_cast<int>(curData.height));
+	SDL_SetTextureScaleMode(texture, SDL_SCALEMODE_NEAREST);
+
+	render_texture = SDL_CreateTexture(m_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET,
+		static_cast<int>(curData.width), static_cast<int>(curData.height));
+	SDL_SetTextureScaleMode(render_texture, SDL_SCALEMODE_NEAREST);
+
+	std::vector<unsigned char> canvas;
+	size_t canvasSize = static_cast<size_t>(curData.width) * static_cast<size_t>(curData.height) * 4;
+	canvas.resize(canvasSize);
+	std::fill(canvas.begin(), canvas.end(), static_cast<unsigned char>(0));
+
+	for (size_t y = 0; y < curData.height; y++)
+	{
+		for (size_t x = 0; x < curData.width; x++)
+		{
+			unsigned char maskByte = maskData.pixel_data[y * maskData.width + x];
+			unsigned char curByte = curData.pixel_data[y * curData.width + x];
+			unsigned char colorArray[3] = {};
+			if (curData.mode == 8)
+			{
+				if (curByte == 0)
+				{
+					std::memcpy(colorArray, ega_table[0], sizeof(colorArray));
+				}
+				else
+				{
+					std::memcpy(colorArray, ega_table[15], sizeof(colorArray));
+				}
+			}
+			else if (curData.mode == 4)
+			{
+				if (curByte < 4)
+				{
+					std::memcpy(colorArray, cga_table[curByte], sizeof(colorArray));
+				}
+			}
+			else
+			{
+				if (curByte < 16)
+				{
+					std::memcpy(colorArray, ega_table[curByte], sizeof(colorArray));
+				}
+			}
+
+			unsigned char alpha = 0xFF;
+			if (maskByte != 0)
+			{
+				alpha = 0;
+			}
+
+			// ABGR
+			canvas[(y * curData.width * 4 + x * 4) + 0] = alpha;
+			canvas[(y * curData.width * 4 + x * 4) + 1] = colorArray[2];
+			canvas[(y * curData.width * 4 + x * 4) + 2] = colorArray[1];
+			canvas[(y * curData.width * 4 + x * 4) + 3] = colorArray[0];
+		}
+	}
+	SDL_UpdateTexture(texture, NULL, canvas.data(), (int)curData.width * 4);
 }
 
 void SDL3Helper::CreateTextureFromMemory(SDL_Texture *&texture, const U5ImageData &curData, bool has_transparent, unsigned char transparent_color[3]) const
@@ -748,8 +805,29 @@ void SDL3Helper::LoadTileTextures(UltimaVResource* u5_resources)
 	for (int indexPic = 0; indexPic < u5_resources->m_Tiles.size(); indexPic++)
 	{
 		U5ImageData& curData = u5_resources->m_Tiles[indexPic];
-		CreateTextureFromMemory(m_TileTextures[indexPic], curData);
+		if (indexPic >= 96 && indexPic <= 111)
+		{
+			m_TileTextures[indexPic].CreateMaskTexture(indexPic, this, &curData, &u5_resources->m_Tiles[static_cast<size_t>(indexPic + 16)], 3);
+		}
+		else
+		{
+			m_TileTextures[indexPic].CreateTexture(indexPic, this, &curData);
+		}
+		
+		////CreateTextureFromMemory(m_TileTextures[indexPic], curData);
 	}
+	// Set rotating textures here
+	m_TileTextures[212].CreateRotationTextures({ 212, 213, 214, 215 }, WATERFALL_ANIMATE);
+	m_TileTextures[213].CreateRotationTextures({ 212, 213, 214, 215 }, WATERFALL_ANIMATE);
+	m_TileTextures[214].CreateRotationTextures({ 212, 213, 214, 215 }, WATERFALL_ANIMATE);
+	m_TileTextures[215].CreateRotationTextures({ 212, 213, 214, 215 }, WATERFALL_ANIMATE);
+
+	m_TileTextures[250].CreateRotationTextures({ 250, 251 }, CLOCK_ANIMATE);
+	m_TileTextures[251].CreateRotationTextures({ 250, 251 }, CLOCK_ANIMATE);
+
+	m_TileTextures[1].CreateScrollingTexture(WATER_ANIMATE);
+	m_TileTextures[2].CreateScrollingTexture(WATER_ANIMATE);
+	m_TileTextures[3].CreateScrollingTexture(WATER_ANIMATE);
 }
 
 void SDL3Helper::LoadProportionalFontTextures(UltimaVResource* u5_resources)
@@ -873,7 +951,7 @@ void SDL3Helper::CopyTextureToStreaming(U5ImageData &texture, SDL_Texture *strea
 	SDL_UnlockTexture(streaming_texture);
 }
 
-void SDL3Helper::DrawLineManual(std::vector<std::pair<int, int>> m_rect, int step, bool isHorz, int xPos, int yPos)
+void SDL3Helper::DrawLineManual(std::vector<std::pair<int, int>> m_rect, int step, bool isHorz, int xPos, int yPos) const
 {
 	SDL_FRect toRect{};
 	toRect.x = static_cast<float>(xPos);
@@ -895,4 +973,12 @@ void SDL3Helper::DrawLineManual(std::vector<std::pair<int, int>> m_rect, int ste
 		
 	}
 	SDL_SetRenderDrawColor(m_renderer, 0, 0, 0, 0);
+}
+
+void SDL3Helper::AnimateTiles(Uint64 elapsed_time)
+{
+	for (auto& curTile : m_TileTextures)
+	{
+		curTile.UpdateTime(elapsed_time);
+	}
 }

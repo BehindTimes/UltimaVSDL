@@ -143,6 +143,7 @@
     <ClCompile Include="SDL3Helper.cpp" />
     <ClCompile Include="SplashScreen.cpp" />
     <ClCompile Include="U5Input.cpp" />
+    <ClCompile Include="U5Tile.cpp" />
     <ClCompile Include="U5Utils.cpp" />
     <ClCompile Include="UltimaVResource.cpp" />
   </ItemGroup>
@@ -158,6 +159,7 @@
     <ClInclude Include="SplashScreen.h" />
     <ClInclude Include="U5Enums.h" />
     <ClInclude Include="U5Input.h" />
+    <ClInclude Include="U5Tile.h" />
     <ClInclude Include="U5Utils.h" />
     <ClInclude Include="UltimaVResource.h" />
   </ItemGroup>
