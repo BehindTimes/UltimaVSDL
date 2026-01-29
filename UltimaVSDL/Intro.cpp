@@ -255,7 +255,7 @@ void Intro::CreateDemo()
 	m_moongate.m_showMoongate = MoongateStatus::CLOSED;
 
 	//m_demoInstructionNum = 90;
-	m_demoInstructionNum = 180;
+	//m_demoInstructionNum = 180;
 }
 
 void Intro::CreateMenu()
@@ -944,6 +944,8 @@ void Intro::ProcessEvents()
 				case MenuChoices::RETURN_TO_VIEW:
 					CreateDemo();
 					break;
+				case MenuChoices::JOURNEY_ONWARD:
+					m_newMode = U5Modes::Game;
 				default:
 					break;
 				}

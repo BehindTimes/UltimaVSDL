@@ -13,6 +13,7 @@
 #include "U5Enums.h"
 #include "UltimaVResource.h"
 #include "U5Input.h"
+#include "U5Game.h"
 
 static std::unique_ptr<SDL3Helper> sdl_helper;
 static std::unique_ptr<UltimaVResource> u5_resources;
@@ -22,6 +23,7 @@ static std::unique_ptr<Intro> intro_screen;
 std::unique_ptr<CutScene> cutscene_screen;
 std::unique_ptr<U5Utils> m_utilities;
 std::unique_ptr<U5Input> m_input;
+std::unique_ptr<U5Game> m_game;
 
 static void MainLoop()
 {
@@ -48,6 +50,9 @@ static void MainLoop()
 
 	cutscene_screen = std::make_unique<CutScene>(sdl_helper.get(), u5_resources.get());
 	cutscene_screen->LoadData();
+
+	m_game = std::make_unique<U5Game>(sdl_helper.get(), u5_resources.get());
+	m_game->LoadData();
 
 	//curObject = splash_screen.get();
 	curObject = intro_screen.get();
@@ -91,6 +96,10 @@ static void MainLoop()
 			case U5Modes::Cutscene:
 				cutscene_screen->LoadData();
 				curObject = cutscene_screen.get();
+				break;
+			case U5Modes::Game:
+				m_game->LoadData();
+				curObject = m_game.get();
 				break;
 			default:
 				curObject = nullptr;
