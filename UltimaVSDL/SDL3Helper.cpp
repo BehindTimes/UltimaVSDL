@@ -836,6 +836,18 @@ void SDL3Helper::LoadTileTextures(UltimaVResource* u5_resources)
 		{
 			m_TileTextures[indexPic].CreateMaskTexture(indexPic, this, &curData, &u5_resources->m_Tiles[static_cast<size_t>(indexPic + 16)], 3);
 		}
+		else if (indexPic >= 52 && indexPic <= 55)
+		{
+			m_TileTextures[indexPic].CreateMaskTexture(indexPic, this, &curData, &u5_resources->m_Tiles[static_cast<size_t>(indexPic + 156)], 3);
+		}
+		else if (indexPic >= 228 && indexPic <= 229)
+		{
+			m_TileTextures[indexPic].CreateMaskTexture(indexPic, this, &curData, &u5_resources->m_Tiles[static_cast<size_t>(indexPic - 18)], 3);
+		}
+		else if (indexPic >= 230 && indexPic <= 231)
+		{
+			m_TileTextures[indexPic].CreateMaskTexture(indexPic, this, &curData, &u5_resources->m_Tiles[static_cast<size_t>(indexPic - 22)], 3);
+		}
 		else
 		{
 			m_TileTextures[indexPic].CreateTexture(indexPic, this, &curData);
@@ -849,14 +861,27 @@ void SDL3Helper::LoadTileTextures(UltimaVResource* u5_resources)
 	m_TileTextures[214].CreateRotationTextures({ 212, 213, 214, 215 }, WATERFALL_ANIMATE);
 	m_TileTextures[215].CreateRotationTextures({ 212, 213, 214, 215 }, WATERFALL_ANIMATE);
 
+	m_TileTextures[216].CreateRotationTextures({ 216, 217, 218, 219 }, WATERFALL_ANIMATE);
+	m_TileTextures[217].CreateRotationTextures({ 216, 217, 218, 219 }, WATERFALL_ANIMATE);
+	m_TileTextures[218].CreateRotationTextures({ 216, 217, 218, 219 }, WATERFALL_ANIMATE);
+	m_TileTextures[219].CreateRotationTextures({ 216, 217, 218, 219 }, WATERFALL_ANIMATE);
+
 	m_TileTextures[250].CreateRotationTextures({ 250, 251 }, CLOCK_ANIMATE);
 	m_TileTextures[251].CreateRotationTextures({ 250, 251 }, CLOCK_ANIMATE);
+
+	m_TileTextures[252].CreateRotationTextures({ 252, 253 }, CLOCK_ANIMATE);
+	m_TileTextures[253].CreateRotationTextures({ 252, 253 }, CLOCK_ANIMATE);
+
+	m_TileTextures[128].CreateRotationTextures({ 128, 129 }, CLOCK_ANIMATE);
+	m_TileTextures[129].CreateRotationTextures({ 128, 129 }, CLOCK_ANIMATE);
+	m_TileTextures[130].CreateRotationTextures({ 130, 131 }, CLOCK_ANIMATE);
+	m_TileTextures[131].CreateRotationTextures({ 130, 131 }, CLOCK_ANIMATE);
 
 	m_TileTextures[1].CreateScrollingTexture(WATER_ANIMATE);
 	m_TileTextures[2].CreateScrollingTexture(WATER_ANIMATE);
 	m_TileTextures[3].CreateScrollingTexture(WATER_ANIMATE);
 
-	//m_TileTextures[188].CreateScrollingTexture(WATER_ANIMATE);
+	m_TileTextures[143].CreateScrollingTexture(WATER_ANIMATE);
 
 	m_TileTextures[176].CreateFireTexture(&u5_resources->m_Tiles[192], FIRE_ANIMATE, u5_resources->m_render_mode);
 	m_TileTextures[177].CreateFireTexture(&u5_resources->m_Tiles[193], FIRE_ANIMATE, u5_resources->m_render_mode);
@@ -867,16 +892,6 @@ void SDL3Helper::LoadTileTextures(UltimaVResource* u5_resources)
 	m_TileTextures[189].CreateFireTexture(&u5_resources->m_Tiles[205], FIRE_ANIMATE, u5_resources->m_render_mode);
 	m_TileTextures[190].CreateFireTexture(&u5_resources->m_Tiles[206], FIRE_ANIMATE, u5_resources->m_render_mode);
 	m_TileTextures[191].CreateFireTexture(&u5_resources->m_Tiles[207], FIRE_ANIMATE, u5_resources->m_render_mode);
-
-	/*// Create NPC tile rotation here
-	for (int i = 303; i < 512; i++)
-	{
-		if (i >= 435 && i <= 438)
-		{
-			continue;
-		}
-		m_TileTextures[i].CreateNPCRotationTextures(NPC_ANIMATE);
-	}*/
 }
 
 void SDL3Helper::LoadProportionalFontTextures(UltimaVResource* u5_resources)

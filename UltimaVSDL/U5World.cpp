@@ -25,7 +25,7 @@ void U5World::Render()
 	SDL_SetRenderDrawColor(m_sdl_helper->m_renderer, 0, 0, 0, 0xFF);
 	m_sdl_helper->ClearScreen();
 
-	int curpos = 0;
+	int curpos = 121;
 	for (int a = 1; a < 12; a++)
 	{
 		for (int b = 1; b < 12; b++)
