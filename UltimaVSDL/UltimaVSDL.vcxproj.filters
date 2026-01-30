@@ -57,6 +57,15 @@
     <ClCompile Include="U5Game.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="U5World.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="U5Dungeon.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GameBase.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SDL3Helper.h">
@@ -102,6 +111,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="U5Game.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="U5World.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="U5Dungeon.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GameBase.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

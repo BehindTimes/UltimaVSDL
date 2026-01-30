@@ -2,6 +2,10 @@
 #include "GameObject.h"
 #include "UltimaVResource.h"
 #include "SDL3Helper.h"
+#include "U5World.h"
+#include <memory>
+#include "U5Dungeon.h"
+#include "GameBase.h"
 
 enum class GameLocation
 {
@@ -23,7 +27,9 @@ private:
 	int m_window_width;
 	int m_window_height;
 
-	void DrawBorder();
 	GameLocation m_location;
+	std::unique_ptr<U5World> m_world;
+	std::unique_ptr<U5Dungeon> m_dungeon;
+	GameBase* m_curLocation;
 };
 

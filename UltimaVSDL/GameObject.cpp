@@ -6,7 +6,11 @@
 GameObject::GameObject(SDL3Helper *sdl_helper, UltimaVResource *u5_resources) :
 	m_sdl_helper(sdl_helper),
 	m_resources(u5_resources),
-	m_clearScreen(false)
+	m_clearScreen(false),
+	m_curTick(0),
+	m_tickElapse(0),
+	m_prevTick(0),
+	m_newMode(U5Modes::None)
 {
 }
 

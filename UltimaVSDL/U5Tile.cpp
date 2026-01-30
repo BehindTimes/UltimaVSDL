@@ -90,6 +90,7 @@ void U5Tile::CreateMaskTexture(int id, SDL3Helper* sdlHelper, U5ImageData* data,
 	m_data = data;
 	m_sdl_helper = sdlHelper;
 	m_secondaryTexture = underlying_texture;
+	UpdateTime(0);
 }
 
 void U5Tile::CreateRotationTextures(std::vector<int> textures, Uint64 animation_speed)
@@ -105,6 +106,7 @@ void U5Tile::CreateRotationTextures(std::vector<int> textures, Uint64 animation_
 		m_cur_texture_in_rotation = 0;
 	}
 	m_cur_texture_in_rotation = std::distance(m_textures_in_rotation.begin(), it);
+	UpdateTime(0);
 }
 
 void U5Tile::CreateNPCRotationTextures(Uint64 animation_speed)
@@ -124,6 +126,7 @@ void U5Tile::CreateNPCRotationTextures(Uint64 animation_speed)
 		m_cur_texture_in_rotation = 0;
 	}
 	m_cur_texture_in_rotation = std::distance(m_textures_in_rotation.begin(), it);
+	UpdateTime(0);
 }
 
 void U5Tile::CreateScrollingTexture(Uint64 animation_speed)
@@ -134,6 +137,7 @@ void U5Tile::CreateScrollingTexture(Uint64 animation_speed)
 	m_render_texture = SDL_CreateTexture(m_sdl_helper->m_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET,
 		static_cast<int>(m_data->width), static_cast<int>(m_data->height));
 	SDL_SetTextureScaleMode(m_render_texture, SDL_SCALEMODE_NEAREST);
+	UpdateTime(0);
 }
 
 void U5Tile::CreateFireTexture(U5ImageData* mask, Uint64 animation_speed, RenderMode render_mode)
@@ -147,6 +151,7 @@ void U5Tile::CreateFireTexture(U5ImageData* mask, Uint64 animation_speed, Render
 		static_cast<int>(m_data->width), static_cast<int>(m_data->height));
 	SDL_SetTextureScaleMode(m_render_texture, SDL_SCALEMODE_NEAREST);
 	m_sdl_helper->CopyTextureToStreaming(*m_data, m_render_texture, m_data->width, m_data->height, true);
+	UpdateTime(0);
 }
 
 void U5Tile::UpdateFireTexture()

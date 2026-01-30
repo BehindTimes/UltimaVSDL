@@ -136,16 +136,19 @@
     <ClCompile Include="AnimationTexture.cpp" />
     <ClCompile Include="CutScene.cpp" />
     <ClCompile Include="FadeObject.cpp" />
+    <ClCompile Include="GameBase.cpp" />
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="Intro.cpp" />
     <ClCompile Include="LzwDecompressor.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="SDL3Helper.cpp" />
     <ClCompile Include="SplashScreen.cpp" />
+    <ClCompile Include="U5Dungeon.cpp" />
     <ClCompile Include="U5Game.cpp" />
     <ClCompile Include="U5Input.cpp" />
     <ClCompile Include="U5Tile.cpp" />
     <ClCompile Include="U5Utils.cpp" />
+    <ClCompile Include="U5World.cpp" />
     <ClCompile Include="UltimaVResource.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -153,16 +156,19 @@
     <ClInclude Include="ColorData.h" />
     <ClInclude Include="CutScene.h" />
     <ClInclude Include="FadeObject.h" />
+    <ClInclude Include="GameBase.h" />
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="Intro.h" />
     <ClInclude Include="LzwDecompressor.h" />
     <ClInclude Include="SDL3Helper.h" />
     <ClInclude Include="SplashScreen.h" />
+    <ClInclude Include="U5Dungeon.h" />
     <ClInclude Include="U5Enums.h" />
     <ClInclude Include="U5Game.h" />
     <ClInclude Include="U5Input.h" />
     <ClInclude Include="U5Tile.h" />
     <ClInclude Include="U5Utils.h" />
+    <ClInclude Include="U5World.h" />
     <ClInclude Include="UltimaVResource.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
