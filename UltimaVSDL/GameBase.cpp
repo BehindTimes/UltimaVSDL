@@ -9,7 +9,8 @@
 GameBase::GameBase(SDL3Helper* sdl_helper, UltimaVResource* u5_resources) :
 	GameObject(sdl_helper, u5_resources),
 	m_xpos(0),
-	m_ypos(0)
+	m_ypos(0),
+	m_smoothscroll(false)
 {
 }
 

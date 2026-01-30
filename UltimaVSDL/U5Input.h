@@ -3,6 +3,7 @@
 #include <SDL3/SDL_stdinc.h>
 #include <SDL3/SDL_events.h>
 #include <SDL3/SDL_keycode.h>
+#include <vector>
 
 enum class InputType
 {
@@ -22,22 +23,25 @@ public:
 	void ProcessKeyUp(SDL_KeyboardEvent event);
 	void StartInput();
 	void FinishInput();
+	void EnableInput(bool enabled);
 	void SetInputType(InputType inputType);
 	SDL_Keycode GetKeyCode() const;
 	void SetKeyDelay(Uint64 delay);
+	void SetRequireAllKeysUp();
 private:
 	SDL3Helper* m_sdl_helper;
-	bool m_anyKeyHit;
-	Uint64 m_anyKeyHitDelay;
+
 	Uint64 m_curTick;
 	Uint64 m_prevTick;
 	Uint64 m_elapsedTick;
-	Uint64 m_keyDelay;
-	bool m_allowProcess;
-	bool m_allowQueueKeyHit;
-
-	Uint64 KEY_DELAY;
+	Uint64 m_curElapsedTime;
+	
+	bool m_enabled;
+	Uint64 m_key_delay;
 	InputType m_InputType;
-	SDL_Keycode m_key_code;
+	std::vector<SDL_Keycode> m_curKeyCodes;
+	bool m_allow;
+	bool m_anyKeyHit;
+	bool m_allKeysMustBeUp;
 };
 

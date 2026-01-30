@@ -882,11 +882,13 @@ void Intro::ProcessEvents()
 		if (m_input->isAnyKeyHit())
 		{
 			m_newMode = U5Modes::MenuSkip;
+			m_input->SetRequireAllKeysUp();
 		}
 		break;
 	case IntroMode::ACKNOWLEDGEMENTS:
 		if (m_input->isAnyKeyHit())
 		{
+			m_input->SetRequireAllKeysUp();
 			m_curAcknowledgementXDelay = 0;
 			m_curAcknowledgementYDelay = 0;
 
@@ -937,15 +939,19 @@ void Intro::ProcessEvents()
 					m_curAcknowledgement = AcknowlegementType::SCROLL_UP;
 					m_curAcknowledgementYDelay = 0;
 					m_curAcknowledgementXDelay = 0;
+					m_input->SetRequireAllKeysUp();
 					break;
 				case MenuChoices::INTRODUCTION: // Introduction
 					m_newMode = U5Modes::Cutscene;
+					m_input->SetRequireAllKeysUp();
 					break;
 				case MenuChoices::RETURN_TO_VIEW:
 					CreateDemo();
+					m_input->SetRequireAllKeysUp();
 					break;
 				case MenuChoices::JOURNEY_ONWARD:
 					m_newMode = U5Modes::Game;
+					m_input->SetRequireAllKeysUp();
 					break;
 				default:
 					break;

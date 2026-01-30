@@ -19,6 +19,10 @@ U5World::U5World(SDL3Helper* sdl_helper, UltimaVResource* u5_resources) :
 {
 	m_xpos = 50;
 	m_ypos = 50;
+	m_DisplayOffset.first = 0;
+	m_DisplayOffset.second = 0;
+
+	m_smoothscroll = true;
 }
 
 U5World::~U5World()
@@ -28,6 +32,10 @@ U5World::~U5World()
 void U5World::Render()
 {
 	DrawBorder();
+	if (!vec_pos.empty())
+	{
+		ProcessScroll();
+	}
 	// We're going to render to the buffer, which gives us a 1 tile buffer on each side
 	// This way, we can enable smooth scrolling in the future if we want
 	m_sdl_helper->SetRenderTarget(m_sdl_helper->m_TargetTextures[TTV_MAIN_DISPLAY_BUFFER]);
@@ -53,28 +61,125 @@ void U5World::Render()
 
 void U5World::ProcessEvents()
 {
+	int tempval;
 	if (m_input->isAnyKeyHit())
-	{
+	{	
+		if (vec_pos.size() > 0)
+		{
+			return;
+		}
 		SDL_Keycode curKey = m_input->GetKeyCode();
 		switch (curKey)
 		{
+		case SDLK_KP_1:
+			vec_pos.emplace_back();
+			vec_pos.back().old_position.first = m_xpos;
+			vec_pos.back().old_position.second = m_ypos;
+			tempval = m_ypos;
+			tempval++;
+			tempval %= 256;
+			vec_pos.back().new_position.second = tempval;
+			tempval = m_xpos;
+			tempval--;
+			tempval += 256;
+			tempval %= 256;
+			vec_pos.back().new_position.first = tempval;
+			m_input->EnableInput(false);
+			break;
+		case SDLK_KP_3:
+			vec_pos.emplace_back();
+			vec_pos.back().old_position.first = m_xpos;
+			vec_pos.back().old_position.second = m_ypos;
+			tempval = m_ypos;
+			tempval++;
+			tempval %= 256;
+			vec_pos.back().new_position.second = tempval;
+			tempval = m_xpos;
+			tempval++;
+			tempval %= 256;
+			vec_pos.back().new_position.first = tempval;
+			m_input->EnableInput(false);
+			break;
+		case SDLK_KP_7:
+			vec_pos.emplace_back();
+			vec_pos.back().old_position.first = m_xpos;
+			vec_pos.back().old_position.second = m_ypos;
+			tempval = m_ypos;
+			tempval--;
+			tempval += 256;
+			tempval %= 256;
+			vec_pos.back().new_position.second = tempval;
+			tempval = m_xpos;
+			tempval--;
+			tempval += 256;
+			tempval %= 256;
+			vec_pos.back().new_position.first = tempval;
+			m_input->EnableInput(false);
+			break;
+		case SDLK_KP_9:
+			vec_pos.emplace_back();
+			vec_pos.back().old_position.first = m_xpos;
+			vec_pos.back().old_position.second = m_ypos;
+			tempval = m_ypos;
+			tempval--;
+			tempval += 256;
+			tempval %= 256;
+			vec_pos.back().new_position.second = tempval;
+			tempval = m_xpos;
+			tempval++;
+			tempval %= 256;
+			vec_pos.back().new_position.first = tempval;
+			m_input->EnableInput(false);
+			break;
 		case SDLK_UP:
-			m_ypos--;
-			m_ypos += 256;
-			m_ypos %= 256;
+			vec_pos.emplace_back();
+			vec_pos.back().old_position.first = m_xpos;
+			vec_pos.back().old_position.second = m_ypos;
+			vec_pos.back().new_position.first = m_xpos;
+			tempval = m_ypos;
+			tempval--;
+			tempval += 256;
+			tempval %= 256;
+			vec_pos.back().new_position.second = tempval;
+			m_input->EnableInput(false);
+			ProcessScroll();
 			break;
 		case SDLK_DOWN:
-			m_ypos++;
-			m_ypos %= 256;
+			vec_pos.emplace_back();
+			vec_pos.back().old_position.first = m_xpos;
+			vec_pos.back().old_position.second = m_ypos;
+			vec_pos.back().new_position.first = m_xpos;
+			tempval = m_ypos;
+			tempval++;
+			tempval %= 256;
+			vec_pos.back().new_position.second = tempval;
+			m_input->EnableInput(false);
+			ProcessScroll();
 			break;
 		case SDLK_LEFT:
-			m_xpos--;
-			m_xpos += 256;
-			m_xpos %= 256;
+			vec_pos.emplace_back();
+			vec_pos.back().old_position.first = m_xpos;
+			vec_pos.back().old_position.second = m_ypos;
+			vec_pos.back().new_position.second = m_ypos;
+			tempval = m_xpos;
+			tempval--;
+			tempval += 256;
+			tempval %= 256;
+			vec_pos.back().new_position.first = tempval;
+			m_input->EnableInput(false);
+			ProcessScroll();
 			break;
 		case SDLK_RIGHT:
-			m_xpos++;
-			m_xpos %= 256;
+			vec_pos.emplace_back();
+			vec_pos.back().old_position.first = m_xpos;
+			vec_pos.back().old_position.second = m_ypos;
+			vec_pos.back().new_position.second = m_ypos;
+			tempval = m_xpos;
+			tempval++;
+			tempval %= 256;
+			vec_pos.back().new_position.first = tempval;
+			m_input->EnableInput(false);
+			ProcessScroll();
 			break;
 		default:
 			break;
@@ -105,4 +210,40 @@ void U5World::DrawBorder()
 	m_sdl_helper->DrawTileTexture8(m_sdl_helper->m_ArrowTextures[1], 7, 23);
 
 	GameBase::DrawBorder();
+}
+
+void U5World::ProcessScroll()
+{
+	// Should never happen
+	if (vec_pos.empty())
+	{
+		return;
+	}
+	bool allowMove;
+
+	if (m_smoothscroll)
+	{
+		vec_pos.back().elapsed_time += m_tickElapse;
+		allowMove = vec_pos.back().elapsed_time >= vec_pos.back().TURN_TIME;
+	}
+	else
+	{
+		allowMove = true;
+	}
+	
+	if (allowMove)
+	{
+		m_xpos = vec_pos.back().new_position.first;
+		m_ypos = vec_pos.back().new_position.second;
+		vec_pos.clear();
+		m_DisplayOffset.first = 0;
+		m_DisplayOffset.second = 0;
+		m_input->EnableInput(true);
+	}
+	else
+	{
+		float ratio = static_cast<float>(vec_pos.back().elapsed_time) / vec_pos.back().TURN_TIME;
+		m_DisplayOffset.first = (vec_pos.back().old_position.first - vec_pos.back().new_position.first) * ratio;
+		m_DisplayOffset.second = (vec_pos.back().old_position.second - vec_pos.back().new_position.second) * ratio;
+	}
 }

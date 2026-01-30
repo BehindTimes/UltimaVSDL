@@ -400,6 +400,9 @@ void SDL3Helper::Poll()
 		}
 		m_input->ProcessKeyDown(m_event.key);
 		break;
+	case SDL_EVENT_KEY_UP:
+		m_input->ProcessKeyUp(m_event.key);
+		break;
 	}
 	m_input->FinishInput();
 }

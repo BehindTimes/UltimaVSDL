@@ -2,6 +2,11 @@
 #include "SDL3Helper.h"
 #include "U5Enums.h"
 #include "UltimaVResource.h"
+#include <SDL3/SDL_stdinc.h>
+#include <memory>
+#include "U5Input.h"
+
+extern std::unique_ptr<U5Input> m_input;
 
 GameObject::GameObject(SDL3Helper *sdl_helper, UltimaVResource *u5_resources) :
 	m_sdl_helper(sdl_helper),
@@ -28,6 +33,7 @@ void GameObject::SetSDLData()
 	m_curTick = m_sdl_helper->GetCurrentTick();
 	m_prevTick = m_curTick;
 	m_tickElapse = 0;
+	m_input->SetKeyDelay(250);
 }
 
 void GameObject::GetElapsedTime()
@@ -47,4 +53,9 @@ bool GameObject::ChangeMode(U5Modes& newMode)
 		m_newMode = U5Modes::None;
 	}
 	return retval;
+}
+
+void GameObject::SetElapsedTime(Uint64 elapsedTime)
+{
+	m_tickElapse = elapsedTime;
 }

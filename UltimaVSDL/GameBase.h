@@ -15,5 +15,6 @@ protected:
 	virtual void DrawBorder();
 	int m_xpos;
 	int m_ypos;
+	bool m_smoothscroll;
 };
 

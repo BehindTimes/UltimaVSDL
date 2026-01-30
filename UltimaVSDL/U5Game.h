@@ -23,6 +23,7 @@ public:
 	virtual void ProcessEvents() override;
 	virtual void LoadData() override;
 	void SetSDLData() override;
+	void GetElapsedTime() override;
 private:
 	int m_window_width;
 	int m_window_height;

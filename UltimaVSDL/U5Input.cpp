@@ -5,20 +5,21 @@
 #include <SDL3/SDL_keycode.h>
 #include <algorithm>
 #include <SDL3/SDL_stdinc.h>
+#include <iostream>
+#include <iterator>
 
 U5Input::U5Input(SDL3Helper* sdl_helper) :
 	m_sdl_helper(sdl_helper),
-	m_anyKeyHit(false),
-	m_anyKeyHitDelay(0),
 	m_curTick(0),
 	m_prevTick(0),
-	m_keyDelay(0),
-	m_allowProcess(true),
 	m_elapsedTick(0),
-	m_allowQueueKeyHit(true),
 	m_InputType(InputType::ANY_KEY),
-	m_key_code(0),
-	KEY_DELAY(100)
+	m_key_delay(250),
+	m_enabled(true),
+	m_allow(true),
+	m_curElapsedTime(0),
+	m_anyKeyHit(false),
+	m_allKeysMustBeUp(false)
 {
 	m_curTick = m_sdl_helper->GetCurrentTick();
 }
@@ -34,82 +35,186 @@ void U5Input::SetInputType(InputType inputType)
 
 bool U5Input::isAnyKeyHit() const
 {
-	return m_anyKeyHit && m_allowQueueKeyHit;
+	if (m_allKeysMustBeUp)
+	{
+		return false;
+	}
+	return m_anyKeyHit;
 }
 
 void U5Input::StartInput()
 {
+	m_anyKeyHit = false;
 	m_prevTick = m_curTick;
 	m_curTick = m_sdl_helper->GetCurrentTick();
 	m_elapsedTick = m_curTick - m_prevTick;
-	m_anyKeyHit = false;
+	if (!m_allow)
+	{
+		m_curElapsedTime += m_elapsedTick;
+	}
+	if (m_allKeysMustBeUp)
+	{
+		if (m_curKeyCodes.empty())
+		{
+			m_allKeysMustBeUp = false;
+		}
+	}
 }
 
 void U5Input::FinishInput()
 {
-	if (!m_allowProcess)
+	if (!m_allow && m_curElapsedTime > m_key_delay)
 	{
-		m_keyDelay += m_elapsedTick;
-		if (m_keyDelay > KEY_DELAY)
-		{
-			m_keyDelay %= KEY_DELAY;
-			m_allowProcess = true;
-			m_allowQueueKeyHit = true;
-		}
-		else
-		{
-			m_allowQueueKeyHit = false;
-		}
+		m_allow = true;
 	}
-	else
+
+	if (m_allow && m_curKeyCodes.size() > 0)
 	{
-		// TO DO: This will depend on the keyboard input type
-		// That is, we may want to ignore certain keys, so who cares if they press another button
-		if (m_anyKeyHit)
-		{
-			m_allowProcess = false;
-			m_allowQueueKeyHit = true;
-		}
+		// Process keys here
+		m_anyKeyHit = true;
+		m_allow = false;
+		m_curElapsedTime = 0;
 	}
 }
 
 void U5Input::ProcessKeyDown(SDL_KeyboardEvent event)
 {
-	//std::vector<SDL_Keycode> UDKR_vec = { SDLK_RETURN, SDLK_UP, SDLK_DOWN, SDLK_LEFT, SDLK_RIGHT };
-	std::vector<SDL_Keycode> UDR_vec = { SDLK_RETURN, SDLK_UP, SDLK_DOWN };
-
-	if (m_allowProcess == true)
+	if (std::find(m_curKeyCodes.begin(), m_curKeyCodes.end(), event.key) == m_curKeyCodes.end())
 	{
-		// Start the delay timer
-		m_keyDelay = 0;
-		// Get the pressed key now
-		switch (m_InputType)
-		{
-		case InputType::UP_DOWN_ENTER:
-			if (std::find(UDR_vec.begin(), UDR_vec.end(), event.key) != UDR_vec.end())
-			{
-				m_anyKeyHit = true;
-				m_key_code = event.key;
-			}
-			break;
-		default:
-			m_anyKeyHit = true;
-			m_key_code = event.key;
-			break;
-		}
+		m_curKeyCodes.push_back(event.key);
 	}
 }
 
 void U5Input::ProcessKeyUp(SDL_KeyboardEvent event)
 {
+	auto it = std::find(m_curKeyCodes.begin(), m_curKeyCodes.end(), event.key);
+	if (it != m_curKeyCodes.end())
+	{
+		m_curKeyCodes.erase(it);
+	}
 }
 
 SDL_Keycode U5Input::GetKeyCode() const
 {
-	return m_key_code;
+	std::vector<SDL_Keycode>::const_iterator kc1;
+	std::vector<SDL_Keycode>::const_iterator kc2;
+	size_t distance1;
+	size_t distance2;
+	if (m_allKeysMustBeUp)
+	{
+		return 0;
+	}
+
+	if (m_anyKeyHit && m_curKeyCodes.size() > 0)
+	{
+		switch (m_curKeyCodes[0])
+		{
+		case SDLK_UP:
+			kc1 = std::find(m_curKeyCodes.begin(), m_curKeyCodes.end(), SDLK_LEFT);
+			kc2 = std::find(m_curKeyCodes.begin(), m_curKeyCodes.end(), SDLK_RIGHT);
+			if (kc1 == m_curKeyCodes.end() && kc2 == m_curKeyCodes.end())
+			{
+				return m_curKeyCodes[0];
+			}
+			else if (kc1 != m_curKeyCodes.end())
+			{
+				return SDLK_KP_7;
+			}
+			else if (kc2 != m_curKeyCodes.end())
+			{
+				return SDLK_KP_9;
+			}
+			else
+			{
+				distance1 = std::distance(m_curKeyCodes.begin(), kc1);
+				distance2 = std::distance(m_curKeyCodes.begin(), kc2);
+				return kc1 < kc2 ? SDLK_KP_7 : SDLK_KP_9;
+			}
+			break;
+		case SDLK_DOWN:
+			kc1 = std::find(m_curKeyCodes.begin(), m_curKeyCodes.end(), SDLK_LEFT);
+			kc2 = std::find(m_curKeyCodes.begin(), m_curKeyCodes.end(), SDLK_RIGHT);
+			if (kc1 == m_curKeyCodes.end() && kc2 == m_curKeyCodes.end())
+			{
+				return m_curKeyCodes[0];
+			}
+			else if (kc1 != m_curKeyCodes.end())
+			{
+				return SDLK_KP_1;
+			}
+			else if (kc2 != m_curKeyCodes.end())
+			{
+				return SDLK_KP_3;
+			}
+			else
+			{
+				distance1 = std::distance(m_curKeyCodes.begin(), kc1);
+				distance2 = std::distance(m_curKeyCodes.begin(), kc2);
+				return kc1 < kc2 ? SDLK_KP_1 : SDLK_KP_3;
+			}
+			break;
+		case SDLK_LEFT:
+			kc1 = std::find(m_curKeyCodes.begin(), m_curKeyCodes.end(), SDLK_UP);
+			kc2 = std::find(m_curKeyCodes.begin(), m_curKeyCodes.end(), SDLK_DOWN);
+			if (kc1 == m_curKeyCodes.end() && kc2 == m_curKeyCodes.end())
+			{
+				return m_curKeyCodes[0];
+			}
+			else if (kc1 != m_curKeyCodes.end())
+			{
+				return SDLK_KP_7;
+			}
+			else if (kc2 != m_curKeyCodes.end())
+			{
+				return SDLK_KP_1;
+			}
+			else
+			{
+				distance1 = std::distance(m_curKeyCodes.begin(), kc1);
+				distance2 = std::distance(m_curKeyCodes.begin(), kc2);
+				return kc1 < kc2 ? SDLK_KP_7 : SDLK_KP_1;
+			}
+			break;
+		case SDLK_RIGHT:
+			kc1 = std::find(m_curKeyCodes.begin(), m_curKeyCodes.end(), SDLK_UP);
+			kc2 = std::find(m_curKeyCodes.begin(), m_curKeyCodes.end(), SDLK_DOWN);
+			if (kc1 == m_curKeyCodes.end() && kc2 == m_curKeyCodes.end())
+			{
+				return m_curKeyCodes[0];
+			}
+			else if (kc1 != m_curKeyCodes.end())
+			{
+				return SDLK_KP_9;
+			}
+			else if (kc2 != m_curKeyCodes.end())
+			{
+				return SDLK_KP_3;
+			}
+			else
+			{
+				distance1 = std::distance(m_curKeyCodes.begin(), kc1);
+				distance2 = std::distance(m_curKeyCodes.begin(), kc2);
+				return kc1 < kc2 ? SDLK_KP_9 : SDLK_KP_3;
+			}
+			break;
+		default:
+			return m_curKeyCodes[0];
+		}
+	}
+	return 0;
 }
 
 void U5Input::SetKeyDelay(Uint64 delay)
 {
-	KEY_DELAY = delay;
+	m_key_delay = delay;
+}
+
+void U5Input::EnableInput(bool enabled)
+{
+	m_enabled = enabled;
+}
+
+void U5Input::SetRequireAllKeysUp()
+{
+	m_allKeysMustBeUp = true;
 }

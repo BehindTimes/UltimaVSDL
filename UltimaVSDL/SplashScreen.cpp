@@ -297,5 +297,6 @@ void SplashScreen::ProcessEvents()
 	if (m_input->isAnyKeyHit())
 	{
 		m_newMode = U5Modes::MenuSkip;
+		m_input->SetRequireAllKeysUp();
 	}
 }

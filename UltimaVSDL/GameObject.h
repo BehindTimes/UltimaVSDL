@@ -14,7 +14,8 @@ public:
 	virtual void Render() = 0;
 	virtual void ProcessEvents() = 0;
 	virtual void LoadData();
-	void GetElapsedTime();
+	virtual void GetElapsedTime();
+	virtual void SetElapsedTime(Uint64 elapsedTime);
 	virtual bool ChangeMode(U5Modes &newMode);
 	
 protected:
