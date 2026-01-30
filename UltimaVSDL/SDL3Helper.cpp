@@ -884,6 +884,11 @@ void SDL3Helper::LoadTileTextures(UltimaVResource* u5_resources)
 	m_TileTextures[2].CreateScrollingTexture(WATER_ANIMATE);
 	m_TileTextures[3].CreateScrollingTexture(WATER_ANIMATE);
 
+	m_TileTextures[18].CreateFlagTexture(CLOCK_ANIMATE, 6, 0, 3, 3);
+	m_TileTextures[20].CreateFlagTexture(CLOCK_ANIMATE, 5, 2, 3, 3);
+	m_TileTextures[21].CreateFlagTexture(CLOCK_ANIMATE, 6, 0, 3, 3);
+	m_TileTextures[62].CreateFlagTexture(CLOCK_ANIMATE, 7, 0, 3, 3);
+
 	m_TileTextures[143].CreateScrollingTexture(WATER_ANIMATE);
 
 	m_TileTextures[176].CreateFireTexture(&u5_resources->m_Tiles[192], FIRE_ANIMATE, u5_resources->m_render_mode);

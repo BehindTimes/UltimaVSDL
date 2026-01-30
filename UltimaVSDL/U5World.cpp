@@ -42,6 +42,8 @@ void U5World::Render()
 	SDL_SetRenderDrawColor(m_sdl_helper->m_renderer, 0, 0, 0, 0xFF);
 	m_sdl_helper->ClearScreen();
 
+	//unsigned char curpos = 0;
+
 	int mapX = m_xpos - 6;
 	int mapY = m_ypos - 6;
 	for (int ypos = 0; ypos < 13; ypos++)
@@ -53,7 +55,7 @@ void U5World::Render()
 			unsigned char curpos = m_resources->m_data.world_map[curX][curY];
 			SDL_Texture* curTexture = m_sdl_helper->m_TileTextures[curpos].GetTexture();
 			m_sdl_helper->DrawTileTexture(curTexture, xpos, ypos);
-			curpos++;
+			//curpos++;
 		}
 	}
 	

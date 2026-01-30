@@ -12,6 +12,7 @@
 #include <cstring>
 #include <SDL3/SDL_pixels.h>
 #include <SDL3/SDL_surface.h>
+#include <SDL3/SDL_rect.h>
 
 extern std::unique_ptr<U5Utils> m_utilities;
 
@@ -63,6 +64,16 @@ SDL_Texture* U5Tile::GetTexture()
 		size_t curTextureNum = m_textures_in_rotation[m_cur_texture_in_rotation];
 		return m_sdl_helper->m_TileTextures[curTextureNum].GetUnderlyingTexture();
 	}
+	case TextureType::FLAG:
+		if (m_cur_texture_in_rotation == 0)
+		{
+			return m_texture;
+		}
+		else
+		{
+			return m_render_texture;
+		}
+		break;
 	case TextureType::MASKED:
 		return m_render_texture;
 	case TextureType::SCROLLING:
@@ -137,6 +148,38 @@ void U5Tile::CreateScrollingTexture(Uint64 animation_speed)
 	m_render_texture = SDL_CreateTexture(m_sdl_helper->m_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET,
 		static_cast<int>(m_data->width), static_cast<int>(m_data->height));
 	SDL_SetTextureScaleMode(m_render_texture, SDL_SCALEMODE_NEAREST);
+	UpdateTime(0);
+}
+
+void U5Tile::CreateFlagTexture(Uint64 animation_speed, int xpos, int ypos, int width, int height)
+{
+	m_textureType = TextureType::FLAG;
+	m_animatingMaxValue = animation_speed;
+
+	m_render_texture = SDL_CreateTexture(m_sdl_helper->m_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET,
+		static_cast<int>(m_data->width), static_cast<int>(m_data->height));
+	SDL_SetTextureScaleMode(m_render_texture, SDL_SCALEMODE_NEAREST);
+
+	SDL_FRect toRect{};
+	SDL_FRect fromRect{};
+	toRect.x = static_cast<float>(xpos);
+	toRect.y = static_cast<float>(ypos);
+	toRect.w = static_cast<float>(width);
+	toRect.h = static_cast<float>(height);
+	fromRect.x = static_cast<float>(xpos);
+	fromRect.y = static_cast<float>(ypos);
+	fromRect.w = static_cast<float>(width);
+	fromRect.h = static_cast<float>(height);
+
+	m_sdl_helper->SetRenderTarget(m_render_texture);
+	SDL_RenderTexture(m_sdl_helper->m_renderer, m_texture, NULL, NULL);
+
+	SDL_RenderTextureRotated(m_sdl_helper->m_renderer, m_texture, &fromRect, &toRect, 0, NULL, SDL_FLIP_VERTICAL);
+
+	//SDL_RenderTextureRotated(m_sdl_helper->m_renderer, m_texture, NULL, NULL, 0, NULL, SDL_FLIP_VERTICAL);
+
+	m_sdl_helper->SetRenderTarget(nullptr);
+
 	UpdateTime(0);
 }
 
@@ -249,6 +292,14 @@ void U5Tile::UpdateTime(Uint64 elapsedTime)
 			}
 		}
 		break;
+	case TextureType::FLAG:
+		m_animatingCurValue += elapsedTime;
+		if (m_animatingCurValue >= m_animatingMaxValue)
+		{
+			m_animatingCurValue %= m_animatingMaxValue;
+			m_cur_texture_in_rotation = m_utilities->GetRandom(0, 2);
+		}
+		break;
 	case TextureType::NPC:
 		m_animatingCurValue += elapsedTime;
 		if (m_animatingCurValue >= m_animatingMaxValue)
@@ -263,7 +314,7 @@ void U5Tile::UpdateTime(Uint64 elapsedTime)
 			{
 				if (m_cur_texture_in_rotation == 0)
 				{
-					m_cur_texture_in_rotation = static_cast<int>(m_textures_in_rotation.size() - 1);
+					m_cur_texture_in_rotation = static_cast<size_t>(m_textures_in_rotation.size() - 1);
 				}
 				else
 				{

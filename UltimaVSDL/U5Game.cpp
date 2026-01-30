@@ -31,7 +31,7 @@ U5Game::~U5Game()
 void U5Game::LoadData()
 {
 	m_input->SetInputType(InputType::ANY_KEY);
-	m_input->SetKeyDelay(250);
+	m_input->SetKeyDelay(125);
 	m_curLocation = m_world.get();
 }
 

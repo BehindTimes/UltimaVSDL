@@ -19,8 +19,10 @@ U5Input::U5Input(SDL3Helper* sdl_helper) :
 	m_allow(true),
 	m_curElapsedTime(0),
 	m_anyKeyHit(false),
-	m_allKeysMustBeUp(false)
+	m_allKeysMustBeUp(false),
+	m_allowDiagonals(false)
 {
+	m_allowDiagonals = true;
 	m_curTick = m_sdl_helper->GetCurrentTick();
 }
 
@@ -105,102 +107,110 @@ SDL_Keycode U5Input::GetKeyCode() const
 		return 0;
 	}
 
-	if (m_anyKeyHit && m_curKeyCodes.size() > 0)
+	if (m_allowDiagonals)
 	{
-		switch (m_curKeyCodes[0])
+		if (m_anyKeyHit && m_curKeyCodes.size() > 0)
 		{
-		case SDLK_UP:
-			kc1 = std::find(m_curKeyCodes.begin(), m_curKeyCodes.end(), SDLK_LEFT);
-			kc2 = std::find(m_curKeyCodes.begin(), m_curKeyCodes.end(), SDLK_RIGHT);
-			if (kc1 == m_curKeyCodes.end() && kc2 == m_curKeyCodes.end())
+			switch (m_curKeyCodes[0])
 			{
+			case SDLK_UP:
+				kc1 = std::find(m_curKeyCodes.begin(), m_curKeyCodes.end(), SDLK_LEFT);
+				kc2 = std::find(m_curKeyCodes.begin(), m_curKeyCodes.end(), SDLK_RIGHT);
+				if (kc1 == m_curKeyCodes.end() && kc2 == m_curKeyCodes.end())
+				{
+					return m_curKeyCodes[0];
+				}
+				else if (kc1 != m_curKeyCodes.end())
+				{
+					return SDLK_KP_7;
+				}
+				else if (kc2 != m_curKeyCodes.end())
+				{
+					return SDLK_KP_9;
+				}
+				else
+				{
+					distance1 = std::distance(m_curKeyCodes.begin(), kc1);
+					distance2 = std::distance(m_curKeyCodes.begin(), kc2);
+					return kc1 < kc2 ? SDLK_KP_7 : SDLK_KP_9;
+				}
+				break;
+			case SDLK_DOWN:
+				kc1 = std::find(m_curKeyCodes.begin(), m_curKeyCodes.end(), SDLK_LEFT);
+				kc2 = std::find(m_curKeyCodes.begin(), m_curKeyCodes.end(), SDLK_RIGHT);
+				if (kc1 == m_curKeyCodes.end() && kc2 == m_curKeyCodes.end())
+				{
+					return m_curKeyCodes[0];
+				}
+				else if (kc1 != m_curKeyCodes.end())
+				{
+					return SDLK_KP_1;
+				}
+				else if (kc2 != m_curKeyCodes.end())
+				{
+					return SDLK_KP_3;
+				}
+				else
+				{
+					distance1 = std::distance(m_curKeyCodes.begin(), kc1);
+					distance2 = std::distance(m_curKeyCodes.begin(), kc2);
+					return kc1 < kc2 ? SDLK_KP_1 : SDLK_KP_3;
+				}
+				break;
+			case SDLK_LEFT:
+				kc1 = std::find(m_curKeyCodes.begin(), m_curKeyCodes.end(), SDLK_UP);
+				kc2 = std::find(m_curKeyCodes.begin(), m_curKeyCodes.end(), SDLK_DOWN);
+				if (kc1 == m_curKeyCodes.end() && kc2 == m_curKeyCodes.end())
+				{
+					return m_curKeyCodes[0];
+				}
+				else if (kc1 != m_curKeyCodes.end())
+				{
+					return SDLK_KP_7;
+				}
+				else if (kc2 != m_curKeyCodes.end())
+				{
+					return SDLK_KP_1;
+				}
+				else
+				{
+					distance1 = std::distance(m_curKeyCodes.begin(), kc1);
+					distance2 = std::distance(m_curKeyCodes.begin(), kc2);
+					return kc1 < kc2 ? SDLK_KP_7 : SDLK_KP_1;
+				}
+				break;
+			case SDLK_RIGHT:
+				kc1 = std::find(m_curKeyCodes.begin(), m_curKeyCodes.end(), SDLK_UP);
+				kc2 = std::find(m_curKeyCodes.begin(), m_curKeyCodes.end(), SDLK_DOWN);
+				if (kc1 == m_curKeyCodes.end() && kc2 == m_curKeyCodes.end())
+				{
+					return m_curKeyCodes[0];
+				}
+				else if (kc1 != m_curKeyCodes.end())
+				{
+					return SDLK_KP_9;
+				}
+				else if (kc2 != m_curKeyCodes.end())
+				{
+					return SDLK_KP_3;
+				}
+				else
+				{
+					distance1 = std::distance(m_curKeyCodes.begin(), kc1);
+					distance2 = std::distance(m_curKeyCodes.begin(), kc2);
+					return kc1 < kc2 ? SDLK_KP_9 : SDLK_KP_3;
+				}
+				break;
+			default:
 				return m_curKeyCodes[0];
 			}
-			else if (kc1 != m_curKeyCodes.end())
-			{
-				return SDLK_KP_7;
-			}
-			else if (kc2 != m_curKeyCodes.end())
-			{
-				return SDLK_KP_9;
-			}
-			else
-			{
-				distance1 = std::distance(m_curKeyCodes.begin(), kc1);
-				distance2 = std::distance(m_curKeyCodes.begin(), kc2);
-				return kc1 < kc2 ? SDLK_KP_7 : SDLK_KP_9;
-			}
-			break;
-		case SDLK_DOWN:
-			kc1 = std::find(m_curKeyCodes.begin(), m_curKeyCodes.end(), SDLK_LEFT);
-			kc2 = std::find(m_curKeyCodes.begin(), m_curKeyCodes.end(), SDLK_RIGHT);
-			if (kc1 == m_curKeyCodes.end() && kc2 == m_curKeyCodes.end())
-			{
-				return m_curKeyCodes[0];
-			}
-			else if (kc1 != m_curKeyCodes.end())
-			{
-				return SDLK_KP_1;
-			}
-			else if (kc2 != m_curKeyCodes.end())
-			{
-				return SDLK_KP_3;
-			}
-			else
-			{
-				distance1 = std::distance(m_curKeyCodes.begin(), kc1);
-				distance2 = std::distance(m_curKeyCodes.begin(), kc2);
-				return kc1 < kc2 ? SDLK_KP_1 : SDLK_KP_3;
-			}
-			break;
-		case SDLK_LEFT:
-			kc1 = std::find(m_curKeyCodes.begin(), m_curKeyCodes.end(), SDLK_UP);
-			kc2 = std::find(m_curKeyCodes.begin(), m_curKeyCodes.end(), SDLK_DOWN);
-			if (kc1 == m_curKeyCodes.end() && kc2 == m_curKeyCodes.end())
-			{
-				return m_curKeyCodes[0];
-			}
-			else if (kc1 != m_curKeyCodes.end())
-			{
-				return SDLK_KP_7;
-			}
-			else if (kc2 != m_curKeyCodes.end())
-			{
-				return SDLK_KP_1;
-			}
-			else
-			{
-				distance1 = std::distance(m_curKeyCodes.begin(), kc1);
-				distance2 = std::distance(m_curKeyCodes.begin(), kc2);
-				return kc1 < kc2 ? SDLK_KP_7 : SDLK_KP_1;
-			}
-			break;
-		case SDLK_RIGHT:
-			kc1 = std::find(m_curKeyCodes.begin(), m_curKeyCodes.end(), SDLK_UP);
-			kc2 = std::find(m_curKeyCodes.begin(), m_curKeyCodes.end(), SDLK_DOWN);
-			if (kc1 == m_curKeyCodes.end() && kc2 == m_curKeyCodes.end())
-			{
-				return m_curKeyCodes[0];
-			}
-			else if (kc1 != m_curKeyCodes.end())
-			{
-				return SDLK_KP_9;
-			}
-			else if (kc2 != m_curKeyCodes.end())
-			{
-				return SDLK_KP_3;
-			}
-			else
-			{
-				distance1 = std::distance(m_curKeyCodes.begin(), kc1);
-				distance2 = std::distance(m_curKeyCodes.begin(), kc2);
-				return kc1 < kc2 ? SDLK_KP_9 : SDLK_KP_3;
-			}
-			break;
-		default:
-			return m_curKeyCodes[0];
 		}
 	}
+	else
+	{
+		return m_curKeyCodes[0];
+	}
+	
 	return 0;
 }
 

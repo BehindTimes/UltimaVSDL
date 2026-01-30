@@ -16,7 +16,7 @@ struct PositionQueue
 	std::pair<int, int> old_position;
 	std::pair<int, int> new_position;
 	Uint64 elapsed_time;
-	const Uint64 TURN_TIME = 250;
+	const Uint64 TURN_TIME = 125;
 };
 
 class U5World : public GameBase

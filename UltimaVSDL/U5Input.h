@@ -43,5 +43,6 @@ private:
 	bool m_allow;
 	bool m_anyKeyHit;
 	bool m_allKeysMustBeUp;
+	bool m_allowDiagonals;
 };
 

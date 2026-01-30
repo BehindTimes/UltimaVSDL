@@ -13,6 +13,7 @@ enum class TextureType
 	MASKED,
 	ROTATING,
 	FIRE,
+	FLAG,
 	NPC
 };
 
@@ -29,6 +30,7 @@ public:
 	void CreateRotationTextures(std::vector<int> textures, Uint64 animation_speed);
 	void CreateNPCRotationTextures(Uint64 animation_speed);
 	void CreateScrollingTexture(Uint64 animation_speed);
+	void CreateFlagTexture(Uint64 animation_speed, int xpos, int ypos, int width, int height);
 	void UpdateTime(Uint64 elapsedTime);
 private:
 	void UpdateFireTexture();
