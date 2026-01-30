@@ -7,6 +7,8 @@
 #include <string>
 #include <vector>
 #include <cstring>
+#include <algorithm>
+#include <array>
  
 static const std::filesystem::path GAME_DIRECTORY("G:/source/UltimaVSDL/u5data");
 
@@ -58,6 +60,14 @@ int UltimaVResource::LoadResources()
 		return -1;
 	}
 	if (0 != LoadMiscMaps())
+	{
+		return -1;
+	}
+	if (0 != LoadWorldMap())
+	{
+		return -1;
+	}
+	if (0 != LoadUnderworldMap())
 	{
 		return -1;
 	}
@@ -703,6 +713,11 @@ int UltimaVResource::LoadDataOvl()
 	{
 		return -5;
 	}*/
+	const size_t MAP_CHUNK_LOC = 0x3886;
+	const size_t MAP_NUM_CHUNKS = 0x100;
+
+	std::copy_n(buffer.begin() + MAP_CHUNK_LOC, MAP_NUM_CHUNKS, m_data.map_chunks.begin());
+
 	return 0;
 }
 
@@ -891,3 +906,104 @@ int UltimaVResource::LoadMiscMaps()
 
 	return 0;
 }
+
+int UltimaVResource::LoadMapChunk(unsigned char cur_chunk_val, size_t curChunkX, size_t curChunkY, std::array<std::array<unsigned char, 256>, 256> &map, const std::vector<unsigned char>& buffer)
+{
+	const size_t CHUNK_WIDTH = 16;
+	const size_t CHUNK_HEIGHT = 16;
+	const size_t CHUNK_SIZE = CHUNK_WIDTH * CHUNK_HEIGHT;
+
+	if (cur_chunk_val == 0xFF) // All water
+	{
+		for (size_t indexY = 0; indexY < CHUNK_HEIGHT; indexY++)
+		{
+			for (size_t indexX = 0; indexX < CHUNK_WIDTH; indexX++)
+			{
+				map[(curChunkX * CHUNK_WIDTH) + indexX][(curChunkY * CHUNK_HEIGHT) + indexY] = 0x01;
+			}
+		}
+	}
+	else
+	{
+		if (buffer.size() < (static_cast<size_t>(cur_chunk_val + 1)) * CHUNK_SIZE)
+		{
+			return -1;
+		}
+		for (size_t indexY = 0; indexY < CHUNK_HEIGHT; indexY++)
+		{
+			for (size_t indexX = 0; indexX < CHUNK_WIDTH; indexX++)
+			{
+				map[(curChunkX * CHUNK_WIDTH) + indexX][(curChunkY * CHUNK_HEIGHT) + indexY] = buffer[(cur_chunk_val * CHUNK_SIZE) + (indexY * CHUNK_WIDTH) + indexX];
+			}
+		}
+	}
+	return 0;
+}
+
+int UltimaVResource::LoadWorldMap()
+{
+	std::string strStoryFile("BRIT.DAT");
+	std::filesystem::path file_path = GAME_DIRECTORY / strStoryFile;
+	if (!std::filesystem::exists(file_path))
+	{
+		return -1;
+	}
+	std::uintmax_t file_size = std::filesystem::file_size(file_path);
+	std::vector<unsigned char> buffer(file_size);
+	std::ifstream file(file_path, std::ios::binary);
+	file.read(reinterpret_cast<char*>(buffer.data()), static_cast<std::streamsize>(file_size));
+	file.close();
+
+	const size_t CHUNK_WIDTH = 16;
+	const size_t CHUNK_HEIGHT = 16;
+
+	for (size_t curChunkY = 0; curChunkY < CHUNK_HEIGHT; curChunkY++)
+	{
+		for (size_t curChunkX = 0; curChunkX < CHUNK_WIDTH; curChunkX++)
+		{
+			size_t cur_chunk = curChunkY * CHUNK_WIDTH + curChunkX;
+			unsigned char cur_chunk_val = m_data.map_chunks[cur_chunk];
+			if (0 != LoadMapChunk(cur_chunk_val, curChunkX, curChunkY, m_data.world_map, buffer))
+			{
+				return -1;
+			}
+		}
+	}
+
+	return 0;
+}
+
+int UltimaVResource::LoadUnderworldMap()
+{
+	std::string strStoryFile("UNDER.DAT");
+	std::filesystem::path file_path = GAME_DIRECTORY / strStoryFile;
+	if (!std::filesystem::exists(file_path))
+	{
+		return -1;
+	}
+	std::uintmax_t file_size = std::filesystem::file_size(file_path);
+	std::vector<unsigned char> buffer(file_size);
+	std::ifstream file(file_path, std::ios::binary);
+	file.read(reinterpret_cast<char*>(buffer.data()), static_cast<std::streamsize>(file_size));
+	file.close();
+
+	const size_t CHUNK_WIDTH = 16;
+	const size_t CHUNK_HEIGHT = 16;
+
+	size_t cur_chunk_val = 0;
+
+	for (size_t curChunkY = 0; curChunkY < CHUNK_HEIGHT; curChunkY++)
+	{
+		for (size_t curChunkX = 0; curChunkX < CHUNK_WIDTH; curChunkX++)
+		{
+			if (0 != LoadMapChunk(static_cast<unsigned char>(cur_chunk_val), curChunkX, curChunkY, m_data.underworld_map, buffer))
+			{
+				return -1;
+			}
+			cur_chunk_val++;
+		}
+	}
+
+	return 0;
+}
+

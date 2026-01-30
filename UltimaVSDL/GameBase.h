@@ -13,5 +13,7 @@ public:
 	std::pair<float, float> m_DisplayOffset;
 protected:
 	virtual void DrawBorder();
+	int m_xpos;
+	int m_ypos;
 };
 

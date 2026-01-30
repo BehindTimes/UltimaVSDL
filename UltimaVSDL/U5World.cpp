@@ -6,10 +6,19 @@
 #include <SDL3/SDL_render.h>
 #include "GameBase.h"
 #include "U5Enums.h"
+#include <memory>
+#include "U5Utils.h"
+#include "U5Input.h"
+#include <SDL3/SDL_keycode.h>
+
+extern std::unique_ptr<U5Utils> m_utilities;
+extern std::unique_ptr<U5Input> m_input;
 
 U5World::U5World(SDL3Helper* sdl_helper, UltimaVResource* u5_resources) :
 	GameBase(sdl_helper, u5_resources)
 {
+	m_xpos = 50;
+	m_ypos = 50;
 }
 
 U5World::~U5World()
@@ -25,12 +34,17 @@ void U5World::Render()
 	SDL_SetRenderDrawColor(m_sdl_helper->m_renderer, 0, 0, 0, 0xFF);
 	m_sdl_helper->ClearScreen();
 
-	int curpos = 121;
-	for (int a = 1; a < 12; a++)
+	int mapX = m_xpos - 6;
+	int mapY = m_ypos - 6;
+	for (int ypos = 0; ypos < 13; ypos++)
 	{
-		for (int b = 1; b < 12; b++)
+		for (int xpos = 0; xpos < 13; xpos++)
 		{
-			m_sdl_helper->DrawTileTexture(m_sdl_helper->m_TileTextures[curpos].GetTexture(), b, a);
+			int curX = (mapX + xpos + 250) % 256;
+			int curY = (mapY + ypos + 250) % 256;
+			unsigned char curpos = m_resources->m_data.world_map[curX][curY];
+			SDL_Texture* curTexture = m_sdl_helper->m_TileTextures[curpos].GetTexture();
+			m_sdl_helper->DrawTileTexture(curTexture, xpos, ypos);
 			curpos++;
 		}
 	}
@@ -39,6 +53,33 @@ void U5World::Render()
 
 void U5World::ProcessEvents()
 {
+	if (m_input->isAnyKeyHit())
+	{
+		SDL_Keycode curKey = m_input->GetKeyCode();
+		switch (curKey)
+		{
+		case SDLK_UP:
+			m_ypos--;
+			m_ypos += 256;
+			m_ypos %= 256;
+			break;
+		case SDLK_DOWN:
+			m_ypos++;
+			m_ypos %= 256;
+			break;
+		case SDLK_LEFT:
+			m_xpos--;
+			m_xpos += 256;
+			m_xpos %= 256;
+			break;
+		case SDLK_RIGHT:
+			m_xpos++;
+			m_xpos %= 256;
+			break;
+		default:
+			break;
+		}
+	}
 }
 
 void U5World::DrawBorder()

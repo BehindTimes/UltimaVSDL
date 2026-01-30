@@ -4,6 +4,7 @@
 #include <vector>
 #include <SDL3/SDL_keycode.h>
 #include <algorithm>
+#include <SDL3/SDL_stdinc.h>
 
 U5Input::U5Input(SDL3Helper* sdl_helper) :
 	m_sdl_helper(sdl_helper),
@@ -15,7 +16,9 @@ U5Input::U5Input(SDL3Helper* sdl_helper) :
 	m_allowProcess(true),
 	m_elapsedTick(0),
 	m_allowQueueKeyHit(true),
-	m_InputType(InputType::ANY_KEY)
+	m_InputType(InputType::ANY_KEY),
+	m_key_code(0),
+	KEY_DELAY(100)
 {
 	m_curTick = m_sdl_helper->GetCurrentTick();
 }
@@ -104,4 +107,9 @@ void U5Input::ProcessKeyUp(SDL_KeyboardEvent event)
 SDL_Keycode U5Input::GetKeyCode() const
 {
 	return m_key_code;
+}
+
+void U5Input::SetKeyDelay(Uint64 delay)
+{
+	KEY_DELAY = delay;
 }

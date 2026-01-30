@@ -24,6 +24,7 @@ public:
 	void FinishInput();
 	void SetInputType(InputType inputType);
 	SDL_Keycode GetKeyCode() const;
+	void SetKeyDelay(Uint64 delay);
 private:
 	SDL3Helper* m_sdl_helper;
 	bool m_anyKeyHit;
@@ -35,7 +36,7 @@ private:
 	bool m_allowProcess;
 	bool m_allowQueueKeyHit;
 
-	const Uint64 KEY_DELAY = 100;
+	Uint64 KEY_DELAY;
 	InputType m_InputType;
 	SDL_Keycode m_key_code;
 };

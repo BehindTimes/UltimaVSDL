@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <cstring>
 #include <string>
+#include <array>
 
 struct U5StoryParagraphInfo
 {
@@ -45,6 +46,12 @@ struct U5StoryScreen
 
 struct U5Data
 {
+	U5Data() :
+		map_chunks{},
+		world_map{},
+		underworld_map{}
+	{
+	}
 	const size_t NUM_STORIES = 21;
 	const size_t NUM_ENDING = 6;
 	std::vector<U5StoryScreen> story_text{ NUM_STORIES };
@@ -53,6 +60,9 @@ struct U5Data
 	std::vector<unsigned char> intro_string_2;
 	std::vector<std::string> intro_demo_string;
 	std::vector<std::string> intro_strings;
+	std::array<unsigned char, 0x100> map_chunks;
+	std::array<std::array<unsigned char, 256>, 256> world_map;
+	std::array<std::array<unsigned char, 256>, 256> underworld_map;
 };
 
 struct IntroScriptInstruction {
@@ -95,6 +105,11 @@ struct U5ImageData
 
 struct U5PaddedImageData : public U5ImageData
 {
+	U5PaddedImageData() :
+		real_width(0),
+		real_height(0)
+	{
+	}
 	uint32_t real_width;
 	uint32_t real_height;
 };
@@ -139,6 +154,10 @@ private:
 	int LoadProportionalFont();
 	int LoadMiscMaps();
 	int LoadTiles();
+	int LoadWorldMap();
+	int LoadUnderworldMap();
+	int LoadMapChunk(unsigned char cur_chunk_val, size_t curChunkX, size_t curChunkY, std::array<std::array<unsigned char, 256>, 256>& map, const std::vector<unsigned char>& buffer);
+
 	int ParseCharacterFile(std::vector<U5ImageData>& bit_file_data, std::vector<unsigned char>& data, int width, int height);
 	int ParseBitFile(std::vector<U5ImageData> &bit_file_data, std::vector<unsigned char> &data);
 	int Parse16File(std::vector<U5ImageData>& bit_file_data, std::vector<unsigned char>& data, int numPixelsPerByte);
