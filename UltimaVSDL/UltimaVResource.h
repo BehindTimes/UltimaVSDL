@@ -5,6 +5,7 @@
 #include <string>
 #include <array>
 #include <utility>
+#include "U5Enums.h"
 
 struct U5StoryParagraphInfo
 {
@@ -64,7 +65,12 @@ struct U5Data
 	std::array<unsigned char, 0x100> map_chunks;
 	std::vector<std::vector<unsigned char>> world_map;
 	std::vector<std::vector<unsigned char>> underworld_map;
+	std::vector<std::vector<std::vector<unsigned char>>> town_maps;
+	std::vector<std::vector<std::vector<unsigned char>>> keep_maps;
+	std::vector<std::vector<std::vector<unsigned char>>> dwelling_maps;
+	std::vector<std::vector<std::vector<unsigned char>>> castle_maps;
 	std::array<std::pair<int, int>, 0x28> location_info;
+	std::array<int, 0x20> location_z_index;
 };
 
 struct IntroScriptInstruction {
@@ -158,6 +164,7 @@ private:
 	int LoadTiles();
 	int LoadWorldMap();
 	int LoadUnderworldMap();
+	int LoadMap(MapTypes map_type);
 	int LoadMapChunk(unsigned char cur_chunk_val, size_t curChunkX, size_t curChunkY, std::vector<std::vector<unsigned char>>& map, const std::vector<unsigned char>& buffer);
 
 	int ParseCharacterFile(std::vector<U5ImageData>& bit_file_data, std::vector<unsigned char>& data, int width, int height);

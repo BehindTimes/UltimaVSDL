@@ -21,14 +21,18 @@ public:
 	void SetSDLData() override;
 	void GetElapsedTime() override;
 	void LoadMap(int map_num);
+
+	std::vector < std::vector<unsigned char> > m_currentMap;
+	GameLocation m_location;
+
 private:
 	int m_window_width;
 	int m_window_height;
 
-	GameLocation m_location;
+	
 	std::unique_ptr<U5World> m_world;
 	std::unique_ptr<U5Dungeon> m_dungeon;
 	GameBase* m_curLocation;
-	std::vector < std::vector<int> > m_currentMap;
+	
 };
 

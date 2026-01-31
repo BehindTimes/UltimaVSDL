@@ -76,3 +76,9 @@ void GameBase::DrawBorder()
 
 	SDL_SetRenderDrawColor(m_sdl_helper->m_renderer, 0, 0, 0, 0);
 }
+
+void GameBase::setPos(int x, int y)
+{
+	m_xpos = x;
+	m_ypos = y;
+}

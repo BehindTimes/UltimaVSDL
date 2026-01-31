@@ -33,6 +33,8 @@ public:
 	void DrawBorder() override;
 	void SetParent(U5Game* parent);
 	std::vector<PositionData> vec_pos;
+
+	GameLocation m_location_type;
 private:
 	void ProcessScroll();
 	int checkValidLocation(const PositionData& pos_info);
@@ -46,7 +48,6 @@ private:
 	void ProcessSouthEast();
 	void ProcessSouthWest();
 
-	GameLocation m_location_type;
 	U5Game* m_parent;
 };
 

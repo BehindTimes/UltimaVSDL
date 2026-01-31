@@ -9,6 +9,7 @@
 #include <cstring>
 #include <algorithm>
 #include <array>
+#include "U5Enums.h"
  
 static const std::filesystem::path GAME_DIRECTORY("G:/source/UltimaVSDL/u5data");
 
@@ -68,6 +69,22 @@ int UltimaVResource::LoadResources()
 		return -1;
 	}
 	if (0 != LoadUnderworldMap())
+	{
+		return -1;
+	}
+	if (0 != LoadMap(MapTypes::Castle))
+	{
+		return -1;
+	}
+	if (0 != LoadMap(MapTypes::Dwelling))
+	{
+		return -1;
+	}
+	if (0 != LoadMap(MapTypes::Keep))
+	{
+		return -1;
+	}
+	if (0 != LoadMap(MapTypes::Town))
 	{
 		return -1;
 	}
@@ -720,11 +737,21 @@ int UltimaVResource::LoadDataOvl()
 
 	const size_t LOCATION_X = 0x1e9a;
 	const size_t LOCATION_Y = 0x1ec2;
+	const size_t LOCATION_Z = 0x1e2a;
 
 	for (size_t index = 0; index < m_data.location_info.size(); index++)
 	{
 		m_data.location_info[index].first = buffer[LOCATION_X + index];
 		m_data.location_info[index].second = buffer[LOCATION_Y + index];
+
+		if (index < 32)
+		{
+			m_data.location_z_index[index] = buffer[LOCATION_Z + index];
+			if (m_data.location_z_index[index] >= 16)
+			{
+				return -6;
+			}
+		}
 	}
 
 	return 0;
@@ -952,6 +979,67 @@ int UltimaVResource::LoadMapChunk(unsigned char cur_chunk_val, size_t curChunkX,
 			}
 		}
 	}
+	return 0;
+}
+
+int UltimaVResource::LoadMap(MapTypes map_type)
+{
+	std::string strStoryFile;
+	switch (map_type)
+	{
+	case MapTypes::Castle:
+		strStoryFile = std::string("CASTLE.DAT");
+		break;
+	case MapTypes::Dwelling:
+		strStoryFile = std::string("DWELLING.DAT");
+		break;
+	case MapTypes::Keep:
+		strStoryFile = std::string("KEEP.DAT");
+		break;
+	case MapTypes::Town:
+		strStoryFile = std::string("TOWNE.DAT");
+		break;
+	default:
+		return -1;
+	}
+
+	std::filesystem::path file_path = GAME_DIRECTORY / strStoryFile;
+	if (!std::filesystem::exists(file_path))
+	{
+		return -1;
+	}
+	std::uintmax_t file_size = std::filesystem::file_size(file_path);
+	std::vector<unsigned char> buffer(file_size);
+	std::ifstream file(file_path, std::ios::binary);
+	file.read(reinterpret_cast<char*>(buffer.data()), static_cast<std::streamsize>(file_size));
+	file.close();
+	if (buffer.size() != 16384)
+	{
+		return -2;
+	}
+
+	std::vector<std::vector<std::vector<std::vector<unsigned char>>>*> map_list = { &m_data.town_maps, &m_data.dwelling_maps, &m_data.castle_maps,  &m_data.keep_maps };
+
+	const int NUM_LEVELS = 16;
+	const int NUM_X = 32;
+	const int NUM_Y = 32;
+	auto& cur_map = map_list[static_cast<int>(map_type)];
+	cur_map->resize(NUM_LEVELS);
+	for (size_t curLevel = 0; curLevel < NUM_LEVELS; curLevel++)
+	{
+		size_t data_offset = curLevel * NUM_X * NUM_Y;
+		(*cur_map)[curLevel].resize(NUM_X);
+		for (size_t curX = 0; curX < NUM_X; curX++)
+		{
+			(*cur_map)[curLevel][curX].resize(NUM_Y);
+			for (size_t curY = 0; curY < NUM_Y; curY++)
+			{
+				size_t curPos = data_offset + (curY * NUM_X) + curX;
+				(*cur_map)[curLevel][curX][curY] = buffer[curPos];
+			}
+		}
+	}
+
 	return 0;
 }
 

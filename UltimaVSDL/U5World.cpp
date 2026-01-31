@@ -48,6 +48,10 @@ void U5World::Render()
 	{
 		ProcessScroll();
 	}
+	if (m_parent == nullptr)
+	{
+		return;
+	}
 	// We're going to render to the buffer, which gives us a 1 tile buffer on each side
 	// This way, we can enable smooth scrolling in the future if we want
 	m_sdl_helper->SetRenderTarget(m_sdl_helper->m_TargetTextures[TTV_MAIN_DISPLAY_BUFFER]);
@@ -56,15 +60,35 @@ void U5World::Render()
 
 	//unsigned char curpos = 0;
 
+	if (nullptr == m_parent || m_parent->m_currentMap.empty() || m_parent->m_currentMap[0].empty())
+	{
+		return;
+	}
+
 	int mapX = m_xpos - 6;
 	int mapY = m_ypos - 6;
 	for (int ypos = 0; ypos < 13; ypos++)
 	{
 		for (int xpos = 0; xpos < 13; xpos++)
 		{
-			int curX = (mapX + xpos + 256) % 256;
-			int curY = (mapY + ypos + 256) % 256;
-			unsigned char curpos = m_resources->m_data.world_map[curX][curY];
+			int curX;
+			int curY;
+			if (m_parent->m_location == GameLocation::World)
+			{
+				curX = static_cast<int>((static_cast<unsigned long long>(mapX) + xpos + m_parent->m_currentMap.size()) % m_parent->m_currentMap.size());
+				curY = static_cast<int>((static_cast<unsigned long long>(mapY) + ypos + m_parent->m_currentMap[0].size()) % m_parent->m_currentMap[0].size());
+			}
+			else
+			{
+				curX = mapX + xpos;
+				curY = mapY + ypos;
+				if (curX < 0 || curY < 0 || curX >= m_parent->m_currentMap.size() || curY >= m_parent->m_currentMap[0].size())
+				{
+					curX = 31;
+					curY = 31;
+				}
+			}
+			unsigned char curpos = m_parent->m_currentMap[curX][curY];
 			SDL_Texture* curTexture = m_sdl_helper->m_TileTextures[curpos].GetTexture();
 			m_sdl_helper->DrawTileTexture(curTexture, xpos, ypos);
 			//curpos++;
@@ -74,6 +98,16 @@ void U5World::Render()
 
 int U5World::checkValidLocation(const PositionData& pos_info)
 {
+	if (m_parent->m_location == GameLocation::Town)
+	{
+		if (pos_info.new_position.first < 0 ||
+			pos_info.new_position.second < 0 ||
+			pos_info.new_position.first >= m_parent->m_currentMap.size() ||
+			pos_info.new_position.second >= m_parent->m_currentMap[0].size())
+		{
+			return -1;
+		}
+	}
 	return 0;
 }
 
@@ -87,8 +121,12 @@ void U5World::ProcessNorth()
 	vec_pos.back().new_position.first = m_xpos;
 	tempval = m_ypos;
 	tempval--;
-	tempval += 256;
-	tempval %= 256;
+	if (m_parent->m_location == GameLocation::World)
+	{
+		tempval += static_cast<int>(m_parent->m_currentMap[0].size());
+		tempval %= static_cast<int>(m_parent->m_currentMap[0].size());
+	}
+	
 	vec_pos.back().new_position.second = tempval;
 	if (0 != checkValidLocation(vec_pos.back()))
 	{
@@ -110,7 +148,10 @@ void U5World::ProcessSouth()
 	vec_pos.back().new_position.first = m_xpos;
 	tempval = m_ypos;
 	tempval++;
-	tempval %= 256;
+	if (m_parent->m_location == GameLocation::World)
+	{
+		tempval %= static_cast<int>(m_parent->m_currentMap[0].size());
+	}
 	vec_pos.back().new_position.second = tempval;
 	if (0 != checkValidLocation(vec_pos.back()))
 	{
@@ -132,7 +173,10 @@ void U5World::ProcessEast()
 	vec_pos.back().new_position.second = m_ypos;
 	tempval = m_xpos;
 	tempval++;
-	tempval %= 256;
+	if (m_parent->m_location == GameLocation::World)
+	{
+		tempval %= m_parent->m_currentMap.size();
+	}
 	vec_pos.back().new_position.first = tempval;
 	if (0 != checkValidLocation(vec_pos.back()))
 	{
@@ -154,8 +198,11 @@ void U5World::ProcessWest()
 	vec_pos.back().new_position.second = m_ypos;
 	tempval = m_xpos;
 	tempval--;
-	tempval += 256;
-	tempval %= 256;
+	if (m_parent->m_location == GameLocation::World)
+	{
+		tempval += static_cast<int>(m_parent->m_currentMap.size());
+		tempval %= static_cast<int>(m_parent->m_currentMap.size());
+	}
 	vec_pos.back().new_position.first = tempval;
 	if (0 != checkValidLocation(vec_pos.back()))
 	{
@@ -176,12 +223,18 @@ void U5World::ProcessNorthEast()
 	vec_pos.back().old_position.second = m_ypos;
 	tempval = m_ypos;
 	tempval--;
-	tempval += 256;
-	tempval %= 256;
+	if (m_parent->m_location == GameLocation::World)
+	{
+		tempval += static_cast<int>(m_parent->m_currentMap[0].size());
+		tempval %= static_cast<int>(m_parent->m_currentMap[0].size());
+	}
 	vec_pos.back().new_position.second = tempval;
 	tempval = m_xpos;
 	tempval++;
-	tempval %= 256;
+	if (m_parent->m_location == GameLocation::World)
+	{
+		tempval %= static_cast<int>(m_parent->m_currentMap.size());
+	}
 	vec_pos.back().new_position.first = tempval;
 	if (0 != checkValidLocation(vec_pos.back()))
 	{
@@ -202,13 +255,16 @@ void U5World::ProcessNorthWest()
 	vec_pos.back().old_position.second = m_ypos;
 	tempval = m_ypos;
 	tempval--;
-	tempval += 256;
-	tempval %= 256;
+	if (m_parent->m_location == GameLocation::World)
+	{
+		tempval += static_cast<int>(m_parent->m_currentMap[0].size());
+		tempval %= static_cast<int>(m_parent->m_currentMap[0].size());
+	}
 	vec_pos.back().new_position.second = tempval;
 	tempval = m_xpos;
 	tempval--;
-	tempval += 256;
-	tempval %= 256;
+	tempval += static_cast<int>(m_parent->m_currentMap.size());
+	tempval %= static_cast<int>(m_parent->m_currentMap.size());
 	vec_pos.back().new_position.first = tempval;
 	if (0 != checkValidLocation(vec_pos.back()))
 	{
@@ -229,11 +285,17 @@ void U5World::ProcessSouthEast()
 	vec_pos.back().old_position.second = m_ypos;
 	tempval = m_ypos;
 	tempval++;
-	tempval %= 256;
+	if (m_parent->m_location == GameLocation::World)
+	{
+		tempval %= m_parent->m_currentMap[0].size();
+	}
 	vec_pos.back().new_position.second = tempval;
 	tempval = m_xpos;
 	tempval++;
-	tempval %= 256;
+	if (m_parent->m_location == GameLocation::World)
+	{
+		tempval %= m_parent->m_currentMap.size();
+	}
 	vec_pos.back().new_position.first = tempval;
 	if (0 != checkValidLocation(vec_pos.back()))
 	{
@@ -254,12 +316,12 @@ void U5World::ProcessSouthWest()
 	vec_pos.back().old_position.second = m_ypos;
 	tempval = m_ypos;
 	tempval++;
-	tempval %= 256;
+	tempval %= static_cast<int>(m_parent->m_currentMap[0].size());
 	vec_pos.back().new_position.second = tempval;
 	tempval = m_xpos;
 	tempval--;
-	tempval += 256;
-	tempval %= 256;
+	tempval += static_cast<int>(m_parent->m_currentMap.size());
+	tempval %= static_cast<int>(m_parent->m_currentMap.size());
 	vec_pos.back().new_position.first = tempval;
 	if (0 != checkValidLocation(vec_pos.back()))
 	{
@@ -373,6 +435,11 @@ void U5World::ProcessScroll()
 	{
 		return;
 	}
+	if (m_parent->m_currentMap.empty() || m_parent->m_currentMap[0].empty())
+	{
+		return;
+	}
+
 	bool allowMove;
 
 	if (m_smoothscroll)
@@ -400,25 +467,28 @@ void U5World::ProcessScroll()
 		float temppos1 = static_cast<float>(vec_pos.back().old_position.first);
 		float temppos2 = static_cast<float>(vec_pos.back().new_position.first);
 
-		if (vec_pos.back().old_position.first == 0 && vec_pos.back().new_position.first == 255)
+		int maxExtentX = static_cast<int>(m_parent->m_currentMap.size() - 1);
+		int maxExtentY = static_cast<int>(m_parent->m_currentMap[0].size() - 1);
+
+		if (vec_pos.back().old_position.first == 0 && vec_pos.back().new_position.first == maxExtentX)
 		{
 			temppos2 = -1;
 		}
-		else if (vec_pos.back().old_position.first == 255 && vec_pos.back().new_position.first == 0)
+		else if (vec_pos.back().old_position.first == maxExtentX && vec_pos.back().new_position.first == 0)
 		{
-			temppos2 = 256;
+			temppos2 = maxExtentX + 1.0f;
 		}
 		m_DisplayOffset.first = (temppos1 - temppos2) * ratio;
 
 		temppos1 = static_cast<float>(vec_pos.back().old_position.second);
 		temppos2 = static_cast<float>(vec_pos.back().new_position.second);
-		if (vec_pos.back().old_position.second == 0 && vec_pos.back().new_position.second == 255)
+		if (vec_pos.back().old_position.second == 0 && vec_pos.back().new_position.second == maxExtentY)
 		{
 			temppos2 = -1;
 		}
-		else if (vec_pos.back().old_position.second == 255 && vec_pos.back().new_position.second == 0)
+		else if (vec_pos.back().old_position.second == maxExtentY && vec_pos.back().new_position.second == 0)
 		{
-			temppos2 = 256;
+			temppos2 = maxExtentY + 1.0f;
 		}
 
 		m_DisplayOffset.second = (temppos1 - temppos2) * ratio;

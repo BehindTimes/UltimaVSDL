@@ -10,6 +10,8 @@
 #include "U5World.h"
 #include "U5Dungeon.h"
 #include <vector>
+#include <algorithm>
+#include <iterator>
 
 extern std::unique_ptr<U5Utils> m_utilities;
 extern std::unique_ptr<U5Input> m_input;
@@ -22,6 +24,7 @@ U5Game::U5Game(SDL3Helper* sdl_helper, UltimaVResource* u5_resources) :
 	m_curLocation(nullptr)
 {
 	m_world = std::make_unique<U5World>(sdl_helper, u5_resources);
+	m_world->SetParent(this);
 	m_dungeon = std::make_unique<U5Dungeon>(sdl_helper, u5_resources);
 }
 
@@ -34,6 +37,7 @@ void U5Game::LoadData()
 	m_input->SetInputType(InputType::ANY_KEY);
 	m_input->SetKeyDelay(125);
 	m_curLocation = m_world.get();
+	LoadMap(-1); // Britannia
 }
 
 void U5Game::SetSDLData()
@@ -108,6 +112,7 @@ void U5Game::GetElapsedTime()
 void U5Game::LoadMap(int map_num)
 {
 	const int MAX_MAPS = 40;
+	const int MAX_TOWN_MAPS = 32;
 
 	if (map_num >= MAX_MAPS)
 	{
@@ -117,11 +122,53 @@ void U5Game::LoadMap(int map_num)
 	// Underworld or Britannia 
 	if (map_num < 0)
 	{
+		m_location = GameLocation::World;
+		if (map_num == -1) // Britannia
+		{
+			m_currentMap.clear();
+			m_currentMap = m_resources->m_data.world_map;
+		}
+		else if (map_num == -2) // Underworld
+		{
+		}
 		return;
 	}
 
 	std::vector<int> Map_Types = {};
 	int map_type = map_num / 8;
-	int map_index = map_num % 8;
+	int map_index = 0;
+	if (map_index < MAX_TOWN_MAPS)
+	{
+		map_index = m_resources->m_data.location_z_index[map_num];
+	}
 	MapTypes curMapType = static_cast<MapTypes>(map_type);
+	switch (curMapType)
+	{
+	case MapTypes::Castle:
+		m_location = GameLocation::Town;
+		m_currentMap.clear();
+		m_currentMap = m_resources->m_data.castle_maps[map_index];
+		m_curLocation->setPos(15, 30);
+		break;
+	case MapTypes::Dwelling:
+		m_location = GameLocation::Town;
+		m_currentMap.clear();
+		m_currentMap = m_resources->m_data.dwelling_maps[map_index];
+		m_curLocation->setPos(15, 30);
+		break;
+	case MapTypes::Keep:
+		m_location = GameLocation::Town;
+		m_currentMap.clear();
+		m_currentMap = m_resources->m_data.keep_maps[map_index];
+		m_curLocation->setPos(15, 30);
+		break;
+	case MapTypes::Town:
+		m_location = GameLocation::Town;
+		m_currentMap.clear();
+		m_currentMap = m_resources->m_data.town_maps[map_index];
+		m_curLocation->setPos(15, 30);
+		break;
+	default:
+		break;
+	}
 }

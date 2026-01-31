@@ -11,6 +11,7 @@ public:
 	explicit GameBase(SDL3Helper* sdl_helper, UltimaVResource* u5_resources);
 	virtual ~GameBase();
 	std::pair<float, float> m_DisplayOffset;
+	void setPos(int x, int y);
 protected:
 	virtual void DrawBorder();
 	int m_xpos;
