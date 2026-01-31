@@ -10,6 +10,7 @@
 #include "U5Utils.h"
 #include "U5Input.h"
 #include <SDL3/SDL_keycode.h>
+#include <iostream>
 
 extern std::unique_ptr<U5Utils> m_utilities;
 extern std::unique_ptr<U5Input> m_input;
@@ -212,6 +213,32 @@ void U5World::DrawBorder()
 	m_sdl_helper->DrawTileTexture8(m_sdl_helper->m_ArrowTextures[1], 7, 23);
 
 	GameBase::DrawBorder();
+
+	if (m_xpos >= 100)
+	{
+		int tempval = (m_xpos / 100) % 10;
+		m_sdl_helper->DrawTileTexture8(m_sdl_helper->m_CharacterSetsTextures[0][0][static_cast<size_t>('0' + tempval)], 8, 0);
+	}
+	if (m_xpos >= 10)
+	{
+		int tempval = (m_xpos / 10) % 10;
+		m_sdl_helper->DrawTileTexture8(m_sdl_helper->m_CharacterSetsTextures[0][0][static_cast<size_t>('0' + tempval)], 9, 0);
+	}
+	int tempval1 = (m_xpos) % 10;
+	m_sdl_helper->DrawTileTexture8(m_sdl_helper->m_CharacterSetsTextures[0][0][static_cast<size_t>('0' + tempval1)], 10, 0);
+
+	if (m_ypos >= 100)
+	{
+		int tempval = (m_ypos / 100) % 10;
+		m_sdl_helper->DrawTileTexture8(m_sdl_helper->m_CharacterSetsTextures[0][0][static_cast<size_t>('0' + tempval)], 12, 0);
+	}
+	if (m_ypos >= 10)
+	{
+		int tempval = (m_ypos / 10) % 10;
+		m_sdl_helper->DrawTileTexture8(m_sdl_helper->m_CharacterSetsTextures[0][0][static_cast<size_t>('0' + tempval)], 13, 0);
+	}
+	int tempval2 = (m_ypos) % 10;
+	m_sdl_helper->DrawTileTexture8(m_sdl_helper->m_CharacterSetsTextures[0][0][static_cast<size_t>('0' + tempval2)], 14, 0);
 }
 
 void U5World::ProcessScroll()
@@ -245,7 +272,32 @@ void U5World::ProcessScroll()
 	else
 	{
 		float ratio = static_cast<float>(vec_pos.back().elapsed_time) / vec_pos.back().TURN_TIME;
-		m_DisplayOffset.first = (vec_pos.back().old_position.first - vec_pos.back().new_position.first) * ratio;
-		m_DisplayOffset.second = (vec_pos.back().old_position.second - vec_pos.back().new_position.second) * ratio;
+		float temppos1 = static_cast<float>(vec_pos.back().old_position.first);
+		float temppos2 = static_cast<float>(vec_pos.back().new_position.first);
+
+		if (vec_pos.back().old_position.first == 0 && vec_pos.back().new_position.first == 255)
+		{
+			temppos2 = -1;
+		}
+		else if (vec_pos.back().old_position.first == 255 && vec_pos.back().new_position.first == 0)
+		{
+			temppos2 = 256;
+		}
+		m_DisplayOffset.first = (temppos1 - temppos2) * ratio;
+
+		temppos1 = static_cast<float>(vec_pos.back().old_position.second);
+		temppos2 = static_cast<float>(vec_pos.back().new_position.second);
+		if (vec_pos.back().old_position.second == 0 && vec_pos.back().new_position.second == 255)
+		{
+			temppos2 = -1;
+		}
+		else if (vec_pos.back().old_position.second == 255 && vec_pos.back().new_position.second == 0)
+		{
+			temppos2 = 256;
+		}
+
+		m_DisplayOffset.second = (temppos1 - temppos2) * ratio;
+
+		//std::cout << vec_pos.back().old_position.first << " " << vec_pos.back().new_position.first << std::endl;
 	}
 }
