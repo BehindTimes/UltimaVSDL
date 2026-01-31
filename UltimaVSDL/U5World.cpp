@@ -11,12 +11,18 @@
 #include "U5Input.h"
 #include <SDL3/SDL_keycode.h>
 #include <iostream>
+#include <algorithm>
+#include <iterator>
+#include <utility>
+#include "U5Game.h"
 
 extern std::unique_ptr<U5Utils> m_utilities;
 extern std::unique_ptr<U5Input> m_input;
 
 U5World::U5World(SDL3Helper* sdl_helper, UltimaVResource* u5_resources) :
-	GameBase(sdl_helper, u5_resources)
+	GameBase(sdl_helper, u5_resources),
+	m_location_type(GameLocation::World),
+	m_parent(nullptr)
 {
 	m_xpos = 50;
 	m_ypos = 50;
@@ -28,6 +34,11 @@ U5World::U5World(SDL3Helper* sdl_helper, UltimaVResource* u5_resources) :
 
 U5World::~U5World()
 {
+}
+
+void U5World::SetParent(U5Game* parent)
+{
+	m_parent = parent;
 }
 
 void U5World::Render()
@@ -51,20 +62,217 @@ void U5World::Render()
 	{
 		for (int xpos = 0; xpos < 13; xpos++)
 		{
-			int curX = (mapX + xpos + 250) % 256;
-			int curY = (mapY + ypos + 250) % 256;
+			int curX = (mapX + xpos + 256) % 256;
+			int curY = (mapY + ypos + 256) % 256;
 			unsigned char curpos = m_resources->m_data.world_map[curX][curY];
 			SDL_Texture* curTexture = m_sdl_helper->m_TileTextures[curpos].GetTexture();
 			m_sdl_helper->DrawTileTexture(curTexture, xpos, ypos);
 			//curpos++;
 		}
 	}
-	
+}
+
+int U5World::checkValidLocation(const PositionData& pos_info)
+{
+	return 0;
+}
+
+void U5World::ProcessNorth()
+{
+	int tempval;
+
+	vec_pos.emplace_back();
+	vec_pos.back().old_position.first = m_xpos;
+	vec_pos.back().old_position.second = m_ypos;
+	vec_pos.back().new_position.first = m_xpos;
+	tempval = m_ypos;
+	tempval--;
+	tempval += 256;
+	tempval %= 256;
+	vec_pos.back().new_position.second = tempval;
+	if (0 != checkValidLocation(vec_pos.back()))
+	{
+		vec_pos.pop_back();
+	}
+	else
+	{
+		m_input->EnableInput(false);
+	}
+}
+
+void U5World::ProcessSouth()
+{
+	int tempval;
+
+	vec_pos.emplace_back();
+	vec_pos.back().old_position.first = m_xpos;
+	vec_pos.back().old_position.second = m_ypos;
+	vec_pos.back().new_position.first = m_xpos;
+	tempval = m_ypos;
+	tempval++;
+	tempval %= 256;
+	vec_pos.back().new_position.second = tempval;
+	if (0 != checkValidLocation(vec_pos.back()))
+	{
+		vec_pos.pop_back();
+	}
+	else
+	{
+		m_input->EnableInput(false);
+	}
+}
+
+void U5World::ProcessEast()
+{
+	int tempval;
+
+	vec_pos.emplace_back();
+	vec_pos.back().old_position.first = m_xpos;
+	vec_pos.back().old_position.second = m_ypos;
+	vec_pos.back().new_position.second = m_ypos;
+	tempval = m_xpos;
+	tempval++;
+	tempval %= 256;
+	vec_pos.back().new_position.first = tempval;
+	if (0 != checkValidLocation(vec_pos.back()))
+	{
+		vec_pos.pop_back();
+	}
+	else
+	{
+		m_input->EnableInput(false);
+	}
+}
+
+void U5World::ProcessWest()
+{
+	int tempval;
+
+	vec_pos.emplace_back();
+	vec_pos.back().old_position.first = m_xpos;
+	vec_pos.back().old_position.second = m_ypos;
+	vec_pos.back().new_position.second = m_ypos;
+	tempval = m_xpos;
+	tempval--;
+	tempval += 256;
+	tempval %= 256;
+	vec_pos.back().new_position.first = tempval;
+	if (0 != checkValidLocation(vec_pos.back()))
+	{
+		vec_pos.pop_back();
+	}
+	else
+	{
+		m_input->EnableInput(false);
+	}
+}
+
+void U5World::ProcessNorthEast()
+{
+	int tempval;
+
+	vec_pos.emplace_back();
+	vec_pos.back().old_position.first = m_xpos;
+	vec_pos.back().old_position.second = m_ypos;
+	tempval = m_ypos;
+	tempval--;
+	tempval += 256;
+	tempval %= 256;
+	vec_pos.back().new_position.second = tempval;
+	tempval = m_xpos;
+	tempval++;
+	tempval %= 256;
+	vec_pos.back().new_position.first = tempval;
+	if (0 != checkValidLocation(vec_pos.back()))
+	{
+		vec_pos.pop_back();
+	}
+	else
+	{
+		m_input->EnableInput(false);
+	}
+}
+
+void U5World::ProcessNorthWest()
+{
+	int tempval;
+
+	vec_pos.emplace_back();
+	vec_pos.back().old_position.first = m_xpos;
+	vec_pos.back().old_position.second = m_ypos;
+	tempval = m_ypos;
+	tempval--;
+	tempval += 256;
+	tempval %= 256;
+	vec_pos.back().new_position.second = tempval;
+	tempval = m_xpos;
+	tempval--;
+	tempval += 256;
+	tempval %= 256;
+	vec_pos.back().new_position.first = tempval;
+	if (0 != checkValidLocation(vec_pos.back()))
+	{
+		vec_pos.pop_back();
+	}
+	else
+	{
+		m_input->EnableInput(false);
+	}
+}
+
+void U5World::ProcessSouthEast()
+{
+	int tempval;
+
+	vec_pos.emplace_back();
+	vec_pos.back().old_position.first = m_xpos;
+	vec_pos.back().old_position.second = m_ypos;
+	tempval = m_ypos;
+	tempval++;
+	tempval %= 256;
+	vec_pos.back().new_position.second = tempval;
+	tempval = m_xpos;
+	tempval++;
+	tempval %= 256;
+	vec_pos.back().new_position.first = tempval;
+	if (0 != checkValidLocation(vec_pos.back()))
+	{
+		vec_pos.pop_back();
+	}
+	else
+	{
+		m_input->EnableInput(false);
+	}
+}
+
+void U5World::ProcessSouthWest()
+{
+	int tempval;
+
+	vec_pos.emplace_back();
+	vec_pos.back().old_position.first = m_xpos;
+	vec_pos.back().old_position.second = m_ypos;
+	tempval = m_ypos;
+	tempval++;
+	tempval %= 256;
+	vec_pos.back().new_position.second = tempval;
+	tempval = m_xpos;
+	tempval--;
+	tempval += 256;
+	tempval %= 256;
+	vec_pos.back().new_position.first = tempval;
+	if (0 != checkValidLocation(vec_pos.back()))
+	{
+		vec_pos.pop_back();
+	}
+	else
+	{
+		m_input->EnableInput(false);
+	}
 }
 
 void U5World::ProcessEvents()
 {
-	int tempval;
 	if (m_input->isAnyKeyHit())
 	{	
 		if (vec_pos.size() > 0)
@@ -75,114 +283,31 @@ void U5World::ProcessEvents()
 		switch (curKey)
 		{
 		case SDLK_KP_1:
-			vec_pos.emplace_back();
-			vec_pos.back().old_position.first = m_xpos;
-			vec_pos.back().old_position.second = m_ypos;
-			tempval = m_ypos;
-			tempval++;
-			tempval %= 256;
-			vec_pos.back().new_position.second = tempval;
-			tempval = m_xpos;
-			tempval--;
-			tempval += 256;
-			tempval %= 256;
-			vec_pos.back().new_position.first = tempval;
-			m_input->EnableInput(false);
+			ProcessSouthWest();
 			break;
 		case SDLK_KP_3:
-			vec_pos.emplace_back();
-			vec_pos.back().old_position.first = m_xpos;
-			vec_pos.back().old_position.second = m_ypos;
-			tempval = m_ypos;
-			tempval++;
-			tempval %= 256;
-			vec_pos.back().new_position.second = tempval;
-			tempval = m_xpos;
-			tempval++;
-			tempval %= 256;
-			vec_pos.back().new_position.first = tempval;
-			m_input->EnableInput(false);
+			ProcessSouthEast();
 			break;
 		case SDLK_KP_7:
-			vec_pos.emplace_back();
-			vec_pos.back().old_position.first = m_xpos;
-			vec_pos.back().old_position.second = m_ypos;
-			tempval = m_ypos;
-			tempval--;
-			tempval += 256;
-			tempval %= 256;
-			vec_pos.back().new_position.second = tempval;
-			tempval = m_xpos;
-			tempval--;
-			tempval += 256;
-			tempval %= 256;
-			vec_pos.back().new_position.first = tempval;
-			m_input->EnableInput(false);
+			ProcessNorthWest();
 			break;
 		case SDLK_KP_9:
-			vec_pos.emplace_back();
-			vec_pos.back().old_position.first = m_xpos;
-			vec_pos.back().old_position.second = m_ypos;
-			tempval = m_ypos;
-			tempval--;
-			tempval += 256;
-			tempval %= 256;
-			vec_pos.back().new_position.second = tempval;
-			tempval = m_xpos;
-			tempval++;
-			tempval %= 256;
-			vec_pos.back().new_position.first = tempval;
-			m_input->EnableInput(false);
+			ProcessNorthEast();
 			break;
 		case SDLK_UP:
-			vec_pos.emplace_back();
-			vec_pos.back().old_position.first = m_xpos;
-			vec_pos.back().old_position.second = m_ypos;
-			vec_pos.back().new_position.first = m_xpos;
-			tempval = m_ypos;
-			tempval--;
-			tempval += 256;
-			tempval %= 256;
-			vec_pos.back().new_position.second = tempval;
-			m_input->EnableInput(false);
-			ProcessScroll();
+			ProcessNorth();
 			break;
 		case SDLK_DOWN:
-			vec_pos.emplace_back();
-			vec_pos.back().old_position.first = m_xpos;
-			vec_pos.back().old_position.second = m_ypos;
-			vec_pos.back().new_position.first = m_xpos;
-			tempval = m_ypos;
-			tempval++;
-			tempval %= 256;
-			vec_pos.back().new_position.second = tempval;
-			m_input->EnableInput(false);
-			ProcessScroll();
+			ProcessSouth();
 			break;
 		case SDLK_LEFT:
-			vec_pos.emplace_back();
-			vec_pos.back().old_position.first = m_xpos;
-			vec_pos.back().old_position.second = m_ypos;
-			vec_pos.back().new_position.second = m_ypos;
-			tempval = m_xpos;
-			tempval--;
-			tempval += 256;
-			tempval %= 256;
-			vec_pos.back().new_position.first = tempval;
-			m_input->EnableInput(false);
-			ProcessScroll();
+			ProcessWest();
 			break;
 		case SDLK_RIGHT:
-			vec_pos.emplace_back();
-			vec_pos.back().old_position.first = m_xpos;
-			vec_pos.back().old_position.second = m_ypos;
-			vec_pos.back().new_position.second = m_ypos;
-			tempval = m_xpos;
-			tempval++;
-			tempval %= 256;
-			vec_pos.back().new_position.first = tempval;
-			m_input->EnableInput(false);
-			ProcessScroll();
+			ProcessEast();
+			break;
+		case SDLK_E:
+			ProcessEnter();
 			break;
 		default:
 			break;
@@ -297,7 +422,28 @@ void U5World::ProcessScroll()
 		}
 
 		m_DisplayOffset.second = (temppos1 - temppos2) * ratio;
+	}
+}
 
-		//std::cout << vec_pos.back().old_position.first << " " << vec_pos.back().new_position.first << std::endl;
+void U5World::ProcessEnter()
+{
+	m_input->SetRequireAllKeysUp();
+
+	if (m_location_type != GameLocation::World)
+	{
+		return;
+	}
+	std::pair<int, int> cur_location = {m_xpos, m_ypos};
+	auto it = std::find(m_resources->m_data.location_info.begin(), m_resources->m_data.location_info.end(), cur_location);
+	if (m_resources->m_data.location_info.end() != it)
+	{
+		size_t curMap = std::distance(m_resources->m_data.location_info.begin(), it);
+		if (m_parent != nullptr)
+		{
+			m_parent->LoadMap(static_cast<int>(curMap));
+		}
+	}
+	else
+	{
 	}
 }

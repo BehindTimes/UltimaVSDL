@@ -6,10 +6,11 @@
 #include <utility>
 #include <SDL3/SDL_stdinc.h>
 #include <vector>
+#include "U5Enums.h"
 
-struct PositionQueue
+struct PositionData
 {
-	PositionQueue() :
+	PositionData() :
 		elapsed_time(0)
 	{
 	}
@@ -18,6 +19,8 @@ struct PositionQueue
 	Uint64 elapsed_time;
 	const Uint64 TURN_TIME = 125;
 };
+
+class U5Game;
 
 class U5World : public GameBase
 {
@@ -28,8 +31,22 @@ public:
 	virtual void Render() override;
 	virtual void ProcessEvents() override;
 	void DrawBorder() override;
-	std::vector<PositionQueue> vec_pos;
+	void SetParent(U5Game* parent);
+	std::vector<PositionData> vec_pos;
 private:
 	void ProcessScroll();
+	int checkValidLocation(const PositionData& pos_info);
+	void ProcessEnter();
+	void ProcessNorth();
+	void ProcessSouth();
+	void ProcessEast();
+	void ProcessWest();
+	void ProcessNorthEast();
+	void ProcessNorthWest();
+	void ProcessSouthEast();
+	void ProcessSouthWest();
+
+	GameLocation m_location_type;
+	U5Game* m_parent;
 };
 

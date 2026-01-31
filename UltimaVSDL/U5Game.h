@@ -6,12 +6,8 @@
 #include <memory>
 #include "U5Dungeon.h"
 #include "GameBase.h"
-
-enum class GameLocation
-{
-	Dungeon,
-	World
-};
+#include <vector>
+#include "U5Enums.h"
 
 class U5Game : public GameObject
 {
@@ -24,6 +20,7 @@ public:
 	virtual void LoadData() override;
 	void SetSDLData() override;
 	void GetElapsedTime() override;
+	void LoadMap(int map_num);
 private:
 	int m_window_width;
 	int m_window_height;
@@ -32,5 +29,6 @@ private:
 	std::unique_ptr<U5World> m_world;
 	std::unique_ptr<U5Dungeon> m_dungeon;
 	GameBase* m_curLocation;
+	std::vector < std::vector<int> > m_currentMap;
 };
 

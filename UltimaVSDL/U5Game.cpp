@@ -9,6 +9,7 @@
 #include "U5Enums.h"
 #include "U5World.h"
 #include "U5Dungeon.h"
+#include <vector>
 
 extern std::unique_ptr<U5Utils> m_utilities;
 extern std::unique_ptr<U5Input> m_input;
@@ -104,3 +105,23 @@ void U5Game::GetElapsedTime()
 	}
 }
 
+void U5Game::LoadMap(int map_num)
+{
+	const int MAX_MAPS = 40;
+
+	if (map_num >= MAX_MAPS)
+	{
+		return;
+	}
+
+	// Underworld or Britannia 
+	if (map_num < 0)
+	{
+		return;
+	}
+
+	std::vector<int> Map_Types = {};
+	int map_type = map_num / 8;
+	int map_index = map_num % 8;
+	MapTypes curMapType = static_cast<MapTypes>(map_type);
+}

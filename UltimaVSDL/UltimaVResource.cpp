@@ -718,6 +718,15 @@ int UltimaVResource::LoadDataOvl()
 
 	std::copy_n(buffer.begin() + MAP_CHUNK_LOC, MAP_NUM_CHUNKS, m_data.map_chunks.begin());
 
+	const size_t LOCATION_X = 0x1e9a;
+	const size_t LOCATION_Y = 0x1ec2;
+
+	for (size_t index = 0; index < m_data.location_info.size(); index++)
+	{
+		m_data.location_info[index].first = buffer[LOCATION_X + index];
+		m_data.location_info[index].second = buffer[LOCATION_Y + index];
+	}
+
 	return 0;
 }
 
@@ -907,11 +916,17 @@ int UltimaVResource::LoadMiscMaps()
 	return 0;
 }
 
-int UltimaVResource::LoadMapChunk(unsigned char cur_chunk_val, size_t curChunkX, size_t curChunkY, std::array<std::array<unsigned char, 256>, 256> &map, const std::vector<unsigned char>& buffer)
+int UltimaVResource::LoadMapChunk(unsigned char cur_chunk_val, size_t curChunkX, size_t curChunkY, std::vector<std::vector<unsigned char>> &map, const std::vector<unsigned char>& buffer)
 {
 	const size_t CHUNK_WIDTH = 16;
 	const size_t CHUNK_HEIGHT = 16;
 	const size_t CHUNK_SIZE = CHUNK_WIDTH * CHUNK_HEIGHT;
+
+	map.resize(256);
+	for (auto& curRow : map)
+	{
+		curRow.resize(256);
+	}
 
 	if (cur_chunk_val == 0xFF) // All water
 	{
