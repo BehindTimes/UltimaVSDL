@@ -242,20 +242,20 @@ void SDL3Helper::DrawTiledText(std::string text, int x_tile, int y_tile)
 	}
 }
 
-void SDL3Helper::DrawTileRect(int x_tile, int y_tile) const
+void SDL3Helper::DrawTileRect(int x_tile, int y_tile, int width, int height, unsigned char r, unsigned char g, unsigned char b) const
 {
 	SDL_FRect toRect{};
 	toRect.x = 0;
 	toRect.y = static_cast<float>(y_tile * HALF_TILE_HEIGHT);
 	toRect.x = static_cast<float>(x_tile * HALF_TILE_WIDTH);
-	toRect.w = HALF_TILE_WIDTH;
-	toRect.h = HALF_TILE_HEIGHT;
-	SDL_SetRenderDrawColor(m_renderer, 0, 0, 0, 0xFF);
+	toRect.w = static_cast<float>(HALF_TILE_WIDTH * width);
+	toRect.h = static_cast<float>(HALF_TILE_HEIGHT * height);
+	SDL_SetRenderDrawColor(m_renderer, r, g, b, 0xFF);
 	SDL_RenderFillRect(m_renderer, &toRect);
 	SDL_SetRenderDrawColor(m_renderer, 0, 0, 0, 0);
 }
 
-void SDL3Helper::DrawTileRect(int x_tile, int y_tile, int num_x, int num_y, unsigned char color, RenderMode mode) const
+/*void SDL3Helper::DrawTileRect(int x_tile, int y_tile, int num_x, int num_y, unsigned char color, RenderMode mode) const
 {
 	unsigned char color_array[3];
 
@@ -280,7 +280,7 @@ void SDL3Helper::DrawTileRect(int x_tile, int y_tile, int num_x, int num_y, unsi
 	SDL_SetRenderDrawColor(m_renderer, color_array[0], color_array[1], color_array[2], 0xFF);
 	SDL_RenderFillRect(m_renderer, &toRect);
 	SDL_SetRenderDrawColor(m_renderer, 0, 0, 0, 0);
-}
+}*/
 
 void SDL3Helper::DrawTileTexture8(SDL_Texture* texture, int x_tile, int y_tile) const
 {

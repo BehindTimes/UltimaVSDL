@@ -51,7 +51,8 @@ struct U5Data
 	U5Data() :
 		map_chunks{},
 		world_map{},
-		underworld_map{}
+		underworld_map{},
+		location_z_index{}
 	{
 	}
 	const size_t NUM_STORIES = 21;

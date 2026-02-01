@@ -17,7 +17,7 @@ struct PositionData
 	std::pair<int, int> old_position;
 	std::pair<int, int> new_position;
 	Uint64 elapsed_time;
-	const Uint64 TURN_TIME = 125;
+	const Uint64 TURN_TIME = 120;
 };
 
 class U5Game;

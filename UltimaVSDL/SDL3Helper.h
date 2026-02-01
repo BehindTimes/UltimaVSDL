@@ -50,8 +50,8 @@ public:
 	void DrawInvertRect(int x_tile, int y_tile, int width, int height) const;
 	void DrawTileTexture8(SDL_Texture* texture, int x_tile, int y_tile) const;
 	void DrawTileTexture(SDL_Texture* texture, int x_tile, int y_tile) const;
-	void DrawTileRect(int x_tile, int y_tile) const;
-	void DrawTileRect(int x_tile, int y_tile, int num_x, int num_y, unsigned char color, RenderMode mode) const;
+	void DrawTileRect(int x_tile, int y_tile, int width = 1, int height = 1, unsigned char r = 0, unsigned char g = 0, unsigned char b = 0) const;
+	//void DrawTileRect(int x_tile, int y_tile, int num_x, int num_y, unsigned char color, RenderMode mode) const;
 	void DrawLineManual(std::vector<std::pair<int, int>> m_rect, int step, bool isHorz, int xPos, int yPos) const;
 	void CreateTextureFromMemory(SDL_Texture*& texture, const U5ImageData& curData, bool has_transparent = false, unsigned char transparent_color[3] = {}) const;
 	void CreateTextureFromMemoryWithMask(SDL_Texture*& texture, SDL_Texture*& render_texture, const U5ImageData& curData, const U5ImageData& maskData) const;

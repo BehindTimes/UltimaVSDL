@@ -15,6 +15,8 @@
 #include <iterator>
 #include <utility>
 #include "U5Game.h"
+#include "ColorData.h"
+#include <string.h>
 
 extern std::unique_ptr<U5Utils> m_utilities;
 extern std::unique_ptr<U5Input> m_input;
@@ -135,7 +137,7 @@ void U5World::ProcessNorth()
 	else
 	{
 		m_input->EnableInput(false);
-		m_parent->m_console->PrintText("North");
+		m_parent->m_console->PrintText("North\n\n");
 	}
 }
 
@@ -161,7 +163,7 @@ void U5World::ProcessSouth()
 	else
 	{
 		m_input->EnableInput(false);
-		m_parent->m_console->PrintText("South");
+		m_parent->m_console->PrintText("South\n\n");
 	}
 }
 
@@ -187,7 +189,7 @@ void U5World::ProcessEast()
 	else
 	{
 		m_input->EnableInput(false);
-		m_parent->m_console->PrintText("East");
+		m_parent->m_console->PrintText("East\n\n");
 	}
 }
 
@@ -214,7 +216,7 @@ void U5World::ProcessWest()
 	else
 	{
 		m_input->EnableInput(false);
-		m_parent->m_console->PrintText("West");
+		m_parent->m_console->PrintText("West\n\n");
 	}
 }
 
@@ -247,6 +249,7 @@ void U5World::ProcessNorthEast()
 	else
 	{
 		m_input->EnableInput(false);
+		m_parent->m_console->PrintText("North East\n\n");
 	}
 }
 
@@ -277,6 +280,7 @@ void U5World::ProcessNorthWest()
 	else
 	{
 		m_input->EnableInput(false);
+		m_parent->m_console->PrintText("North West\n\n");
 	}
 }
 
@@ -308,6 +312,7 @@ void U5World::ProcessSouthEast()
 	else
 	{
 		m_input->EnableInput(false);
+		m_parent->m_console->PrintText("South East\n\n");
 	}
 }
 
@@ -334,6 +339,7 @@ void U5World::ProcessSouthWest()
 	else
 	{
 		m_input->EnableInput(false);
+		m_parent->m_console->PrintText("South West\n\n");
 	}
 }
 
@@ -384,12 +390,22 @@ void U5World::ProcessEvents()
 void U5World::DrawBorder()
 {
 	SDL_FRect line;
+	unsigned char color_array[3];
 
-	m_sdl_helper->DrawTileRect(1, 0, 6, 1, 1, m_resources->m_render_mode);
-	m_sdl_helper->DrawTileRect(1, 23, 6, 1, 1, m_resources->m_render_mode);
+	if (m_resources->m_render_mode == RenderMode::CGA)
+	{ 
+		std::memcpy(color_array, cga_table[1], sizeof(color_array));
+	}
+	else
+	{
+		std::memcpy(color_array, ega_table[1], sizeof(color_array));
+	}
 
-	m_sdl_helper->DrawTileRect(17, 0, 22, 1, 1, m_resources->m_render_mode);
-	m_sdl_helper->DrawTileRect(17, 23, 6, 1, 1, m_resources->m_render_mode);
+	m_sdl_helper->DrawTileRect(1, 0, 6, 1, color_array[0], color_array[1], color_array[2]);
+	m_sdl_helper->DrawTileRect(1, 23, 6, 1, color_array[0], color_array[1], color_array[2]);
+
+	m_sdl_helper->DrawTileRect(17, 0, 22, 1, color_array[0], color_array[1], color_array[2]);
+	m_sdl_helper->DrawTileRect(17, 23, 6, 1, color_array[0], color_array[1], color_array[2]);
 
 	SDL_SetRenderDrawColor(m_sdl_helper->m_renderer, 0xFF, 0xFF, 0xFF, 0xFF);
 	line = { HALF_TILE_WIDTH - LINE_THICKNESS, HALF_TILE_HEIGHT - LINE_THICKNESS, (6 * HALF_TILE_WIDTH) + (LINE_THICKNESS), LINE_THICKNESS };

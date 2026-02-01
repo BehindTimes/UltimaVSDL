@@ -6,6 +6,12 @@
 #include "U5Enums.h"
 #include <string>
 #include <SDL3/SDL_stdinc.h>
+#include <memory>
+#include "U5Utils.h"
+#include "U5Input.h"
+
+extern std::unique_ptr<U5Utils> m_utilities;
+extern std::unique_ptr<U5Input> m_input;
 
 U5Console::U5Console(SDL3Helper* sdl_helper, UltimaVResource* u5_resources) :
 	m_sdl_helper(sdl_helper),
@@ -13,10 +19,16 @@ U5Console::U5Console(SDL3Helper* sdl_helper, UltimaVResource* u5_resources) :
 	m_tickElapse(0),
 	m_showPrompt(true),
 	m_curCursor(0),
-	m_curCursorDelay(0)
+	m_curCursorRenderDelay(0),
+	m_curScrollDelay(0),
+	m_curLine(12),
+	m_cursorPosX(1),
+	m_scroll(false),
+	m_scrollOffset(0),
+	m_startLine(0),
+	m_blockPrompt(false)
 {
-	m_cursorPos.first = 1;
-	m_cursorPos.second = 12;
+	ShowPrompt(true);
 }
 
 U5Console::~U5Console()
@@ -30,28 +42,128 @@ void U5Console::Render(Uint64 tickElapse)
 	m_sdl_helper->SetRenderTarget(m_sdl_helper->m_TargetTextures[TTV_CONSOLE]);
 	SDL_SetRenderDrawColor(m_sdl_helper->m_renderer, 0, 0, 0, 0xFF);
 	m_sdl_helper->ClearScreen();
-	if (m_showPrompt)
+
+	if (m_scroll)
 	{
-		RenderCursor();
+		ProcessScroll();
+		m_sdl_helper->SetRenderTarget(m_sdl_helper->m_TargetTextures[TTV_CONSOLE]);
+		m_sdl_helper->RenderTextureAt(m_sdl_helper->m_TargetTextures[TTV_CONSOLE_BUFFER], 0, static_cast<float>(-m_startLine * HALF_TILE_HEIGHT) - m_scrollOffset, 16.0f * HALF_TILE_WIDTH, static_cast<float>(NUM_BUF_LINES * HALF_TILE_HEIGHT));
+		m_sdl_helper->RenderTextureAt(m_sdl_helper->m_TargetTextures[TTV_CONSOLE_BUFFER], 0, static_cast<float>((14 - m_startLine) * HALF_TILE_HEIGHT) - m_scrollOffset, 16.0f * HALF_TILE_WIDTH, static_cast<float>(NUM_BUF_LINES * HALF_TILE_HEIGHT));
 	}
+	else
+	{
+		CheckText();
+		m_sdl_helper->SetRenderTarget(m_sdl_helper->m_TargetTextures[TTV_CONSOLE]);
+		m_sdl_helper->RenderTextureAt(m_sdl_helper->m_TargetTextures[TTV_CONSOLE_BUFFER], 0, static_cast<float>(-m_startLine * HALF_TILE_HEIGHT), 16.0f * HALF_TILE_WIDTH, static_cast<float>(NUM_BUF_LINES * HALF_TILE_HEIGHT));
+		m_sdl_helper->RenderTextureAt(m_sdl_helper->m_TargetTextures[TTV_CONSOLE_BUFFER], 0, static_cast<float>((14 - m_startLine) * HALF_TILE_HEIGHT), 16.0f * HALF_TILE_WIDTH, static_cast<float>(NUM_BUF_LINES * HALF_TILE_HEIGHT));
+
+		if (m_showPrompt)
+		{
+			RenderCursor();
+		}
+	}
+	
 	m_sdl_helper->SetRenderTarget(nullptr);
-	m_sdl_helper->RenderTextureAt(m_sdl_helper->m_TargetTextures[TTV_CONSOLE], 24 * HALF_TILE_WIDTH, 11 * HALF_TILE_HEIGHT, 16 * HALF_TILE_WIDTH, 13 * HALF_TILE_HEIGHT);
+	m_sdl_helper->RenderTextureAt(m_sdl_helper->m_TargetTextures[TTV_CONSOLE], 24 * HALF_TILE_WIDTH, 11 * HALF_TILE_HEIGHT, 16 * HALF_TILE_WIDTH, static_cast<float>(NUM_BUF_LINES - 1) * HALF_TILE_HEIGHT);
 	SDL_SetRenderDrawColor(m_sdl_helper->m_renderer, 0, 0, 0, 0);
+}
+
+void U5Console::ClearLine()
+{
+	int tempLine = m_curLine + 2;
+	tempLine %= NUM_BUF_LINES;
+	m_sdl_helper->SetRenderTarget(m_sdl_helper->m_TargetTextures[TTV_CONSOLE_BUFFER]);
+	m_sdl_helper->DrawTileRect(0, tempLine, 16, 1);
+	m_sdl_helper->SetRenderTarget(nullptr);
+}
+
+bool U5Console::CheckText()
+{
+	if (m_buffer_strings.empty())
+	{
+		if (!m_blockPrompt)
+		{
+			ShowPrompt(true);
+			m_showPrompt = true;
+		}
+		return false;
+	}
+	m_sdl_helper->SetRenderTarget(m_sdl_helper->m_TargetTextures[TTV_CONSOLE_BUFFER]);
+	std::string curLine = m_buffer_strings.front();
+	m_scroll = curLine == std::string("\n");
+	if (!m_scroll)
+	{
+		m_sdl_helper->DrawTiledText(curLine, m_cursorPosX, m_curLine);
+	}
+	m_buffer_strings.pop_front();
+	m_sdl_helper->SetRenderTarget(nullptr);
+	
+	return m_scroll;
 }
 
 void U5Console::PrintText(std::string text)
 {
+	m_showPrompt = false;
+
+	auto strVals = m_utilities->splitString(text, '\n', true);
+
+	if (strVals.size() > 0)
+	{
+		for (auto& elem : strVals)
+		{
+			m_buffer_strings.push_back(elem);
+		}
+		if (!m_scroll)
+		{
+			CheckText();
+		}
+	}
+}
+
+void U5Console::ProcessScroll()
+{
+	m_curScrollDelay += m_tickElapse;
+	if (m_curScrollDelay >= SCROLL_DELAY)
+	{
+		ClearLine();
+		m_scrollOffset = 0;
+		m_scroll = false;
+		m_curScrollDelay = 0;
+		m_startLine++;
+		m_curLine++;
+		m_curLine %= NUM_BUF_LINES;
+		m_startLine %= NUM_BUF_LINES;
+		CheckText();
+	}
+	else
+	{
+		float ratio = static_cast<float>(m_curScrollDelay) / SCROLL_DELAY;
+		m_scrollOffset = HALF_TILE_HEIGHT * ratio;
+	}
 }
 
 void U5Console::RenderCursor()
 {
-	m_curCursorDelay += m_tickElapse;
-	if (m_curCursorDelay >= CURSOR_DELAY)
+	if (m_input->IsAnyKeyDown())
+	{
+		return;
+	}
+	m_curCursorRenderDelay += m_tickElapse;
+	if (m_curCursorRenderDelay >= CURSOR_RENDER_DELAY)
 	{
 		const int NUM_CURSOR = 4;
 		m_curCursor++;
 		m_curCursor %= NUM_CURSOR;
-		m_curCursorDelay %= CURSOR_DELAY;
+		m_curCursorRenderDelay %= CURSOR_RENDER_DELAY;
 	}
-	m_sdl_helper->DrawTileTexture8(m_sdl_helper->m_CharacterSetsTextures[0][0][static_cast<size_t>(5 + m_curCursor)], m_cursorPos.first, m_cursorPos.second);
+	int temppos = m_startLine + 12;
+	temppos %= 14;
+	m_sdl_helper->DrawTileTexture8(m_sdl_helper->m_CharacterSetsTextures[0][0][static_cast<size_t>(5 + m_curCursor)], m_cursorPosX, 12);
+}
+
+void U5Console::ShowPrompt(bool show)
+{
+	m_sdl_helper->SetRenderTarget(m_sdl_helper->m_TargetTextures[TTV_CONSOLE_BUFFER]);
+	m_sdl_helper->DrawTileTexture8(m_sdl_helper->m_ArrowTextures[1], 0, m_curLine);
+	m_sdl_helper->SetRenderTarget(nullptr);
 }

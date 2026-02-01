@@ -44,6 +44,11 @@ bool U5Input::isAnyKeyHit() const
 	return m_anyKeyHit;
 }
 
+bool U5Input::IsAnyKeyDown() const
+{
+	return !m_curKeyCodes.empty();
+}
+
 void U5Input::StartInput()
 {
 	m_anyKeyHit = false;

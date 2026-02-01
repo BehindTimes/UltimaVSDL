@@ -28,6 +28,7 @@ public:
 	SDL_Keycode GetKeyCode() const;
 	void SetKeyDelay(Uint64 delay);
 	void SetRequireAllKeysUp();
+	bool IsAnyKeyDown() const;
 private:
 	SDL3Helper* m_sdl_helper;
 
