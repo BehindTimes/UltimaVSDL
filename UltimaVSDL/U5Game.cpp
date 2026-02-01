@@ -12,6 +12,7 @@
 #include <vector>
 #include <algorithm>
 #include <iterator>
+#include "U5Console.h"
 
 extern std::unique_ptr<U5Utils> m_utilities;
 extern std::unique_ptr<U5Input> m_input;
@@ -26,6 +27,7 @@ U5Game::U5Game(SDL3Helper* sdl_helper, UltimaVResource* u5_resources) :
 	m_world = std::make_unique<U5World>(sdl_helper, u5_resources);
 	m_world->SetParent(this);
 	m_dungeon = std::make_unique<U5Dungeon>(sdl_helper, u5_resources);
+	m_console = std::make_unique<U5Console>(sdl_helper, u5_resources);
 }
 
 U5Game::~U5Game()
@@ -50,6 +52,8 @@ void U5Game::Render()
 	m_sdl_helper->SetRenderTarget(nullptr);
 	m_sdl_helper->GetScreenDimensions(m_window_width, m_window_height);
 	m_sdl_helper->ClearScreen();
+
+	m_console->Render(m_tickElapse);
 	
 	if (nullptr != m_curLocation)
 	{

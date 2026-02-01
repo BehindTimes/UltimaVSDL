@@ -8,6 +8,7 @@
 #include "GameBase.h"
 #include <vector>
 #include "U5Enums.h"
+#include "U5Console.h"
 
 class U5Game : public GameObject
 {
@@ -24,6 +25,7 @@ public:
 
 	std::vector < std::vector<unsigned char> > m_currentMap;
 	GameLocation m_location;
+	std::unique_ptr<U5Console> m_console;
 
 private:
 	int m_window_width;

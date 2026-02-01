@@ -66,6 +66,9 @@
     <ClCompile Include="GameBase.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="U5Console.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SDL3Helper.h">
@@ -120,6 +123,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="GameBase.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="U5Console.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

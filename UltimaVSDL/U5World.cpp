@@ -135,6 +135,7 @@ void U5World::ProcessNorth()
 	else
 	{
 		m_input->EnableInput(false);
+		m_parent->m_console->PrintText("North");
 	}
 }
 
@@ -160,6 +161,7 @@ void U5World::ProcessSouth()
 	else
 	{
 		m_input->EnableInput(false);
+		m_parent->m_console->PrintText("South");
 	}
 }
 
@@ -185,6 +187,7 @@ void U5World::ProcessEast()
 	else
 	{
 		m_input->EnableInput(false);
+		m_parent->m_console->PrintText("East");
 	}
 }
 
@@ -211,6 +214,7 @@ void U5World::ProcessWest()
 	else
 	{
 		m_input->EnableInput(false);
+		m_parent->m_console->PrintText("West");
 	}
 }
 
