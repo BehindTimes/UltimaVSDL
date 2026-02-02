@@ -11,6 +11,8 @@
 #include "U5Input.h"
 #include <iostream>
 #include <vector>
+#include <deque>
+#include <utility>
 
 extern std::unique_ptr<U5Utils> m_utilities;
 extern std::unique_ptr<U5Input> m_input;
@@ -29,9 +31,10 @@ U5Console::U5Console(SDL3Helper* sdl_helper, UltimaVResource* u5_resources) :
 	m_scrollOffset(0),
 	m_startLine(0),
 	m_blockPrompt(false),
-	m_hasPrompt(true)
+	m_hasPrompt(true),
+	m_smoothscroll(true)
 {
-	ShowPrompt(true);
+	ShowPrompt();
 }
 
 U5Console::~U5Console()
@@ -151,7 +154,7 @@ std::vector<std::string> U5Console::FormatText(std::string text, int startElem)
 		{
 			ret.emplace_back(text.substr(0, found_pos));
 			ret.emplace_back(std::string("\n"));
-			text.erase(0, found_pos + 1);
+			text.erase(0, static_cast<size_t>(found_pos + 1));
 		}
 		else
 		{
@@ -165,6 +168,25 @@ std::vector<std::string> U5Console::FormatText(std::string text, int startElem)
 	return ret;
 }
 
+int U5Console::GetCursorStartPos()
+{
+	if (m_buffer_strings.empty())
+	{
+		return m_cursorPosX;
+	}
+	int curpos = 0;
+	for (std::deque<std::pair<int,std::string>>::reverse_iterator it = m_buffer_strings.rbegin(); it != m_buffer_strings.rend(); ++it)
+	{
+		if ((*it).second == std::string("\n"))
+		{
+			return curpos;
+		}
+		curpos += static_cast<int>((*it).second.size());
+	}
+
+	return m_cursorPosX;
+}
+
 void U5Console::PrintText(std::string text, bool showElem)
 {
 	auto strVals = m_utilities->splitString(text, '\n', true);
@@ -174,15 +196,8 @@ void U5Console::PrintText(std::string text, bool showElem)
 		bool first = true;
 		for (auto& elem : strVals)
 		{
-			bool tempBuf = m_cursorPosX;
-			if (!m_buffer_strings.empty())
-			{
-				if (m_buffer_strings.back().first == 1)
-				{
-					tempBuf = 1;
-				}
-			}
-			auto tempVals = FormatText(elem, first ? tempBuf : 0);
+			auto tempVals = FormatText(elem, first ? GetCursorStartPos() : 0);
+			first = false;
 			for (auto& elem1 : tempVals)
 			{
 				m_buffer_strings.push_back({ showElem ? 1 : 0, elem1 });
@@ -211,7 +226,7 @@ void U5Console::ProcessScroll()
 		m_startLine %= NUM_BUF_LINES;
 		if (m_hasPrompt)
 		{
-			ShowPrompt(true);
+			ShowPrompt();
 			m_cursorPosX = 1;
 		}
 		else
@@ -222,8 +237,11 @@ void U5Console::ProcessScroll()
 	}
 	else
 	{
-		float ratio = static_cast<float>(m_curScrollDelay) / SCROLL_DELAY;
-		m_scrollOffset = HALF_TILE_HEIGHT * ratio;
+		if (m_smoothscroll)
+		{
+			float ratio = static_cast<float>(m_curScrollDelay) / SCROLL_DELAY;
+			m_scrollOffset = HALF_TILE_HEIGHT * ratio;
+		}
 	}
 }
 
@@ -246,7 +264,7 @@ void U5Console::RenderCursor()
 	m_sdl_helper->DrawTileTexture8(m_sdl_helper->m_CharacterSetsTextures[0][0][static_cast<size_t>(5 + m_curCursor)], m_cursorPosX, 12);
 }
 
-void U5Console::ShowPrompt(bool show)
+void U5Console::ShowPrompt()
 {
 	m_sdl_helper->SetRenderTarget(m_sdl_helper->m_TargetTextures[TTV_CONSOLE_BUFFER]);
 	m_sdl_helper->DrawTileTexture8(m_sdl_helper->m_ArrowTextures[1], 0, m_curLine);

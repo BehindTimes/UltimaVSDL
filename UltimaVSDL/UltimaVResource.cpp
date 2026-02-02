@@ -665,6 +665,23 @@ int UltimaVResource::LoadStory(std::vector<unsigned char> &data_buffer)
 	return 0;
 }
 
+std::string UltimaVResource::ReadNextString(std::vector<unsigned char>::iterator data)
+{
+	const int MAX_NAME_SIZE = 64;
+	std::string retval;
+	// Limit 
+	for (int index = 0; index < MAX_NAME_SIZE; index++)
+	{
+		if (*(data + index) == 0)
+		{
+			return retval;
+		}
+		retval += *(data + index);
+	}
+
+	return retval;
+}
+
 bool UltimaVResource::ReadStrings(const std::vector<unsigned char>& buffer, std::vector<std::string>& str_vec, size_t start_pos, size_t end_pos)
 {
 	if (buffer.size() <= end_pos)
@@ -726,7 +743,15 @@ int UltimaVResource::LoadDataOvl()
 	{
 		return -5;
 	}
+	if (!ReadStrings(buffer, m_data.game_strings_0, 0x52, 0x129a))
+	{
+		return -5;
+	}
 	if (!ReadStrings(buffer, m_data.game_strings_1, 0x266f, 0x28d5))
+	{
+		return -5;
+	}
+	if (!ReadStrings(buffer, m_data.game_strings_2, 0x2956, 0x2bd0))
 	{
 		return -5;
 	}
@@ -742,6 +767,7 @@ int UltimaVResource::LoadDataOvl()
 	const size_t LOCATION_X = 0x1e9a;
 	const size_t LOCATION_Y = 0x1ec2;
 	const size_t LOCATION_Z = 0x1e2a;
+	const size_t LOCATION_NAME_OFFSET = 0x1e4a;
 
 	for (size_t index = 0; index < m_data.location_info.size(); index++)
 	{
@@ -756,6 +782,12 @@ int UltimaVResource::LoadDataOvl()
 				return -6;
 			}
 		}
+
+		uint32_t name_offset;
+		size_t curPos = LOCATION_NAME_OFFSET + (2 * index);
+		name_offset = ReadInt16(buffer.begin(), curPos);
+		name_offset += 0x10;
+		m_data.location_names[index] = ReadNextString(buffer.begin() + name_offset);
 	}
 
 	return 0;

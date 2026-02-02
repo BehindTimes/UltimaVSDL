@@ -16,13 +16,14 @@ public:
 
 	void Render(Uint64 tickElapse);
 	void PrintText(std::string text, bool showElem = false);
-	void ShowPrompt(bool show);
+	void ShowPrompt();
 	void BlockPrompt(bool block);
 private:
 	void RenderCursor();
 	void ClearLine();
 	void ProcessScroll();
 	bool CheckText();
+	int GetCursorStartPos();
 	std::vector<std::string> FormatText(std::string text, int startElem = 0);
 
 	SDL3Helper* m_sdl_helper;
@@ -37,6 +38,7 @@ private:
 	bool m_scroll;
 	bool m_blockPrompt;
 	bool m_hasPrompt;
+	bool m_smoothscroll;
 
 	float m_scrollOffset;
 	int m_startLine;

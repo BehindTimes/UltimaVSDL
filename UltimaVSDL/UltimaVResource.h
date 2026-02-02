@@ -62,7 +62,9 @@ struct U5Data
 	std::vector<unsigned char> intro_string_1;
 	std::vector<unsigned char> intro_string_2;
 	std::vector<std::string> intro_demo_string;
+	std::vector<std::string> game_strings_0;
 	std::vector<std::string> game_strings_1;
+	std::vector<std::string> game_strings_2;
 	std::vector<std::string> intro_strings;
 	std::array<unsigned char, 0x100> map_chunks;
 	std::vector<std::vector<unsigned char>> world_map;
@@ -72,6 +74,7 @@ struct U5Data
 	std::vector<std::vector<std::vector<unsigned char>>> dwelling_maps;
 	std::vector<std::vector<std::vector<unsigned char>>> castle_maps;
 	std::array<std::pair<int, int>, 0x28> location_info;
+	std::array<std::string, 0x28> location_names;
 	std::array<int, 0x20> location_z_index;
 };
 
@@ -178,5 +181,6 @@ private:
 	int ReadImage(std::vector<unsigned char> &data, size_t offset, int numPixelsPerByte, U5ImageData& outImage);
 	void LoadStoryText(const std::vector<unsigned char>& buffer, size_t pos, std::vector<unsigned char>& text);
 	bool ReadStrings(const std::vector<unsigned char>& buffer, std::vector<std::string>& str_vec, size_t start_pos, size_t end_pos);
+	std::string ReadNextString(std::vector<unsigned char>::iterator data);
 };
 

@@ -49,6 +49,8 @@ const int WATER_ANIMATE = 2000;
 const int FIRE_ANIMATE = 100;
 const int NPC_ANIMATE = 250;
 
+const int NUM_CONSOLE_WIDTH = 16;
+
 enum class GameLocation
 {
 	Dungeon,

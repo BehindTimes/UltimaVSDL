@@ -27,8 +27,10 @@ U5World::U5World(SDL3Helper* sdl_helper, UltimaVResource* u5_resources) :
 	m_location_type(GameLocation::World),
 	m_parent(nullptr)
 {
-	m_xpos = 50;
-	m_ypos = 50;
+	//m_xpos = 50;
+	//m_ypos = 50;
+	m_xpos = 86;
+	m_ypos = 110;
 	m_DisplayOffset.first = 0;
 	m_DisplayOffset.second = 0;
 
@@ -628,6 +630,7 @@ void U5World::ProcessEnter()
 		return;
 	}
 	std::pair<int, int> cur_location = {m_xpos, m_ypos};
+	std::string dwelling_name;
 	auto it = std::find(m_resources->m_data.location_info.begin(), m_resources->m_data.location_info.end(), cur_location);
 	if (m_resources->m_data.location_info.end() != it)
 	{
@@ -635,9 +638,62 @@ void U5World::ProcessEnter()
 		if (m_parent != nullptr)
 		{
 			m_parent->LoadMap(static_cast<int>(curMap));
+
+			m_parent->m_console->PrintText(m_resources->m_data.game_strings_2[31]);
+			if (m_resources->m_data.location_names[curMap].empty())
+			{
+				// Specially handle them
+				switch (curMap)
+				{
+				case 0x10: // Lord British
+					dwelling_name = m_resources->m_data.game_strings_2[0x2d];
+					m_parent->m_console->PrintText(dwelling_name + std::string("\n"), false);
+					break;
+				default:
+					break;
+				}
+			}
+			else
+			{
+				int dwellingType = static_cast<int>(curMap / 8);
+				
+				switch (dwellingType)
+				{
+				case 0: // town
+					dwelling_name = m_resources->m_data.game_strings_2[0x25];
+					break;
+				case 1: // dwelling
+					dwelling_name = m_resources->m_data.game_strings_2[0x21];
+					break;
+				case 2: // village
+					dwelling_name = m_resources->m_data.game_strings_2[0x24];
+					break;
+				case 3: // keep
+					dwelling_name = m_resources->m_data.game_strings_2[0x23];
+					break;
+				case 4: // dungeon
+					dwelling_name = m_resources->m_data.game_strings_2[0x29];
+					break;
+				default:
+					dwelling_name = "???";
+					break;
+				}
+				m_parent->m_console->PrintText(dwelling_name + std::string("\n\n"), false);
+				int num_spaces = static_cast<int>(NUM_CONSOLE_WIDTH - m_resources->m_data.location_names[curMap].size()) / 2;
+				for (int index = 0; index < num_spaces; index++)
+				{
+					m_parent->m_console->PrintText(" ", false);
+				}
+				m_parent->m_console->PrintText(m_resources->m_data.location_names[curMap]);
+				m_parent->m_console->PrintText("\n", false);
+			}
+			m_parent->m_console->PrintText("\n", true);
 		}
 	}
 	else
 	{
+		m_parent->m_console->PrintText(m_resources->m_data.game_strings_2[31]);
+		m_parent->m_console->PrintText(m_resources->m_data.game_strings_2[46]);
+		m_parent->m_console->PrintText("\n", true);
 	}
 }
