@@ -3,8 +3,10 @@
 #include "UltimaVResource.h"
 #include "SDL3Helper.h"
 #include <SDL3/SDL_stdinc.h>
-#include <stack>
 #include <deque>
+#include <string>
+#include <utility>
+#include <vector>
 
 class U5Console
 {
@@ -13,13 +15,15 @@ public:
 	~U5Console();
 
 	void Render(Uint64 tickElapse);
-	void PrintText(std::string text);
+	void PrintText(std::string text, bool showElem = false);
 	void ShowPrompt(bool show);
+	void BlockPrompt(bool block);
 private:
 	void RenderCursor();
 	void ClearLine();
 	void ProcessScroll();
 	bool CheckText();
+	std::vector<std::string> FormatText(std::string text, int startElem = 0);
 
 	SDL3Helper* m_sdl_helper;
 	UltimaVResource* m_resources;
@@ -32,6 +36,7 @@ private:
 	int m_curLine;
 	bool m_scroll;
 	bool m_blockPrompt;
+	bool m_hasPrompt;
 
 	float m_scrollOffset;
 	int m_startLine;
@@ -39,6 +44,6 @@ private:
 	const Uint64 CURSOR_RENDER_DELAY = 100;
 	const Uint64 SCROLL_DELAY = 60;
 	const int NUM_BUF_LINES = 14;
-	std::deque<std::string> m_buffer_strings;
+	std::deque<std::pair<int, std::string>> m_buffer_strings;
 };
 

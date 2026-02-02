@@ -20,7 +20,8 @@ U5Input::U5Input(SDL3Helper* sdl_helper) :
 	m_curElapsedTime(0),
 	m_anyKeyHit(false),
 	m_allKeysMustBeUp(false),
-	m_allowDiagonals(false)
+	m_allowDiagonals(false),
+	m_isValid(true)
 {
 	m_allowDiagonals = true;
 	m_curTick = m_sdl_helper->GetCurrentTick();
@@ -47,6 +48,11 @@ bool U5Input::isAnyKeyHit() const
 bool U5Input::IsAnyKeyDown() const
 {
 	return !m_curKeyCodes.empty();
+}
+
+bool U5Input::IsEnabled() const
+{
+	return m_enabled;
 }
 
 void U5Input::StartInput()

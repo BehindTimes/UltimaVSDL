@@ -726,6 +726,10 @@ int UltimaVResource::LoadDataOvl()
 	{
 		return -5;
 	}
+	if (!ReadStrings(buffer, m_data.game_strings_1, 0x266f, 0x28d5))
+	{
+		return -5;
+	}
 	/*if (!ReadStrings(buffer, m_data.intro_strings, 0x750a, 0xa459))
 	{
 		return -5;

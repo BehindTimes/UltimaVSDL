@@ -29,6 +29,9 @@ public:
 	void SetKeyDelay(Uint64 delay);
 	void SetRequireAllKeysUp();
 	bool IsAnyKeyDown() const;
+	bool IsEnabled() const;
+
+	bool m_isValid;
 private:
 	SDL3Helper* m_sdl_helper;
 

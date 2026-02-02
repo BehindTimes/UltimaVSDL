@@ -62,6 +62,7 @@ struct U5Data
 	std::vector<unsigned char> intro_string_1;
 	std::vector<unsigned char> intro_string_2;
 	std::vector<std::string> intro_demo_string;
+	std::vector<std::string> game_strings_1;
 	std::vector<std::string> intro_strings;
 	std::array<unsigned char, 0x100> map_chunks;
 	std::vector<std::vector<unsigned char>> world_map;

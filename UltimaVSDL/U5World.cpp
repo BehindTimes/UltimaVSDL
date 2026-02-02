@@ -32,6 +32,8 @@ U5World::U5World(SDL3Helper* sdl_helper, UltimaVResource* u5_resources) :
 	m_DisplayOffset.second = 0;
 
 	m_smoothscroll = true;
+
+	m_process_key = std::bind(&U5World::ProcessAnyKeyHit, this);
 }
 
 U5World::~U5World()
@@ -46,7 +48,7 @@ void U5World::SetParent(U5Game* parent)
 void U5World::Render()
 {
 	DrawBorder();
-	if (!vec_pos.empty())
+	if (!m_vec_pos.empty())
 	{
 		ProcessScroll();
 	}
@@ -107,6 +109,8 @@ int U5World::checkValidLocation(const PositionData& pos_info)
 			pos_info.new_position.first >= m_parent->m_currentMap.size() ||
 			pos_info.new_position.second >= m_parent->m_currentMap[0].size())
 		{
+			m_process_key = std::bind(&U5World::ProcessLeaveTown, this);
+			m_parent->m_console->BlockPrompt(true);
 			return -1;
 		}
 	}
@@ -117,10 +121,10 @@ void U5World::ProcessNorth()
 {
 	int tempval;
 
-	vec_pos.emplace_back();
-	vec_pos.back().old_position.first = m_xpos;
-	vec_pos.back().old_position.second = m_ypos;
-	vec_pos.back().new_position.first = m_xpos;
+	m_vec_pos.emplace_back();
+	m_vec_pos.back().old_position.first = m_xpos;
+	m_vec_pos.back().old_position.second = m_ypos;
+	m_vec_pos.back().new_position.first = m_xpos;
 	tempval = m_ypos;
 	tempval--;
 	if (m_parent->m_location == GameLocation::World)
@@ -129,15 +133,20 @@ void U5World::ProcessNorth()
 		tempval %= static_cast<int>(m_parent->m_currentMap[0].size());
 	}
 	
-	vec_pos.back().new_position.second = tempval;
-	if (0 != checkValidLocation(vec_pos.back()))
+	m_vec_pos.back().new_position.second = tempval;
+	int check_location = checkValidLocation(m_vec_pos.back());
+	if (0 < check_location)
 	{
-		vec_pos.pop_back();
+		m_vec_pos.pop_back();
 	}
 	else
 	{
 		m_input->EnableInput(false);
-		m_parent->m_console->PrintText("North\n\n");
+		m_parent->m_console->PrintText(m_resources->m_data.game_strings_1[4]);
+		if (check_location == 0)
+		{
+			m_parent->m_console->PrintText("\n", true);
+		}
 	}
 }
 
@@ -145,25 +154,30 @@ void U5World::ProcessSouth()
 {
 	int tempval;
 
-	vec_pos.emplace_back();
-	vec_pos.back().old_position.first = m_xpos;
-	vec_pos.back().old_position.second = m_ypos;
-	vec_pos.back().new_position.first = m_xpos;
+	m_vec_pos.emplace_back();
+	m_vec_pos.back().old_position.first = m_xpos;
+	m_vec_pos.back().old_position.second = m_ypos;
+	m_vec_pos.back().new_position.first = m_xpos;
 	tempval = m_ypos;
 	tempval++;
 	if (m_parent->m_location == GameLocation::World)
 	{
 		tempval %= static_cast<int>(m_parent->m_currentMap[0].size());
 	}
-	vec_pos.back().new_position.second = tempval;
-	if (0 != checkValidLocation(vec_pos.back()))
+	m_vec_pos.back().new_position.second = tempval;
+	int check_location = checkValidLocation(m_vec_pos.back());
+	if (0 < check_location)
 	{
-		vec_pos.pop_back();
+		m_vec_pos.pop_back();
 	}
 	else
 	{
 		m_input->EnableInput(false);
-		m_parent->m_console->PrintText("South\n\n");
+		m_parent->m_console->PrintText(m_resources->m_data.game_strings_1[5]);
+		if (check_location == 0)
+		{
+			m_parent->m_console->PrintText("\n", true);
+		}
 	}
 }
 
@@ -171,25 +185,30 @@ void U5World::ProcessEast()
 {
 	int tempval;
 
-	vec_pos.emplace_back();
-	vec_pos.back().old_position.first = m_xpos;
-	vec_pos.back().old_position.second = m_ypos;
-	vec_pos.back().new_position.second = m_ypos;
+	m_vec_pos.emplace_back();
+	m_vec_pos.back().old_position.first = m_xpos;
+	m_vec_pos.back().old_position.second = m_ypos;
+	m_vec_pos.back().new_position.second = m_ypos;
 	tempval = m_xpos;
 	tempval++;
 	if (m_parent->m_location == GameLocation::World)
 	{
 		tempval %= m_parent->m_currentMap.size();
 	}
-	vec_pos.back().new_position.first = tempval;
-	if (0 != checkValidLocation(vec_pos.back()))
+	m_vec_pos.back().new_position.first = tempval;
+	int check_location = checkValidLocation(m_vec_pos.back());
+	if (0 < check_location)
 	{
-		vec_pos.pop_back();
+		m_vec_pos.pop_back();
 	}
 	else
 	{
 		m_input->EnableInput(false);
-		m_parent->m_console->PrintText("East\n\n");
+		m_parent->m_console->PrintText(m_resources->m_data.game_strings_1[6]);
+		if (check_location == 0)
+		{
+			m_parent->m_console->PrintText("\n", true);
+		}
 	}
 }
 
@@ -197,10 +216,10 @@ void U5World::ProcessWest()
 {
 	int tempval;
 
-	vec_pos.emplace_back();
-	vec_pos.back().old_position.first = m_xpos;
-	vec_pos.back().old_position.second = m_ypos;
-	vec_pos.back().new_position.second = m_ypos;
+	m_vec_pos.emplace_back();
+	m_vec_pos.back().old_position.first = m_xpos;
+	m_vec_pos.back().old_position.second = m_ypos;
+	m_vec_pos.back().new_position.second = m_ypos;
 	tempval = m_xpos;
 	tempval--;
 	if (m_parent->m_location == GameLocation::World)
@@ -208,15 +227,20 @@ void U5World::ProcessWest()
 		tempval += static_cast<int>(m_parent->m_currentMap.size());
 		tempval %= static_cast<int>(m_parent->m_currentMap.size());
 	}
-	vec_pos.back().new_position.first = tempval;
-	if (0 != checkValidLocation(vec_pos.back()))
+	m_vec_pos.back().new_position.first = tempval;
+	int check_location = checkValidLocation(m_vec_pos.back());
+	if (0 < check_location)
 	{
-		vec_pos.pop_back();
+		m_vec_pos.pop_back();
 	}
 	else
 	{
 		m_input->EnableInput(false);
-		m_parent->m_console->PrintText("West\n\n");
+		m_parent->m_console->PrintText(m_resources->m_data.game_strings_1[7]);
+		if (check_location == 0)
+		{
+			m_parent->m_console->PrintText("\n", true);
+		}
 	}
 }
 
@@ -224,9 +248,9 @@ void U5World::ProcessNorthEast()
 {
 	int tempval;
 
-	vec_pos.emplace_back();
-	vec_pos.back().old_position.first = m_xpos;
-	vec_pos.back().old_position.second = m_ypos;
+	m_vec_pos.emplace_back();
+	m_vec_pos.back().old_position.first = m_xpos;
+	m_vec_pos.back().old_position.second = m_ypos;
 	tempval = m_ypos;
 	tempval--;
 	if (m_parent->m_location == GameLocation::World)
@@ -234,22 +258,27 @@ void U5World::ProcessNorthEast()
 		tempval += static_cast<int>(m_parent->m_currentMap[0].size());
 		tempval %= static_cast<int>(m_parent->m_currentMap[0].size());
 	}
-	vec_pos.back().new_position.second = tempval;
+	m_vec_pos.back().new_position.second = tempval;
 	tempval = m_xpos;
 	tempval++;
 	if (m_parent->m_location == GameLocation::World)
 	{
 		tempval %= static_cast<int>(m_parent->m_currentMap.size());
 	}
-	vec_pos.back().new_position.first = tempval;
-	if (0 != checkValidLocation(vec_pos.back()))
+	m_vec_pos.back().new_position.first = tempval;
+	int check_location = checkValidLocation(m_vec_pos.back());
+	if (0 < check_location)
 	{
-		vec_pos.pop_back();
+		m_vec_pos.pop_back();
 	}
 	else
 	{
 		m_input->EnableInput(false);
-		m_parent->m_console->PrintText("North East\n\n");
+		m_parent->m_console->PrintText("Northeast\n");
+		if (check_location == 0)
+		{
+			m_parent->m_console->PrintText("\n", true);
+		}
 	}
 }
 
@@ -257,9 +286,9 @@ void U5World::ProcessNorthWest()
 {
 	int tempval;
 
-	vec_pos.emplace_back();
-	vec_pos.back().old_position.first = m_xpos;
-	vec_pos.back().old_position.second = m_ypos;
+	m_vec_pos.emplace_back();
+	m_vec_pos.back().old_position.first = m_xpos;
+	m_vec_pos.back().old_position.second = m_ypos;
 	tempval = m_ypos;
 	tempval--;
 	if (m_parent->m_location == GameLocation::World)
@@ -267,20 +296,25 @@ void U5World::ProcessNorthWest()
 		tempval += static_cast<int>(m_parent->m_currentMap[0].size());
 		tempval %= static_cast<int>(m_parent->m_currentMap[0].size());
 	}
-	vec_pos.back().new_position.second = tempval;
+	m_vec_pos.back().new_position.second = tempval;
 	tempval = m_xpos;
 	tempval--;
 	tempval += static_cast<int>(m_parent->m_currentMap.size());
 	tempval %= static_cast<int>(m_parent->m_currentMap.size());
-	vec_pos.back().new_position.first = tempval;
-	if (0 != checkValidLocation(vec_pos.back()))
+	m_vec_pos.back().new_position.first = tempval;
+	int check_location = checkValidLocation(m_vec_pos.back());
+	if (0 < check_location)
 	{
-		vec_pos.pop_back();
+		m_vec_pos.pop_back();
 	}
 	else
 	{
 		m_input->EnableInput(false);
-		m_parent->m_console->PrintText("North West\n\n");
+		m_parent->m_console->PrintText("Northwest\n");
+		if (check_location == 0)
+		{
+			m_parent->m_console->PrintText("\n", true);
+		}
 	}
 }
 
@@ -288,31 +322,36 @@ void U5World::ProcessSouthEast()
 {
 	int tempval;
 
-	vec_pos.emplace_back();
-	vec_pos.back().old_position.first = m_xpos;
-	vec_pos.back().old_position.second = m_ypos;
+	m_vec_pos.emplace_back();
+	m_vec_pos.back().old_position.first = m_xpos;
+	m_vec_pos.back().old_position.second = m_ypos;
 	tempval = m_ypos;
 	tempval++;
 	if (m_parent->m_location == GameLocation::World)
 	{
 		tempval %= m_parent->m_currentMap[0].size();
 	}
-	vec_pos.back().new_position.second = tempval;
+	m_vec_pos.back().new_position.second = tempval;
 	tempval = m_xpos;
 	tempval++;
 	if (m_parent->m_location == GameLocation::World)
 	{
 		tempval %= m_parent->m_currentMap.size();
 	}
-	vec_pos.back().new_position.first = tempval;
-	if (0 != checkValidLocation(vec_pos.back()))
+	m_vec_pos.back().new_position.first = tempval;
+	int check_location = checkValidLocation(m_vec_pos.back());
+	if (0 < check_location)
 	{
-		vec_pos.pop_back();
+		m_vec_pos.pop_back();
 	}
 	else
 	{
 		m_input->EnableInput(false);
-		m_parent->m_console->PrintText("South East\n\n");
+		m_parent->m_console->PrintText("Southeast\n");
+		if (check_location == 0)
+		{
+			m_parent->m_console->PrintText("\n", true);
+		}
 	}
 }
 
@@ -320,34 +359,68 @@ void U5World::ProcessSouthWest()
 {
 	int tempval;
 
-	vec_pos.emplace_back();
-	vec_pos.back().old_position.first = m_xpos;
-	vec_pos.back().old_position.second = m_ypos;
+	m_vec_pos.emplace_back();
+	m_vec_pos.back().old_position.first = m_xpos;
+	m_vec_pos.back().old_position.second = m_ypos;
 	tempval = m_ypos;
 	tempval++;
 	tempval %= static_cast<int>(m_parent->m_currentMap[0].size());
-	vec_pos.back().new_position.second = tempval;
+	m_vec_pos.back().new_position.second = tempval;
 	tempval = m_xpos;
 	tempval--;
 	tempval += static_cast<int>(m_parent->m_currentMap.size());
 	tempval %= static_cast<int>(m_parent->m_currentMap.size());
-	vec_pos.back().new_position.first = tempval;
-	if (0 != checkValidLocation(vec_pos.back()))
+	m_vec_pos.back().new_position.first = tempval;
+	int check_location = checkValidLocation(m_vec_pos.back());
+	if (0 < check_location)
 	{
-		vec_pos.pop_back();
+		m_vec_pos.pop_back();
 	}
 	else
 	{
 		m_input->EnableInput(false);
-		m_parent->m_console->PrintText("South West\n\n");
+		m_parent->m_console->PrintText("Southwest\n");
+		if (check_location == 0)
+		{
+			m_parent->m_console->PrintText("\n", true);
+		}
 	}
 }
 
-void U5World::ProcessEvents()
+void U5World::ProcessLeaveTown()
+{
+	m_parent->m_console->PrintText(m_resources->m_data.game_strings_1[8]);
+	m_process_key = std::bind(&U5World::HandleLeaveTown, this);
+}
+
+void U5World::HandleLeaveTown()
+{
+	int ret = ProcessYesNo();
+}
+
+int U5World::ProcessYesNo()
+{
+	m_input->m_isValid = true;
+	SDL_Keycode curKey = m_input->GetKeyCode();
+	switch (curKey)
+	{
+	case SDLK_Y:
+		return 'Y';
+	case SDLK_N:
+		return 'N';
+	default:
+		m_input->m_isValid = false;
+		break;
+	}
+	return -1;
+}
+
+void U5World::ProcessAnyKeyHit()
 {
 	if (m_input->isAnyKeyHit())
-	{	
-		if (vec_pos.size() > 0)
+	{
+		m_input->m_isValid = true;
+		if (m_vec_pos.size() > 0)
 		{
 			return;
 		}
@@ -382,8 +455,17 @@ void U5World::ProcessEvents()
 			ProcessEnter();
 			break;
 		default:
+			m_input->m_isValid = false;
 			break;
 		}
+	}
+}
+
+void U5World::ProcessEvents()
+{
+	if (m_process_key)
+	{
+		m_process_key();
 	}
 }
 
@@ -451,7 +533,7 @@ void U5World::DrawBorder()
 void U5World::ProcessScroll()
 {
 	// Should never happen
-	if (vec_pos.empty())
+	if (m_vec_pos.empty())
 	{
 		return;
 	}
@@ -464,8 +546,8 @@ void U5World::ProcessScroll()
 
 	if (m_smoothscroll)
 	{
-		vec_pos.back().elapsed_time += m_tickElapse;
-		allowMove = vec_pos.back().elapsed_time >= vec_pos.back().TURN_TIME;
+		m_vec_pos.back().elapsed_time += m_tickElapse;
+		allowMove = m_vec_pos.back().elapsed_time >= m_vec_pos.back().TURN_TIME;
 	}
 	else
 	{
@@ -474,39 +556,39 @@ void U5World::ProcessScroll()
 	
 	if (allowMove)
 	{
-		m_xpos = vec_pos.back().new_position.first;
-		m_ypos = vec_pos.back().new_position.second;
-		vec_pos.clear();
+		m_xpos = m_vec_pos.back().new_position.first;
+		m_ypos = m_vec_pos.back().new_position.second;
+		m_vec_pos.clear();
 		m_DisplayOffset.first = 0;
 		m_DisplayOffset.second = 0;
 		m_input->EnableInput(true);
 	}
 	else
 	{
-		float ratio = static_cast<float>(vec_pos.back().elapsed_time) / vec_pos.back().TURN_TIME;
-		float temppos1 = static_cast<float>(vec_pos.back().old_position.first);
-		float temppos2 = static_cast<float>(vec_pos.back().new_position.first);
+		float ratio = static_cast<float>(m_vec_pos.back().elapsed_time) / m_vec_pos.back().TURN_TIME;
+		float temppos1 = static_cast<float>(m_vec_pos.back().old_position.first);
+		float temppos2 = static_cast<float>(m_vec_pos.back().new_position.first);
 
 		int maxExtentX = static_cast<int>(m_parent->m_currentMap.size() - 1);
 		int maxExtentY = static_cast<int>(m_parent->m_currentMap[0].size() - 1);
 
-		if (vec_pos.back().old_position.first == 0 && vec_pos.back().new_position.first == maxExtentX)
+		if (m_vec_pos.back().old_position.first == 0 && m_vec_pos.back().new_position.first == maxExtentX)
 		{
 			temppos2 = -1;
 		}
-		else if (vec_pos.back().old_position.first == maxExtentX && vec_pos.back().new_position.first == 0)
+		else if (m_vec_pos.back().old_position.first == maxExtentX && m_vec_pos.back().new_position.first == 0)
 		{
 			temppos2 = maxExtentX + 1.0f;
 		}
 		m_DisplayOffset.first = (temppos1 - temppos2) * ratio;
 
-		temppos1 = static_cast<float>(vec_pos.back().old_position.second);
-		temppos2 = static_cast<float>(vec_pos.back().new_position.second);
-		if (vec_pos.back().old_position.second == 0 && vec_pos.back().new_position.second == maxExtentY)
+		temppos1 = static_cast<float>(m_vec_pos.back().old_position.second);
+		temppos2 = static_cast<float>(m_vec_pos.back().new_position.second);
+		if (m_vec_pos.back().old_position.second == 0 && m_vec_pos.back().new_position.second == maxExtentY)
 		{
 			temppos2 = -1;
 		}
-		else if (vec_pos.back().old_position.second == maxExtentY && vec_pos.back().new_position.second == 0)
+		else if (m_vec_pos.back().old_position.second == maxExtentY && m_vec_pos.back().new_position.second == 0)
 		{
 			temppos2 = maxExtentY + 1.0f;
 		}

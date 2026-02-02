@@ -7,6 +7,7 @@
 #include <SDL3/SDL_stdinc.h>
 #include <vector>
 #include "U5Enums.h"
+#include <functional>
 
 struct PositionData
 {
@@ -32,7 +33,7 @@ public:
 	virtual void ProcessEvents() override;
 	void DrawBorder() override;
 	void SetParent(U5Game* parent);
-	std::vector<PositionData> vec_pos;
+	std::vector<PositionData> m_vec_pos;
 
 	GameLocation m_location_type;
 private:
@@ -48,6 +49,15 @@ private:
 	void ProcessSouthEast();
 	void ProcessSouthWest();
 
+	void ProcessAnyKeyHit();
+	int ProcessYesNo();
+
+	void ProcessLeaveTown();
+	void HandleLeaveTown();
+
+	std::function<void()> m_process_key;
+
 	U5Game* m_parent;
+
 };
 

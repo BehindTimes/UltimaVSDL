@@ -9,6 +9,8 @@
 #include <memory>
 #include "U5Utils.h"
 #include "U5Input.h"
+#include <iostream>
+#include <vector>
 
 extern std::unique_ptr<U5Utils> m_utilities;
 extern std::unique_ptr<U5Input> m_input;
@@ -26,13 +28,19 @@ U5Console::U5Console(SDL3Helper* sdl_helper, UltimaVResource* u5_resources) :
 	m_scroll(false),
 	m_scrollOffset(0),
 	m_startLine(0),
-	m_blockPrompt(false)
+	m_blockPrompt(false),
+	m_hasPrompt(true)
 {
 	ShowPrompt(true);
 }
 
 U5Console::~U5Console()
 {
+}
+
+void U5Console::BlockPrompt(bool block)
+{
+	m_blockPrompt = block;
 }
 
 void U5Console::Render(Uint64 tickElapse)
@@ -81,37 +89,105 @@ bool U5Console::CheckText()
 {
 	if (m_buffer_strings.empty())
 	{
-		if (!m_blockPrompt)
-		{
-			ShowPrompt(true);
-			m_showPrompt = true;
-		}
 		return false;
 	}
+	
+	auto& curPair = m_buffer_strings.front();
+	std::string curLine = curPair.second;
+	if (curPair.first == 1)
+	{
+		m_hasPrompt = true;
+	}
+	else
+	{
+		m_hasPrompt = false;
+	}
 	m_sdl_helper->SetRenderTarget(m_sdl_helper->m_TargetTextures[TTV_CONSOLE_BUFFER]);
-	std::string curLine = m_buffer_strings.front();
+
 	m_scroll = curLine == std::string("\n");
 	if (!m_scroll)
 	{
 		m_sdl_helper->DrawTiledText(curLine, m_cursorPosX, m_curLine);
+		m_cursorPosX += static_cast<int>(curLine.size());
+	}
+	else
+	{
+		m_cursorPosX = m_hasPrompt ? 1 : 0;
 	}
 	m_buffer_strings.pop_front();
+
 	m_sdl_helper->SetRenderTarget(nullptr);
 	
 	return m_scroll;
 }
 
-void U5Console::PrintText(std::string text)
+std::vector<std::string> U5Console::FormatText(std::string text, int startElem)
 {
-	m_showPrompt = false;
+	const int CONSOLE_SIZE = 16;
+	size_t max_len = static_cast<size_t>(CONSOLE_SIZE - startElem);
+	std::vector<std::string> ret;
+	
+	bool valid = true;
+	while (valid)
+	{
+		if (text.size() < max_len)
+		{
+			ret.push_back(text);
+			return ret;
+		}
 
+		bool found = false;
+		int found_pos = -1;
+		for (size_t curIndex = max_len; curIndex > 0; curIndex--)
+		{
+			if (text[curIndex] == ' ')
+			{
+				found = true;
+				found_pos = static_cast<int>(curIndex);
+				break;
+			}
+		}
+		if (found)
+		{
+			ret.emplace_back(text.substr(0, found_pos));
+			ret.emplace_back(std::string("\n"));
+			text.erase(0, found_pos + 1);
+		}
+		else
+		{
+			ret.emplace_back(text.substr(0, CONSOLE_SIZE - 1));
+			ret.emplace_back(std::string("\n"));
+			text.erase(0, CONSOLE_SIZE);
+		}
+		max_len = CONSOLE_SIZE;
+	}
+
+	return ret;
+}
+
+void U5Console::PrintText(std::string text, bool showElem)
+{
 	auto strVals = m_utilities->splitString(text, '\n', true);
 
 	if (strVals.size() > 0)
 	{
+		bool first = true;
 		for (auto& elem : strVals)
 		{
-			m_buffer_strings.push_back(elem);
+			bool tempBuf = m_cursorPosX;
+			if (!m_buffer_strings.empty())
+			{
+				if (m_buffer_strings.back().first == 1)
+				{
+					tempBuf = 1;
+				}
+			}
+			auto tempVals = FormatText(elem, first ? tempBuf : 0);
+			for (auto& elem1 : tempVals)
+			{
+				m_buffer_strings.push_back({ showElem ? 1 : 0, elem1 });
+				showElem = false;
+			}
 		}
 		if (!m_scroll)
 		{
@@ -133,6 +209,15 @@ void U5Console::ProcessScroll()
 		m_curLine++;
 		m_curLine %= NUM_BUF_LINES;
 		m_startLine %= NUM_BUF_LINES;
+		if (m_hasPrompt)
+		{
+			ShowPrompt(true);
+			m_cursorPosX = 1;
+		}
+		else
+		{
+			m_cursorPosX = 0;
+		}
 		CheckText();
 	}
 	else
@@ -144,7 +229,7 @@ void U5Console::ProcessScroll()
 
 void U5Console::RenderCursor()
 {
-	if (m_input->IsAnyKeyDown())
+	if (m_input->IsAnyKeyDown() && m_input->m_isValid)
 	{
 		return;
 	}
