@@ -53,6 +53,7 @@ enum class GameLocation
 {
 	Dungeon,
 	World,
+	Underworld,
 	Town
 };
 

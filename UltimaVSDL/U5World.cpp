@@ -16,7 +16,8 @@
 #include <utility>
 #include "U5Game.h"
 #include "ColorData.h"
-#include <string.h>
+#include <cstring>
+#include <functional>
 
 extern std::unique_ptr<U5Utils> m_utilities;
 extern std::unique_ptr<U5Input> m_input;
@@ -396,6 +397,27 @@ void U5World::ProcessLeaveTown()
 void U5World::HandleLeaveTown()
 {
 	int ret = ProcessYesNo();
+	if (ret == 'Y')
+	{
+		m_process_key = std::bind(&U5World::ProcessAnyKeyHit, this);
+		m_parent->m_console->PrintText(m_resources->m_data.game_strings_1[9]);
+		if (m_parent->m_old_location == GameLocation::World)
+		{
+			m_parent->m_console->PrintText(m_resources->m_data.game_strings_1[11]);
+		}
+		else if (m_parent->m_old_location == GameLocation::World)
+		{
+			m_parent->m_console->PrintText(m_resources->m_data.game_strings_1[10]);
+		}
+		m_parent->m_console->PrintText("\n", true);
+		m_parent->LoadMap(-1);
+	}
+	else if (ret == 'N')
+	{
+		m_process_key = std::bind(&U5World::ProcessAnyKeyHit, this);
+		m_parent->m_console->PrintText(m_resources->m_data.game_strings_1[12]);
+		m_parent->m_console->PrintText("\n", true);
+	}
 }
 
 int U5World::ProcessYesNo()

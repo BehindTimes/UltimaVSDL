@@ -22,6 +22,7 @@ U5Game::U5Game(SDL3Helper* sdl_helper, UltimaVResource* u5_resources) :
 	m_window_width(0),
 	m_window_height(0),
 	m_location(GameLocation::World),
+	m_old_location(GameLocation::World),
 	m_curLocation(nullptr)
 {
 	m_world = std::make_unique<U5World>(sdl_helper, u5_resources);
@@ -39,6 +40,7 @@ void U5Game::LoadData()
 	m_input->SetInputType(InputType::ANY_KEY);
 	m_input->SetKeyDelay(125);
 	m_curLocation = m_world.get();
+	m_curLocation->GetPos(m_old_position.first, m_old_position.second);
 	LoadMap(-1); // Britannia
 }
 
@@ -123,20 +125,25 @@ void U5Game::LoadMap(int map_num)
 		return;
 	}
 
+	m_old_location = m_location;
 	// Underworld or Britannia 
 	if (map_num < 0)
 	{
-		m_location = GameLocation::World;
 		if (map_num == -1) // Britannia
 		{
+			m_location = GameLocation::World;
 			m_currentMap.clear();
 			m_currentMap = m_resources->m_data.world_map;
+			m_curLocation->SetPos(m_old_position.first, m_old_position.second);
 		}
 		else if (map_num == -2) // Underworld
 		{
+			m_location = GameLocation::Underworld;
 		}
 		return;
 	}
+
+	m_curLocation->GetPos(m_old_position.first, m_old_position.second);
 
 	std::vector<int> Map_Types = {};
 	int map_type = map_num / 8;
@@ -152,25 +159,25 @@ void U5Game::LoadMap(int map_num)
 		m_location = GameLocation::Town;
 		m_currentMap.clear();
 		m_currentMap = m_resources->m_data.castle_maps[map_index];
-		m_curLocation->setPos(15, 30);
+		m_curLocation->SetPos(15, 30);
 		break;
 	case MapTypes::Dwelling:
 		m_location = GameLocation::Town;
 		m_currentMap.clear();
 		m_currentMap = m_resources->m_data.dwelling_maps[map_index];
-		m_curLocation->setPos(15, 30);
+		m_curLocation->SetPos(15, 30);
 		break;
 	case MapTypes::Keep:
 		m_location = GameLocation::Town;
 		m_currentMap.clear();
 		m_currentMap = m_resources->m_data.keep_maps[map_index];
-		m_curLocation->setPos(15, 30);
+		m_curLocation->SetPos(15, 30);
 		break;
 	case MapTypes::Town:
 		m_location = GameLocation::Town;
 		m_currentMap.clear();
 		m_currentMap = m_resources->m_data.town_maps[map_index];
-		m_curLocation->setPos(15, 30);
+		m_curLocation->SetPos(15, 30);
 		break;
 	default:
 		break;
