@@ -150,6 +150,10 @@ void U5World::ProcessNorth()
 		{
 			m_parent->m_console->PrintText("\n", true);
 		}
+		if (0 > check_location)
+		{
+			m_vec_pos.pop_back();
+		}
 	}
 }
 
@@ -180,6 +184,10 @@ void U5World::ProcessSouth()
 		if (check_location == 0)
 		{
 			m_parent->m_console->PrintText("\n", true);
+		}
+		if (0 > check_location)
+		{
+			m_vec_pos.pop_back();
 		}
 	}
 }
@@ -212,6 +220,10 @@ void U5World::ProcessEast()
 		{
 			m_parent->m_console->PrintText("\n", true);
 		}
+		if (0 > check_location)
+		{
+			m_vec_pos.pop_back();
+		}
 	}
 }
 
@@ -243,6 +255,10 @@ void U5World::ProcessWest()
 		if (check_location == 0)
 		{
 			m_parent->m_console->PrintText("\n", true);
+		}
+		if (0 > check_location)
+		{
+			m_vec_pos.pop_back();
 		}
 	}
 }
@@ -282,6 +298,10 @@ void U5World::ProcessNorthEast()
 		{
 			m_parent->m_console->PrintText("\n", true);
 		}
+		if (0 > check_location)
+		{
+			m_vec_pos.pop_back();
+		}
 	}
 }
 
@@ -317,6 +337,10 @@ void U5World::ProcessNorthWest()
 		if (check_location == 0)
 		{
 			m_parent->m_console->PrintText("\n", true);
+		}
+		if (0 > check_location)
+		{
+			m_vec_pos.pop_back();
 		}
 	}
 }
@@ -355,6 +379,10 @@ void U5World::ProcessSouthEast()
 		{
 			m_parent->m_console->PrintText("\n", true);
 		}
+		if (0 > check_location)
+		{
+			m_vec_pos.pop_back();
+		}
 	}
 }
 
@@ -386,6 +414,10 @@ void U5World::ProcessSouthWest()
 		if (check_location == 0)
 		{
 			m_parent->m_console->PrintText("\n", true);
+		}
+		if (0 > check_location)
+		{
+			m_vec_pos.pop_back();
 		}
 	}
 }
