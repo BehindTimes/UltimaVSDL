@@ -29,8 +29,10 @@ U5World::U5World(SDL3Helper* sdl_helper, UltimaVResource* u5_resources) :
 {
 	//m_xpos = 50;
 	//m_ypos = 50;
-	m_xpos = 86;
-	m_ypos = 110;
+	//m_xpos = 86;
+	//m_ypos = 110;
+	m_xpos = 176;
+	m_ypos = 210;
 	m_DisplayOffset.first = 0;
 	m_DisplayOffset.second = 0;
 
@@ -671,14 +673,30 @@ void U5World::ProcessEnter()
 		{
 			m_parent->LoadMap(static_cast<int>(curMap));
 
-			m_parent->m_console->PrintText(m_resources->m_data.game_strings_2[31]);
+			m_parent->m_console->PrintText(m_resources->m_data.game_strings_2[31], false, true);
 			if (m_resources->m_data.location_names[curMap].empty())
 			{
 				// Specially handle them
 				switch (curMap)
 				{
+				case 0x0D: // Sutek's Hut
+					dwelling_name = m_resources->m_data.game_strings_2[0x21];
+					m_parent->m_console->PrintText(dwelling_name + std::string("\n"), false);
+					break;
+				case 0x0E: // Sin'Varaal's Hut
+					dwelling_name = m_resources->m_data.game_strings_2[0x21];
+					m_parent->m_console->PrintText(dwelling_name + std::string("\n"), false);
+					break;
+				case 0x0F: // Hut
+					dwelling_name = m_resources->m_data.game_strings_2[0x21];
+					m_parent->m_console->PrintText(dwelling_name + std::string("\n"), false);
+					break;
 				case 0x10: // Lord British
 					dwelling_name = m_resources->m_data.game_strings_2[0x2d];
+					m_parent->m_console->PrintText(dwelling_name + std::string("\n"), false);
+					break;
+				case 0x11: // Lord Blackthorn
+					dwelling_name = m_resources->m_data.game_strings_2[0x2c];
 					m_parent->m_console->PrintText(dwelling_name + std::string("\n"), false);
 					break;
 				default:
@@ -688,6 +706,7 @@ void U5World::ProcessEnter()
 			else
 			{
 				int dwellingType = static_cast<int>(curMap / 8);
+				int exType = static_cast<int>(curMap % 8);
 				
 				switch (dwellingType)
 				{
@@ -695,7 +714,7 @@ void U5World::ProcessEnter()
 					dwelling_name = m_resources->m_data.game_strings_2[0x25];
 					break;
 				case 1: // dwelling
-					dwelling_name = m_resources->m_data.game_strings_2[0x21];
+					dwelling_name = exType < 4 ? m_resources->m_data.game_strings_2[0x2b] : m_resources->m_data.game_strings_2[0x21];
 					break;
 				case 2: // village
 					dwelling_name = m_resources->m_data.game_strings_2[0x24];

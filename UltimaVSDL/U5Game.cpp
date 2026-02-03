@@ -148,7 +148,7 @@ void U5Game::LoadMap(int map_num)
 	std::vector<int> Map_Types = {};
 	int map_type = map_num / 8;
 	int map_index = 0;
-	if (map_index < MAX_TOWN_MAPS)
+	if (map_num < MAX_TOWN_MAPS)
 	{
 		map_index = m_resources->m_data.location_z_index[map_num];
 	}

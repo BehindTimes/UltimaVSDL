@@ -15,7 +15,7 @@ public:
 	~U5Console();
 
 	void Render(Uint64 tickElapse);
-	void PrintText(std::string text, bool showElem = false);
+	void PrintText(std::string text, bool showElem = false, bool partial = false);
 	void ShowPrompt();
 	void BlockPrompt(bool block);
 private:

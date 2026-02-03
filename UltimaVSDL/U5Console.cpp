@@ -158,6 +158,10 @@ std::vector<std::string> U5Console::FormatText(std::string text, int startElem)
 		}
 		else
 		{
+			if (startElem > 1)
+			{
+				ret.emplace_back(std::string("\n"));
+			}
 			ret.emplace_back(text.substr(0, CONSOLE_SIZE - 1));
 			ret.emplace_back(std::string("\n"));
 			text.erase(0, CONSOLE_SIZE);
@@ -184,10 +188,10 @@ int U5Console::GetCursorStartPos()
 		curpos += static_cast<int>((*it).second.size());
 	}
 
-	return m_cursorPosX;
+	return curpos + 1;
 }
 
-void U5Console::PrintText(std::string text, bool showElem)
+void U5Console::PrintText(std::string text, bool showElem, bool partial)
 {
 	auto strVals = m_utilities->splitString(text, '\n', true);
 
@@ -196,15 +200,23 @@ void U5Console::PrintText(std::string text, bool showElem)
 		bool first = true;
 		for (auto& elem : strVals)
 		{
-			auto tempVals = FormatText(elem, first ? GetCursorStartPos() : 0);
-			first = false;
-			for (auto& elem1 : tempVals)
+			if (elem == std::string("\n"))
 			{
-				m_buffer_strings.push_back({ showElem ? 1 : 0, elem1 });
+				m_buffer_strings.push_back({ showElem ? 1 : 0, elem });
 				showElem = false;
 			}
+			else
+			{
+				auto tempVals = FormatText(elem, first ? GetCursorStartPos() : 0);
+				first = false;
+				for (auto& elem1 : tempVals)
+				{
+					m_buffer_strings.push_back({ showElem ? 1 : 0, elem1 });
+					showElem = false;
+				}
+			}	
 		}
-		if (!m_scroll)
+		if (!m_scroll && !partial)
 		{
 			CheckText();
 		}
