@@ -29,10 +29,10 @@ U5World::U5World(SDL3Helper* sdl_helper, UltimaVResource* u5_resources) :
 {
 	//m_xpos = 50;
 	//m_ypos = 50;
-	//m_xpos = 86;
-	//m_ypos = 110;
-	m_xpos = 176;
-	m_ypos = 210;
+	m_xpos = 86;
+	m_ypos = 110;
+	//m_xpos = 176;
+	//m_ypos = 210;
 	m_DisplayOffset.first = 0;
 	m_DisplayOffset.second = 0;
 
@@ -324,8 +324,11 @@ void U5World::ProcessNorthWest()
 	m_vec_pos.back().new_position.second = tempval;
 	tempval = m_xpos;
 	tempval--;
-	tempval += static_cast<int>(m_parent->m_currentMap.size());
-	tempval %= static_cast<int>(m_parent->m_currentMap.size());
+	if (m_parent->m_location == GameLocation::World)
+	{
+		tempval += static_cast<int>(m_parent->m_currentMap.size());
+		tempval %= static_cast<int>(m_parent->m_currentMap.size());
+	}
 	m_vec_pos.back().new_position.first = tempval;
 	int check_location = checkValidLocation(m_vec_pos.back());
 	if (0 < check_location)
@@ -397,12 +400,18 @@ void U5World::ProcessSouthWest()
 	m_vec_pos.back().old_position.second = m_ypos;
 	tempval = m_ypos;
 	tempval++;
-	tempval %= static_cast<int>(m_parent->m_currentMap[0].size());
+	if (m_parent->m_location == GameLocation::World)
+	{
+		tempval %= static_cast<int>(m_parent->m_currentMap[0].size());
+	}
 	m_vec_pos.back().new_position.second = tempval;
 	tempval = m_xpos;
 	tempval--;
-	tempval += static_cast<int>(m_parent->m_currentMap.size());
-	tempval %= static_cast<int>(m_parent->m_currentMap.size());
+	if (m_parent->m_location == GameLocation::World)
+	{
+		tempval += static_cast<int>(m_parent->m_currentMap.size());
+		tempval %= static_cast<int>(m_parent->m_currentMap.size());
+	}
 	m_vec_pos.back().new_position.first = tempval;
 	int check_location = checkValidLocation(m_vec_pos.back());
 	if (0 < check_location)
