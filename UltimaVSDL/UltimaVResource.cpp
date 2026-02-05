@@ -10,11 +10,13 @@
 #include <algorithm>
 #include <array>
 #include "U5Enums.h"
- 
-static const std::filesystem::path GAME_DIRECTORY("G:/source/UltimaVSDL/u5data");
+#include "GameOptions.h"
+#include <memory>
+
+extern std::unique_ptr<GameOptions> m_options;
 
 UltimaVResource::UltimaVResource() :
-	m_render_mode(RenderMode::EGA)
+	m_render_mode(m_options->m_render_mode)
 {
 	std::memset(m_CutsceneMap, 0, sizeof(m_CutsceneMap));
 	std::memset(m_DemoMap, 0, sizeof(m_DemoMap));
@@ -305,7 +307,7 @@ int UltimaVResource::ParseCharacterFile(std::vector<U5ImageData>& bit_file_data,
 int UltimaVResource::LoadPathFile()
 {
 	const std::string file_name = "BRITISH.PTH";
-	std::filesystem::path file_path = GAME_DIRECTORY / file_name;
+	std::filesystem::path file_path = m_options->m_game_directory / file_name;
 	if (!std::filesystem::exists(file_path))
 	{
 		return -1;
@@ -328,7 +330,7 @@ int UltimaVResource::LoadBitFiles()
 
 	for (std::string strFile : file_names)
 	{
-		std::filesystem::path file_path = GAME_DIRECTORY / strFile;
+		std::filesystem::path file_path = m_options->m_game_directory / strFile;
 		if (!std::filesystem::exists(file_path))
 		{
 			return -1;
@@ -369,7 +371,7 @@ int UltimaVResource::LoadBitFiles()
 int UltimaVResource::LoadProportionalFont()
 {
 	std::string strStoryFile("PROPORT.PCS");
-	std::filesystem::path file_path = GAME_DIRECTORY / strStoryFile;
+	std::filesystem::path file_path = m_options->m_game_directory / strStoryFile;
 	if (!std::filesystem::exists(file_path))
 	{
 		return -1;
@@ -452,7 +454,7 @@ int UltimaVResource::LoadCharacterSets()
 		m_CharacterSetsData[index].resize(file_extensions.size());
 		for (size_t ext_index = 0; ext_index < file_names.size(); ext_index++)
 		{
-			std::filesystem::path file_path = GAME_DIRECTORY / (file_names[index] + file_extensions[ext_index]);
+			std::filesystem::path file_path = m_options->m_game_directory / (file_names[index] + file_extensions[ext_index]);
 			if (!std::filesystem::exists(file_path))
 			{
 				return -1;
@@ -491,7 +493,7 @@ int UltimaVResource::Load16Images()
 
 	for (size_t index = 0; index < file_names.size(); index++)
 	{
-		std::filesystem::path file_path = GAME_DIRECTORY / (file_names[index] + strExt);
+		std::filesystem::path file_path = m_options->m_game_directory / (file_names[index] + strExt);
 		if (!std::filesystem::exists(file_path))
 		{
 			return -1;
@@ -551,7 +553,7 @@ int UltimaVResource::LoadEnding(std::vector<unsigned char>& data_buffer)
 
 	std::string strStoryFile("END.DAT");
 
-	std::filesystem::path file_path = GAME_DIRECTORY / strStoryFile;
+	std::filesystem::path file_path = m_options->m_game_directory / strStoryFile;
 	if (!std::filesystem::exists(file_path))
 	{
 		return -1;
@@ -617,7 +619,7 @@ int UltimaVResource::LoadStory(std::vector<unsigned char> &data_buffer)
 
 	std::string strStoryFile("STORY.DAT");
 
-	std::filesystem::path file_path = GAME_DIRECTORY / strStoryFile;
+	std::filesystem::path file_path = m_options->m_game_directory / strStoryFile;
 	if (!std::filesystem::exists(file_path))
 	{
 		return -1;
@@ -711,7 +713,7 @@ bool UltimaVResource::ReadStrings(const std::vector<unsigned char>& buffer, std:
 int UltimaVResource::LoadDataOvl()
 {
 	std::string strStoryFile("DATA.OVL");
-	std::filesystem::path file_path = GAME_DIRECTORY / strStoryFile;
+	std::filesystem::path file_path = m_options->m_game_directory / strStoryFile;
 	if (!std::filesystem::exists(file_path))
 	{
 		return -1;
@@ -882,7 +884,7 @@ int UltimaVResource::LoadTiles()
 		modnum = 0b1111;
 	}
 	std::string strStoryFile = std::string("TILES") + strExt;
-	std::filesystem::path file_path = GAME_DIRECTORY / strStoryFile;
+	std::filesystem::path file_path = m_options->m_game_directory / strStoryFile;
 	if (!std::filesystem::exists(file_path))
 	{
 		return -1;
@@ -949,7 +951,7 @@ int UltimaVResource::LoadTiles()
 int UltimaVResource::LoadMiscMaps()
 {
 	std::string strStoryFile("MISCMAPS.DAT");
-	std::filesystem::path file_path = GAME_DIRECTORY / strStoryFile;
+	std::filesystem::path file_path = m_options->m_game_directory / strStoryFile;
 	if (!std::filesystem::exists(file_path))
 	{
 		return -1;
@@ -1107,7 +1109,7 @@ int UltimaVResource::LoadMap(MapTypes map_type)
 		return -1;
 	}
 
-	std::filesystem::path file_path = GAME_DIRECTORY / strStoryFile;
+	std::filesystem::path file_path = m_options->m_game_directory / strStoryFile;
 	if (!std::filesystem::exists(file_path))
 	{
 		return -1;
@@ -1150,7 +1152,7 @@ int UltimaVResource::LoadMap(MapTypes map_type)
 int UltimaVResource::LoadWorldMap()
 {
 	std::string strStoryFile("BRIT.DAT");
-	std::filesystem::path file_path = GAME_DIRECTORY / strStoryFile;
+	std::filesystem::path file_path = m_options->m_game_directory / strStoryFile;
 	if (!std::filesystem::exists(file_path))
 	{
 		return -1;
@@ -1183,7 +1185,7 @@ int UltimaVResource::LoadWorldMap()
 int UltimaVResource::LoadUnderworldMap()
 {
 	std::string strStoryFile("UNDER.DAT");
-	std::filesystem::path file_path = GAME_DIRECTORY / strStoryFile;
+	std::filesystem::path file_path = m_options->m_game_directory / strStoryFile;
 	if (!std::filesystem::exists(file_path))
 	{
 		return -1;

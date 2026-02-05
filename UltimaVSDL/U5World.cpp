@@ -18,9 +18,12 @@
 #include "ColorData.h"
 #include <cstring>
 #include <functional>
+#include <string>
+#include "GameOptions.h"
 
 extern std::unique_ptr<U5Utils> m_utilities;
 extern std::unique_ptr<U5Input> m_input;
+extern std::unique_ptr<GameOptions> m_options;
 
 U5World::U5World(SDL3Helper* sdl_helper, UltimaVResource* u5_resources) :
 	GameBase(sdl_helper, u5_resources),
@@ -37,7 +40,7 @@ U5World::U5World(SDL3Helper* sdl_helper, UltimaVResource* u5_resources) :
 	m_DisplayOffset.first = 0;
 	m_DisplayOffset.second = 0;
 
-	m_smoothscroll = true;
+	m_smoothscroll = m_options->m_smooth_scroll;
 
 	m_process_key = std::bind(&U5World::ProcessAnyKeyHit, this);
 }

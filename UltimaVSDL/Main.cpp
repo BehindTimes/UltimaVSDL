@@ -14,6 +14,7 @@
 #include "UltimaVResource.h"
 #include "U5Input.h"
 #include "U5Game.h"
+#include "GameOptions.h"
 
 static std::unique_ptr<SDL3Helper> sdl_helper;
 static std::unique_ptr<UltimaVResource> u5_resources;
@@ -24,6 +25,7 @@ std::unique_ptr<CutScene> cutscene_screen;
 std::unique_ptr<U5Utils> m_utilities;
 std::unique_ptr<U5Input> m_input;
 std::unique_ptr<U5Game> m_game;
+std::unique_ptr<GameOptions> m_options;
 
 static void MainLoop()
 {
@@ -114,6 +116,12 @@ static void MainLoop()
 int main([[maybe_unused]]int argc, [[maybe_unused]] char** argv)
 {
 	bool valid;
+	m_options = std::make_unique<GameOptions>();
+	if (m_options->Initialize() != 0)
+	{
+		return EXIT_FAILURE;
+	}
+
 	sdl_helper = std::make_unique<SDL3Helper>();
 	valid = sdl_helper->Intialize();
 

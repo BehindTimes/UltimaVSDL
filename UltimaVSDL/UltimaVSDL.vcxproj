@@ -138,6 +138,7 @@
     <ClCompile Include="FadeObject.cpp" />
     <ClCompile Include="GameBase.cpp" />
     <ClCompile Include="GameObject.cpp" />
+    <ClCompile Include="GameOptions.cpp" />
     <ClCompile Include="Intro.cpp" />
     <ClCompile Include="LzwDecompressor.cpp" />
     <ClCompile Include="Main.cpp" />
@@ -159,6 +160,7 @@
     <ClInclude Include="FadeObject.h" />
     <ClInclude Include="GameBase.h" />
     <ClInclude Include="GameObject.h" />
+    <ClInclude Include="GameOptions.h" />
     <ClInclude Include="Intro.h" />
     <ClInclude Include="LzwDecompressor.h" />
     <ClInclude Include="SDL3Helper.h" />
