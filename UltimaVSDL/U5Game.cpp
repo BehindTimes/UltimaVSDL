@@ -23,7 +23,9 @@ U5Game::U5Game(SDL3Helper* sdl_helper, UltimaVResource* u5_resources) :
 	m_window_height(0),
 	m_location(GameLocation::World),
 	m_old_location(GameLocation::World),
-	m_curLocation(nullptr)
+	m_curLocation(nullptr),
+	m_map_level(0),
+	m_map_type(0)
 {
 	m_world = std::make_unique<U5World>(sdl_helper, u5_resources);
 	m_world->SetParent(this);
@@ -115,6 +117,38 @@ void U5Game::GetElapsedTime()
 	}
 }
 
+void U5Game::ChangeLevel(int map_level)
+{
+	if (map_level < 0 || map_level >= 16)
+	{
+		return;
+	}
+	if (m_map_type < 0 || m_map_type > 4)
+	{
+		return;
+	}
+	m_map_level = map_level;
+
+	MapTypes curMapType = static_cast<MapTypes>(m_map_type);
+	switch (curMapType)
+	{
+	case MapTypes::Castle:
+		m_currentMap = m_resources->m_data.castle_maps[m_map_level];
+		break;
+	case MapTypes::Dwelling:
+		m_currentMap = m_resources->m_data.dwelling_maps[m_map_level];
+		break;
+	case MapTypes::Keep:
+		m_currentMap = m_resources->m_data.keep_maps[m_map_level];
+		break;
+	case MapTypes::Town:
+		m_currentMap = m_resources->m_data.town_maps[m_map_level];
+		break;
+	default:
+		break;
+	}
+}
+
 void U5Game::LoadMap(int map_num)
 {
 	const int MAX_MAPS = 40;
@@ -146,37 +180,37 @@ void U5Game::LoadMap(int map_num)
 	m_curLocation->GetPos(m_old_position.first, m_old_position.second);
 
 	std::vector<int> Map_Types = {};
-	int map_type = map_num / 8;
-	int map_index = 0;
+	m_map_type = map_num / 8;
+	m_map_level = 0;
 	if (map_num < MAX_TOWN_MAPS)
 	{
-		map_index = m_resources->m_data.location_z_index[map_num];
+		m_map_level = m_resources->m_data.location_z_index[map_num];
 	}
-	MapTypes curMapType = static_cast<MapTypes>(map_type);
+	MapTypes curMapType = static_cast<MapTypes>(m_map_type);
 	switch (curMapType)
 	{
 	case MapTypes::Castle:
 		m_location = GameLocation::Town;
 		m_currentMap.clear();
-		m_currentMap = m_resources->m_data.castle_maps[map_index];
+		m_currentMap = m_resources->m_data.castle_maps[m_map_level];
 		m_curLocation->SetPos(15, 30);
 		break;
 	case MapTypes::Dwelling:
 		m_location = GameLocation::Town;
 		m_currentMap.clear();
-		m_currentMap = m_resources->m_data.dwelling_maps[map_index];
+		m_currentMap = m_resources->m_data.dwelling_maps[m_map_level];
 		m_curLocation->SetPos(15, 30);
 		break;
 	case MapTypes::Keep:
 		m_location = GameLocation::Town;
 		m_currentMap.clear();
-		m_currentMap = m_resources->m_data.keep_maps[map_index];
+		m_currentMap = m_resources->m_data.keep_maps[m_map_level];
 		m_curLocation->SetPos(15, 30);
 		break;
 	case MapTypes::Town:
 		m_location = GameLocation::Town;
 		m_currentMap.clear();
-		m_currentMap = m_resources->m_data.town_maps[map_index];
+		m_currentMap = m_resources->m_data.town_maps[m_map_level];
 		m_curLocation->SetPos(15, 30);
 		break;
 	default:

@@ -747,7 +747,7 @@ int UltimaVResource::LoadDataOvl()
 	{
 		return -5;
 	}
-	if (!ReadStrings(buffer, m_data.game_strings_1, 0x266f, 0x28d5))
+	if (!ReadStrings(buffer, m_data.game_strings_1, 0x266a, 0x28d5))
 	{
 		return -5;
 	}
@@ -755,6 +755,74 @@ int UltimaVResource::LoadDataOvl()
 	{
 		return -5;
 	}
+	if (!ReadStrings(buffer, m_data.game_strings_3, 0x6aea, 0x6d56))
+	{
+		return -5;
+	}
+	if (!ReadStrings(buffer, m_data.game_strings_4, 0x6d84, 0x7010))
+	{
+		return -5;
+	}
+	if (!ReadStrings(buffer, m_data.game_strings_5, 0x702a, 0x70e8))
+	{
+		return -5;
+	}
+
+	if (!ReadStrings(buffer, m_data.game_strings_6, 0x70f2, 0x71d1))
+	{
+		return -5;
+	}
+
+	if (!ReadStrings(buffer, m_data.game_strings_7, 0x71dc, 0x7208))
+	{
+		return -5;
+	}
+
+	if (!ReadStrings(buffer, m_data.game_strings_8, 0x721c, 0x7384))
+	{
+		return -5;
+	}
+
+	if (!ReadStrings(buffer, m_data.game_strings_9, 0x7398, 0x74f5))
+	{
+		return -5;
+	}
+
+	if (!ReadStrings(buffer, m_data.game_strings_10, 0x750a, 0x77f3))
+	{
+		return -5;
+	}
+
+	if (!ReadStrings(buffer, m_data.game_strings_11, 0x7808, 0x7850))
+	{
+		return -5;
+	}
+
+	if (!ReadStrings(buffer, m_data.game_strings_12, 0x785c, 0x7a19))
+	{
+		return -5;
+	}
+
+	if (!ReadStrings(buffer, m_data.game_strings_13, 0x7a26, 0x7f09))
+	{
+		return -5;
+	}
+
+	if (!ReadStrings(buffer, m_data.game_strings_14, 0x7f26, 0x820e))
+	{
+		return -5;
+	}
+
+	if (!ReadStrings(buffer, m_data.game_strings_15, 0x8216, 0x848f))
+	{
+		return -5;
+	}
+
+	if (!ReadStrings(buffer, m_data.game_strings_16, 0x84aa, 0x9215))
+	{
+		return -5;
+	}
+
 	/*if (!ReadStrings(buffer, m_data.intro_strings, 0x750a, 0xa459))
 	{
 		return -5;

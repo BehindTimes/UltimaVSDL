@@ -147,7 +147,7 @@ void U5World::ProcessNorth()
 	else
 	{
 		m_input->EnableInput(false);
-		m_parent->m_console->PrintText(m_resources->m_data.game_strings_1[4]);
+		m_parent->m_console->PrintText(m_resources->m_data.game_strings_1[NORTH_STRING]);
 		if (check_location == 0)
 		{
 			m_parent->m_console->PrintText("\n", true);
@@ -182,7 +182,7 @@ void U5World::ProcessSouth()
 	else
 	{
 		m_input->EnableInput(false);
-		m_parent->m_console->PrintText(m_resources->m_data.game_strings_1[5]);
+		m_parent->m_console->PrintText(m_resources->m_data.game_strings_1[SOUTH_STRING]);
 		if (check_location == 0)
 		{
 			m_parent->m_console->PrintText("\n", true);
@@ -217,7 +217,7 @@ void U5World::ProcessEast()
 	else
 	{
 		m_input->EnableInput(false);
-		m_parent->m_console->PrintText(m_resources->m_data.game_strings_1[6]);
+		m_parent->m_console->PrintText(m_resources->m_data.game_strings_1[EAST_STRING]);
 		if (check_location == 0)
 		{
 			m_parent->m_console->PrintText("\n", true);
@@ -253,7 +253,7 @@ void U5World::ProcessWest()
 	else
 	{
 		m_input->EnableInput(false);
-		m_parent->m_console->PrintText(m_resources->m_data.game_strings_1[7]);
+		m_parent->m_console->PrintText(m_resources->m_data.game_strings_1[WEST_STRING]);
 		if (check_location == 0)
 		{
 			m_parent->m_console->PrintText("\n", true);
@@ -435,8 +435,49 @@ void U5World::ProcessSouthWest()
 
 void U5World::ProcessLeaveTown()
 {
-	m_parent->m_console->PrintText(m_resources->m_data.game_strings_1[8]);
+	m_parent->m_console->PrintText(m_resources->m_data.game_strings_1[LEAVE_TOWN_STRING]);
 	m_process_key = std::bind(&U5World::HandleLeaveTown, this);
+}
+
+void U5World::HandleKlimb()
+{
+	int ret = ProcessDirection();
+
+	m_input->m_isValid = false;
+	
+	switch (ret)
+	{
+	case 'U':
+		m_parent->m_console->PrintText(m_resources->m_data.game_strings_1[NORTH_STRING]);
+		m_parent->m_console->PrintText(m_resources->m_data.game_strings_1[WHAT_STRING]);
+		m_parent->m_console->PrintText("\n", true);
+		m_process_key = std::bind(&U5World::ProcessAnyKeyHit, this);
+		m_input->SetRequireAllKeysUp();
+		break;
+	case 'D':
+		m_parent->m_console->PrintText(m_resources->m_data.game_strings_1[SOUTH_STRING]);
+		m_parent->m_console->PrintText(m_resources->m_data.game_strings_1[WHAT_STRING]);
+		m_parent->m_console->PrintText("\n", true);
+		m_process_key = std::bind(&U5World::ProcessAnyKeyHit, this);
+		m_input->SetRequireAllKeysUp();
+		break;
+	case 'L':
+		m_parent->m_console->PrintText(m_resources->m_data.game_strings_1[WEST_STRING]);
+		m_parent->m_console->PrintText(m_resources->m_data.game_strings_1[WHAT_STRING]);
+		m_parent->m_console->PrintText("\n", true);
+		m_process_key = std::bind(&U5World::ProcessAnyKeyHit, this);
+		m_input->SetRequireAllKeysUp();
+		break;
+	case 'R':
+		m_parent->m_console->PrintText(m_resources->m_data.game_strings_1[EAST_STRING]);
+		m_parent->m_console->PrintText(m_resources->m_data.game_strings_1[WHAT_STRING]);
+		m_parent->m_console->PrintText("\n", true);
+		m_process_key = std::bind(&U5World::ProcessAnyKeyHit, this);
+		m_input->SetRequireAllKeysUp();
+		break;
+	default:
+		break;
+	}
 }
 
 void U5World::HandleLeaveTown()
@@ -445,14 +486,14 @@ void U5World::HandleLeaveTown()
 	if (ret == 'Y')
 	{
 		m_process_key = std::bind(&U5World::ProcessAnyKeyHit, this);
-		m_parent->m_console->PrintText(m_resources->m_data.game_strings_1[9]);
+		m_parent->m_console->PrintText(m_resources->m_data.game_strings_1[YES_STRING]);
 		if (m_parent->m_old_location == GameLocation::World)
 		{
-			m_parent->m_console->PrintText(m_resources->m_data.game_strings_1[11]);
+			m_parent->m_console->PrintText(m_resources->m_data.game_strings_1[BRITANNIA_STRING]);
 		}
-		else if (m_parent->m_old_location == GameLocation::World)
+		else if (m_parent->m_old_location == GameLocation::Underworld)
 		{
-			m_parent->m_console->PrintText(m_resources->m_data.game_strings_1[10]);
+			m_parent->m_console->PrintText(m_resources->m_data.game_strings_1[UNDERWORLD_STRING]);
 		}
 		m_parent->m_console->PrintText("\n", true);
 		m_parent->LoadMap(-1);
@@ -460,7 +501,7 @@ void U5World::HandleLeaveTown()
 	else if (ret == 'N')
 	{
 		m_process_key = std::bind(&U5World::ProcessAnyKeyHit, this);
-		m_parent->m_console->PrintText(m_resources->m_data.game_strings_1[12]);
+		m_parent->m_console->PrintText(m_resources->m_data.game_strings_1[NO_STRING]);
 		m_parent->m_console->PrintText("\n", true);
 	}
 }
@@ -475,6 +516,31 @@ int U5World::ProcessYesNo()
 		return 'Y';
 	case SDLK_N:
 		return 'N';
+	default:
+		m_input->m_isValid = false;
+		break;
+	}
+	return -1;
+}
+
+int U5World::ProcessDirection()
+{
+	m_input->m_isValid = true;
+	SDL_Keycode curKey = m_input->GetKeyCode();
+	switch (curKey)
+	{
+	case SDLK_UP:
+		return 'U';
+		break;
+	case SDLK_DOWN:
+		return 'D';
+		break;
+	case SDLK_LEFT:
+		return 'L';
+		break;
+	case SDLK_RIGHT:
+		return 'R';
+		break;
 	default:
 		m_input->m_isValid = false;
 		break;
@@ -520,6 +586,9 @@ void U5World::ProcessAnyKeyHit()
 			break;
 		case SDLK_E:
 			ProcessEnter();
+			break;
+		case SDLK_K:
+			ProcessKlimb();
 			break;
 		default:
 			m_input->m_isValid = false;
@@ -664,6 +733,39 @@ void U5World::ProcessScroll()
 	}
 }
 
+void U5World::ProcessKlimb()
+{
+	m_input->SetRequireAllKeysUp();
+	m_parent->m_console->PrintText(m_resources->m_data.game_strings_3[KLIMB_STRING]);
+	if (m_parent->m_location == GameLocation::World)
+	{
+		m_parent->m_console->PrintText(m_resources->m_data.game_strings_16[WITH_WHAT_STRING]);
+		m_parent->m_console->PrintText("\n", true);
+		return;
+	}
+	if (m_xpos >= 0 && m_ypos >= 0 && m_xpos < m_parent->m_currentMap.size() && m_ypos < m_parent->m_currentMap[0].size())
+	{
+		unsigned char curpos = m_parent->m_currentMap[m_xpos][m_ypos];
+
+		switch (curpos)
+		{
+		case LADDER_UP_TILE:
+			m_parent->m_console->PrintText(m_resources->m_data.game_strings_16[UP_STRING]);
+			m_parent->m_console->PrintText("\n", true);
+			m_parent->ChangeLevel(m_parent->m_map_level + 1);
+			return;
+		case LADDER_DOWN_TILE:
+			m_parent->m_console->PrintText(m_resources->m_data.game_strings_16[DOWN_STRING]);
+			m_parent->m_console->PrintText("\n", true);
+			m_parent->ChangeLevel(m_parent->m_map_level - 1);
+			return;
+		default:
+			break;
+		}
+	}
+	m_process_key = std::bind(&U5World::HandleKlimb, this);
+}
+
 void U5World::ProcessEnter()
 {
 	m_input->SetRequireAllKeysUp();
@@ -682,30 +784,30 @@ void U5World::ProcessEnter()
 		{
 			m_parent->LoadMap(static_cast<int>(curMap));
 
-			m_parent->m_console->PrintText(m_resources->m_data.game_strings_2[31], false, true);
+			m_parent->m_console->PrintText(m_resources->m_data.game_strings_2[ENTER_STRING], false, true);
 			if (m_resources->m_data.location_names[curMap].empty())
 			{
 				// Specially handle them
 				switch (curMap)
 				{
 				case 0x0D: // Sutek's Hut
-					dwelling_name = m_resources->m_data.game_strings_2[0x21];
+					dwelling_name = m_resources->m_data.game_strings_2[HUT_STRING];
 					m_parent->m_console->PrintText(dwelling_name + std::string("\n"), false);
 					break;
 				case 0x0E: // Sin'Varaal's Hut
-					dwelling_name = m_resources->m_data.game_strings_2[0x21];
+					dwelling_name = m_resources->m_data.game_strings_2[HUT_STRING];
 					m_parent->m_console->PrintText(dwelling_name + std::string("\n"), false);
 					break;
 				case 0x0F: // Hut
-					dwelling_name = m_resources->m_data.game_strings_2[0x21];
+					dwelling_name = m_resources->m_data.game_strings_2[HUT_STRING];
 					m_parent->m_console->PrintText(dwelling_name + std::string("\n"), false);
 					break;
 				case 0x10: // Lord British
-					dwelling_name = m_resources->m_data.game_strings_2[0x2d];
+					dwelling_name = m_resources->m_data.game_strings_2[BRITISH_CASTLE_STRING];
 					m_parent->m_console->PrintText(dwelling_name + std::string("\n"), false);
 					break;
 				case 0x11: // Lord Blackthorn
-					dwelling_name = m_resources->m_data.game_strings_2[0x2c];
+					dwelling_name = m_resources->m_data.game_strings_2[BLACKTHORN_PALANCE_STRING];
 					m_parent->m_console->PrintText(dwelling_name + std::string("\n"), false);
 					break;
 				default:
@@ -720,19 +822,19 @@ void U5World::ProcessEnter()
 				switch (dwellingType)
 				{
 				case 0: // town
-					dwelling_name = m_resources->m_data.game_strings_2[0x25];
+					dwelling_name = m_resources->m_data.game_strings_2[TOWN_STRING];
 					break;
 				case 1: // dwelling
-					dwelling_name = exType < 4 ? m_resources->m_data.game_strings_2[0x2b] : m_resources->m_data.game_strings_2[0x21];
+					dwelling_name = exType < 4 ? m_resources->m_data.game_strings_2[DWELLING_STRING] : m_resources->m_data.game_strings_2[HUT_STRING];
 					break;
 				case 2: // village
-					dwelling_name = m_resources->m_data.game_strings_2[0x24];
+					dwelling_name = m_resources->m_data.game_strings_2[VILLAGE_STRING];
 					break;
 				case 3: // keep
-					dwelling_name = m_resources->m_data.game_strings_2[0x23];
+					dwelling_name = m_resources->m_data.game_strings_2[KEEP_STRING];
 					break;
 				case 4: // dungeon
-					dwelling_name = m_resources->m_data.game_strings_2[0x29];
+					dwelling_name = m_resources->m_data.game_strings_2[DUNGEON_STRING];
 					break;
 				default:
 					dwelling_name = "???";

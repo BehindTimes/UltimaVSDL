@@ -48,12 +48,15 @@ private:
 	void ProcessNorthWest();
 	void ProcessSouthEast();
 	void ProcessSouthWest();
+	void ProcessKlimb();
 
 	void ProcessAnyKeyHit();
 	int ProcessYesNo();
+	int ProcessDirection();
 
 	void ProcessLeaveTown();
 	void HandleLeaveTown();
+	void HandleKlimb();
 
 	std::function<void()> m_process_key;
 

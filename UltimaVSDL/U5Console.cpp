@@ -263,6 +263,15 @@ void U5Console::RenderCursor()
 	{
 		return;
 	}
+	if (m_scroll)
+	{
+		return;
+	}
+	if (!m_buffer_strings.empty())
+	{
+		return;
+
+	}
 	m_curCursorRenderDelay += m_tickElapse;
 	if (m_curCursorRenderDelay >= CURSOR_RENDER_DELAY)
 	{

@@ -67,3 +67,33 @@ enum class MapTypes
 	Keep,
 	Dungeon
 };
+
+const int NORTH_STRING = 5;
+const int SOUTH_STRING = 6;
+const int EAST_STRING = 7;
+const int WEST_STRING = 8;
+
+const int WHAT_STRING = 23;
+
+const int KEEP_STRING = 0x23;
+const int VILLAGE_STRING = 0x24;
+const int TOWN_STRING = 0x25;
+const int HUT_STRING = 0x21;
+const int DUNGEON_STRING = 0x29;
+const int DWELLING_STRING = 0x2b;
+const int BLACKTHORN_PALANCE_STRING = 0x2c;
+const int BRITISH_CASTLE_STRING = 0x2d;
+
+const int YES_STRING = 10;
+const int UNDERWORLD_STRING = 11;
+const int BRITANNIA_STRING = 12;
+const int NO_STRING = 13;
+const int UP_STRING = 201;
+const int DOWN_STRING = 202;
+const int WITH_WHAT_STRING = 222;
+const int KLIMB_STRING = 34;
+const int LEAVE_TOWN_STRING = 9;
+const int ENTER_STRING = 31;
+
+const int LADDER_UP_TILE = 200;
+const int LADDER_DOWN_TILE = 201;
