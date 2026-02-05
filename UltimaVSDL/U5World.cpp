@@ -25,7 +25,8 @@ extern std::unique_ptr<U5Input> m_input;
 U5World::U5World(SDL3Helper* sdl_helper, UltimaVResource* u5_resources) :
 	GameBase(sdl_helper, u5_resources),
 	m_location_type(GameLocation::World),
-	m_parent(nullptr)
+	m_parent(nullptr),
+	m_allowMove(true)
 {
 	//m_xpos = 50;
 	//m_ypos = 50;
@@ -122,6 +123,213 @@ int U5World::checkValidLocation(const PositionData& pos_info)
 	return 0;
 }
 
+void U5World::HandleNorth()
+{
+	if (!m_allowMove)
+	{
+		return;
+	}
+	m_process_key = std::bind(&U5World::ProcessAnyKeyHit, this);
+
+	if (m_parent->m_location == GameLocation::Town)
+	{
+		unsigned char curtile = m_parent->m_currentMap[m_xpos][m_ypos];
+		if (curtile == STAIRS_UP)
+		{
+			m_parent->ChangeLevel(m_parent->m_map_level + 1);
+		}
+		else if (curtile == STAIRS_DOWN)
+		{
+			m_parent->ChangeLevel(m_parent->m_map_level - 1);
+		}
+	}
+}
+
+void U5World::HandleSouth()
+{
+	if (!m_allowMove)
+	{
+		return;
+	}
+	m_process_key = std::bind(&U5World::ProcessAnyKeyHit, this);
+	if (m_parent->m_location == GameLocation::Town)
+	{
+		unsigned char curtile = m_parent->m_currentMap[m_xpos][m_ypos];
+		if (curtile == STAIRS_UP)
+		{
+			m_parent->ChangeLevel(m_parent->m_map_level - 1);
+		}
+		else if (curtile == STAIRS_DOWN)
+		{
+			m_parent->ChangeLevel(m_parent->m_map_level + 1);
+		}
+	}
+}
+
+void U5World::HandleEast()
+{
+	if (!m_allowMove)
+	{
+		return;
+	}
+	m_process_key = std::bind(&U5World::ProcessAnyKeyHit, this);
+
+	if (m_parent->m_location == GameLocation::Town)
+	{
+		unsigned char curtile = m_parent->m_currentMap[m_xpos][m_ypos];
+		if (curtile == STAIRS_LEFT)
+		{
+			m_parent->ChangeLevel(m_parent->m_map_level + 1);
+		}
+		else if (curtile == STAIRS_RIGHT)
+		{
+			m_parent->ChangeLevel(m_parent->m_map_level - 1);
+		}
+	}
+}
+
+void U5World::HandleWest()
+{
+	if (!m_allowMove)
+	{
+		return;
+	}
+	m_process_key = std::bind(&U5World::ProcessAnyKeyHit, this);
+
+	if (m_parent->m_location == GameLocation::Town)
+	{
+		unsigned char curtile = m_parent->m_currentMap[m_xpos][m_ypos];
+		if (curtile == STAIRS_LEFT)
+		{
+			m_parent->ChangeLevel(m_parent->m_map_level - 1);
+		}
+		else if (curtile == STAIRS_RIGHT)
+		{
+			m_parent->ChangeLevel(m_parent->m_map_level + 1);
+		}
+	}
+}
+
+void U5World::HandleNortheast()
+{
+	if (!m_allowMove)
+	{
+		return;
+	}
+	m_process_key = std::bind(&U5World::ProcessAnyKeyHit, this);
+
+	if (m_parent->m_location == GameLocation::Town)
+	{
+		unsigned char curtile = m_parent->m_currentMap[m_xpos][m_ypos];
+		if (curtile == STAIRS_UP)
+		{
+			m_parent->ChangeLevel(m_parent->m_map_level + 1);
+		}
+		else if (curtile == STAIRS_DOWN)
+		{
+			m_parent->ChangeLevel(m_parent->m_map_level - 1);
+		}
+		else if (curtile == STAIRS_LEFT)
+		{
+			m_parent->ChangeLevel(m_parent->m_map_level + 1);
+		}
+		else if (curtile == STAIRS_RIGHT)
+		{
+			m_parent->ChangeLevel(m_parent->m_map_level - 1);
+		}
+	}
+}
+
+void U5World::HandleNorthwest()
+{
+	if (!m_allowMove)
+	{
+		return;
+	}
+	m_process_key = std::bind(&U5World::ProcessAnyKeyHit, this);
+
+	if (m_parent->m_location == GameLocation::Town)
+	{
+		unsigned char curtile = m_parent->m_currentMap[m_xpos][m_ypos];
+		if (curtile == STAIRS_UP)
+		{
+			m_parent->ChangeLevel(m_parent->m_map_level + 1);
+		}
+		else if (curtile == STAIRS_DOWN)
+		{
+			m_parent->ChangeLevel(m_parent->m_map_level - 1);
+		}
+		else if (curtile == STAIRS_LEFT)
+		{
+			m_parent->ChangeLevel(m_parent->m_map_level - 1);
+		}
+		else if (curtile == STAIRS_RIGHT)
+		{
+			m_parent->ChangeLevel(m_parent->m_map_level + 1);
+		}
+	}
+}
+
+void U5World::HandleSoutheast()
+{
+	if (!m_allowMove)
+	{
+		return;
+	}
+	m_process_key = std::bind(&U5World::ProcessAnyKeyHit, this);
+
+	if (m_parent->m_location == GameLocation::Town)
+	{
+		unsigned char curtile = m_parent->m_currentMap[m_xpos][m_ypos];
+		if (curtile == STAIRS_UP)
+		{
+			m_parent->ChangeLevel(m_parent->m_map_level - 1);
+		}
+		else if (curtile == STAIRS_DOWN)
+		{
+			m_parent->ChangeLevel(m_parent->m_map_level + 1);
+		}
+		else if (curtile == STAIRS_LEFT)
+		{
+			m_parent->ChangeLevel(m_parent->m_map_level + 1);
+		}
+		else if (curtile == STAIRS_RIGHT)
+		{
+			m_parent->ChangeLevel(m_parent->m_map_level - 1);
+		}
+	}
+}
+
+void U5World::HandleSouthwest()
+{
+	if (!m_allowMove)
+	{
+		return;
+	}
+	m_process_key = std::bind(&U5World::ProcessAnyKeyHit, this);
+
+	if (m_parent->m_location == GameLocation::Town)
+	{
+		unsigned char curtile = m_parent->m_currentMap[m_xpos][m_ypos];
+		if (curtile == STAIRS_UP)
+		{
+			m_parent->ChangeLevel(m_parent->m_map_level - 1);
+		}
+		else if (curtile == STAIRS_DOWN)
+		{
+			m_parent->ChangeLevel(m_parent->m_map_level + 1);
+		}
+		else if (curtile == STAIRS_LEFT)
+		{
+			m_parent->ChangeLevel(m_parent->m_map_level - 1);
+		}
+		else if (curtile == STAIRS_RIGHT)
+		{
+			m_parent->ChangeLevel(m_parent->m_map_level + 1);
+		}
+	}
+}
+
 void U5World::ProcessNorth()
 {
 	int tempval;
@@ -151,6 +359,7 @@ void U5World::ProcessNorth()
 		if (check_location == 0)
 		{
 			m_parent->m_console->PrintText("\n", true);
+			m_process_key = std::bind(&U5World::HandleNorth, this);
 		}
 		if (0 > check_location)
 		{
@@ -186,6 +395,7 @@ void U5World::ProcessSouth()
 		if (check_location == 0)
 		{
 			m_parent->m_console->PrintText("\n", true);
+			m_process_key = std::bind(&U5World::HandleSouth, this);
 		}
 		if (0 > check_location)
 		{
@@ -221,6 +431,7 @@ void U5World::ProcessEast()
 		if (check_location == 0)
 		{
 			m_parent->m_console->PrintText("\n", true);
+			m_process_key = std::bind(&U5World::HandleEast, this);
 		}
 		if (0 > check_location)
 		{
@@ -257,6 +468,7 @@ void U5World::ProcessWest()
 		if (check_location == 0)
 		{
 			m_parent->m_console->PrintText("\n", true);
+			m_process_key = std::bind(&U5World::HandleWest, this);
 		}
 		if (0 > check_location)
 		{
@@ -299,6 +511,7 @@ void U5World::ProcessNorthEast()
 		if (check_location == 0)
 		{
 			m_parent->m_console->PrintText("\n", true);
+			m_process_key = std::bind(&U5World::HandleNortheast, this);
 		}
 		if (0 > check_location)
 		{
@@ -342,6 +555,7 @@ void U5World::ProcessNorthWest()
 		if (check_location == 0)
 		{
 			m_parent->m_console->PrintText("\n", true);
+			m_process_key = std::bind(&U5World::HandleNorthwest, this);
 		}
 		if (0 > check_location)
 		{
@@ -383,6 +597,7 @@ void U5World::ProcessSouthEast()
 		if (check_location == 0)
 		{
 			m_parent->m_console->PrintText("\n", true);
+			m_process_key = std::bind(&U5World::HandleSoutheast, this);
 		}
 		if (0 > check_location)
 		{
@@ -425,6 +640,7 @@ void U5World::ProcessSouthWest()
 		if (check_location == 0)
 		{
 			m_parent->m_console->PrintText("\n", true);
+			m_process_key = std::bind(&U5World::HandleSouthwest, this);
 		}
 		if (0 > check_location)
 		{
@@ -678,19 +894,17 @@ void U5World::ProcessScroll()
 		return;
 	}
 
-	bool allowMove;
-
 	if (m_smoothscroll)
 	{
 		m_vec_pos.back().elapsed_time += m_tickElapse;
-		allowMove = m_vec_pos.back().elapsed_time >= m_vec_pos.back().TURN_TIME;
+		m_allowMove = m_vec_pos.back().elapsed_time >= m_vec_pos.back().TURN_TIME;
 	}
 	else
 	{
-		allowMove = true;
+		m_allowMove = true;
 	}
 	
-	if (allowMove)
+	if (m_allowMove)
 	{
 		m_xpos = m_vec_pos.back().new_position.first;
 		m_ypos = m_vec_pos.back().new_position.second;

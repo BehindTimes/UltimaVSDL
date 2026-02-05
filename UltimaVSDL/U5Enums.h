@@ -95,5 +95,10 @@ const int KLIMB_STRING = 34;
 const int LEAVE_TOWN_STRING = 9;
 const int ENTER_STRING = 31;
 
+const int STAIRS_UP = 196;
+const int STAIRS_LEFT = 197;
+const int STAIRS_DOWN = 198;
+const int STAIRS_RIGHT = 199;
 const int LADDER_UP_TILE = 200;
 const int LADDER_DOWN_TILE = 201;
+

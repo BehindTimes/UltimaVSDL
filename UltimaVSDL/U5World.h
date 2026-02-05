@@ -58,9 +58,19 @@ private:
 	void HandleLeaveTown();
 	void HandleKlimb();
 
+	void HandleNorth();
+	void HandleSouth();
+	void HandleEast();
+	void HandleWest();
+	void HandleNortheast();
+	void HandleNorthwest();
+	void HandleSoutheast();
+	void HandleSouthwest();
+
 	std::function<void()> m_process_key;
 
 	U5Game* m_parent;
+	bool m_allowMove;
 
 };
 
