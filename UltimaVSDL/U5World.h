@@ -67,6 +67,9 @@ private:
 	void HandleSoutheast();
 	void HandleSouthwest();
 
+	void PreMove();
+	void PostMove();
+
 	std::function<void()> m_process_key;
 
 	U5Game* m_parent;

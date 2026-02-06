@@ -1076,3 +1076,13 @@ void U5World::ProcessEnter()
 		m_parent->m_console->PrintText("\n", true);
 	}
 }
+
+// Calculate NPC stuff here
+void U5World::PreMove()
+{
+}
+
+// This will lead to an end turn
+void U5World::PostMove()
+{
+}

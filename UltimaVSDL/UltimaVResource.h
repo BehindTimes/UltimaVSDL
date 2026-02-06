@@ -7,6 +7,27 @@
 #include <utility>
 #include "U5Enums.h"
 
+struct NPC_Schedule
+{
+	uint8_t AI_types[3];
+	uint8_t x_coordinates[3];
+	uint8_t y_coordinates[3];
+	int8_t z_coordinates[3];
+	uint8_t times[4];
+};
+
+struct NPC_Info
+{
+	NPC_Schedule schedule[32];
+	uint8_t type[32]; // merchant, guard, etc.
+	uint8_t dialog_number[32];
+};
+
+struct NPC_File
+{
+	NPC_Info info[8]; // each NPC file has information for 8 maps
+};
+
 struct U5StoryParagraphInfo
 {
 	U5StoryParagraphInfo() :
@@ -52,7 +73,8 @@ struct U5Data
 		map_chunks{},
 		world_map{},
 		underworld_map{},
-		location_z_index{}
+		location_z_index{},
+		npc_info{}
 	{
 	}
 	const size_t NUM_STORIES = 21;
@@ -90,6 +112,7 @@ struct U5Data
 	std::array<std::pair<int, int>, 0x28> location_info;
 	std::array<std::string, 0x28> location_names;
 	std::array<int, 0x20> location_z_index;
+	std::array< NPC_File, 4> npc_info;
 };
 
 struct IntroScriptInstruction {
@@ -173,6 +196,7 @@ private:
 
 	int LoadBitFiles();
 	int LoadPathFile();
+	int LoadNPCs(MapTypes map_type);
 	int Load16Images();
 	int LoadStory(std::vector<unsigned char> &buffer);
 	int LoadEnding(std::vector<unsigned char>& buffer);

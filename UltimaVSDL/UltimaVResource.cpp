@@ -12,6 +12,7 @@
 #include "U5Enums.h"
 #include "GameOptions.h"
 #include <memory>
+#include <iostream>
 
 extern std::unique_ptr<GameOptions> m_options;
 
@@ -87,6 +88,22 @@ int UltimaVResource::LoadResources()
 		return -1;
 	}
 	if (0 != LoadMap(MapTypes::Town))
+	{
+		return -1;
+	}
+	if (0 != LoadNPCs(MapTypes::Castle))
+	{
+		return -1;
+	}
+	if (0 != LoadNPCs(MapTypes::Dwelling))
+	{
+		return -1;
+	}
+	if (0 != LoadNPCs(MapTypes::Keep))
+	{
+		return -1;
+	}
+	if (0 != LoadNPCs(MapTypes::Town))
 	{
 		return -1;
 	}
@@ -1085,6 +1102,95 @@ int UltimaVResource::LoadMapChunk(unsigned char cur_chunk_val, size_t curChunkX,
 			}
 		}
 	}
+	return 0;
+}
+
+int UltimaVResource::LoadNPCs(MapTypes map_type)
+{
+	std::string strStoryFile;
+	
+	switch (map_type)
+	{
+	case MapTypes::Castle:
+		strStoryFile = std::string("CASTLE.NPC");
+		break;
+	case MapTypes::Dwelling:
+		strStoryFile = std::string("DWELLING.NPC");
+		break;
+	case MapTypes::Keep:
+		strStoryFile = std::string("KEEP.NPC");
+		break;
+	case MapTypes::Town:
+		strStoryFile = std::string("TOWNE.NPC");
+		break;
+	default:
+		return -1;
+	}
+
+	std::filesystem::path file_path = m_options->m_game_directory / strStoryFile;
+	if (!std::filesystem::exists(file_path))
+	{
+		return -1;
+	}
+	std::uintmax_t file_size = std::filesystem::file_size(file_path);
+	std::vector<unsigned char> buffer(file_size);
+	std::ifstream file(file_path, std::ios::binary);
+	file.read(reinterpret_cast<char*>(buffer.data()), static_cast<std::streamsize>(file_size));
+	file.close();
+	if (buffer.size() != 4608)
+	{
+		return -2;
+	}
+	int map_num = static_cast<int>(map_type);
+	auto& curMap = m_data.npc_info[map_num];
+	size_t curPos = 0;
+
+	for (int index = 0; index < 8; index++)
+	{
+		// Load the schedule
+		for (int schedule_index = 0; schedule_index < 32; schedule_index++)
+		{
+			for (int AI_index = 0; AI_index < 3; AI_index++)
+			{
+				curMap.info[index].schedule[schedule_index].AI_types[AI_index] = buffer[curPos];
+				curPos++;
+			}
+			for (int x_index = 0; x_index < 3; x_index++)
+			{
+				curMap.info[index].schedule[schedule_index].x_coordinates[x_index] = buffer[curPos];
+				curPos++;
+			}
+			for (int y_index = 0; y_index < 3; y_index++)
+			{
+				curMap.info[index].schedule[schedule_index].y_coordinates[y_index] = buffer[curPos];
+				curPos++;
+			}
+			for (int z_index = 0; z_index < 3; z_index++)
+			{
+				curMap.info[index].schedule[schedule_index].z_coordinates[z_index] = static_cast<int8_t>(buffer[curPos]);
+				curPos++;
+				//std::cout << std::to_string(curMap.info[index].schedule[schedule_index].z_coordinates[z_index]) << std::endl;
+			}
+			for (int times_index = 0; times_index < 4; times_index++)
+			{
+				curMap.info[index].schedule[schedule_index].times[times_index] = buffer[curPos];
+				curPos++;
+			}
+		}
+		// Load the NPC type
+		for (int schedule_index = 0; schedule_index < 32; schedule_index++)
+		{
+			curMap.info[index].type[schedule_index] = buffer[curPos];
+			curPos++;
+		}
+		// Load the dialog number
+		for (int schedule_index = 0; schedule_index < 32; schedule_index++)
+		{
+			curMap.info[index].dialog_number[schedule_index] = buffer[curPos];
+			curPos++;
+		}
+	}
+
 	return 0;
 }
 
