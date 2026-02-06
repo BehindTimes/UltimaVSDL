@@ -26,13 +26,17 @@ public:
 	void ChangeLevel(int map_level);
 
 	std::vector < std::vector<unsigned char> > m_currentMap;
+	NPC_Info* m_curNPCs;
 	GameLocation m_location;
 	std::unique_ptr<U5Console> m_console;
 	GameLocation m_old_location;
 	std::pair<int, int> m_old_position;
 	int m_map_level;
+	int m_cur_level;
 
 private:
+	void LoadNPCData();
+
 	int m_window_width;
 	int m_window_height;
 	int m_map_type;

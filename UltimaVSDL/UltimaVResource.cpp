@@ -1152,41 +1152,41 @@ int UltimaVResource::LoadNPCs(MapTypes map_type)
 		{
 			for (int AI_index = 0; AI_index < 3; AI_index++)
 			{
-				curMap.info[index].schedule[schedule_index].AI_types[AI_index] = buffer[curPos];
+				curMap.info[index].data[schedule_index].schedule.AI_types[AI_index] = buffer[curPos];
 				curPos++;
 			}
 			for (int x_index = 0; x_index < 3; x_index++)
 			{
-				curMap.info[index].schedule[schedule_index].x_coordinates[x_index] = buffer[curPos];
+				curMap.info[index].data[schedule_index].schedule.x_coordinates[x_index] = buffer[curPos];
 				curPos++;
 			}
 			for (int y_index = 0; y_index < 3; y_index++)
 			{
-				curMap.info[index].schedule[schedule_index].y_coordinates[y_index] = buffer[curPos];
+				curMap.info[index].data[schedule_index].schedule.y_coordinates[y_index] = buffer[curPos];
 				curPos++;
 			}
 			for (int z_index = 0; z_index < 3; z_index++)
 			{
-				curMap.info[index].schedule[schedule_index].z_coordinates[z_index] = static_cast<int8_t>(buffer[curPos]);
+				curMap.info[index].data[schedule_index].schedule.z_coordinates[z_index] = static_cast<int8_t>(buffer[curPos]);
 				curPos++;
 				//std::cout << std::to_string(curMap.info[index].schedule[schedule_index].z_coordinates[z_index]) << std::endl;
 			}
 			for (int times_index = 0; times_index < 4; times_index++)
 			{
-				curMap.info[index].schedule[schedule_index].times[times_index] = buffer[curPos];
+				curMap.info[index].data[schedule_index].schedule.times[times_index] = buffer[curPos];
 				curPos++;
 			}
 		}
 		// Load the NPC type
 		for (int schedule_index = 0; schedule_index < 32; schedule_index++)
 		{
-			curMap.info[index].type[schedule_index] = buffer[curPos];
+			curMap.info[index].data[schedule_index].type = buffer[curPos];
 			curPos++;
 		}
 		// Load the dialog number
 		for (int schedule_index = 0; schedule_index < 32; schedule_index++)
 		{
-			curMap.info[index].dialog_number[schedule_index] = buffer[curPos];
+			curMap.info[index].data[schedule_index].dialog_number = buffer[curPos];
 			curPos++;
 		}
 	}

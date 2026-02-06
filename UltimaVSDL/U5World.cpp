@@ -54,6 +54,45 @@ void U5World::SetParent(U5Game* parent)
 	m_parent = parent;
 }
 
+void U5World::DrawNPCs()
+{
+	if (m_parent->m_curNPCs == nullptr)
+	{
+		return;
+	}
+	// Index 0 is the Avatar
+	for (int index = 1; index < 32; index++)
+	{
+		if (m_parent->m_curNPCs->data[index].current_z != m_parent->m_cur_level)
+		{
+			continue;
+		}
+		int curpos = m_parent->m_curNPCs->data[index].type + 0x100;
+
+		if (curpos >= m_sdl_helper->m_TileTextures.size() || curpos == 0x100)
+		{
+			continue; // Should never happen
+		}
+
+		int mapX = m_parent->m_curNPCs->data[index].current_x - (m_xpos - 6);
+		int mapY = m_parent->m_curNPCs->data[index].current_y - (m_ypos - 6);
+
+		unsigned char map_tile = m_parent->m_currentMap[m_parent->m_curNPCs->data[index].current_x][m_parent->m_curNPCs->data[index].current_y];
+
+		SDL_Texture* curTexture;
+		if (map_tile == BED_HEAD)
+		{
+			curTexture = m_sdl_helper->m_TileTextures[BED_SLEEPING].GetTexture();
+		}
+		else
+		{
+			curTexture = m_sdl_helper->m_TileTextures[curpos].GetTexture();
+		}
+		
+		m_sdl_helper->DrawTileTexture(curTexture, mapX, mapY);
+	}
+}
+
 void U5World::Render()
 {
 	DrawBorder();
@@ -104,8 +143,11 @@ void U5World::Render()
 			unsigned char curpos = m_parent->m_currentMap[curX][curY];
 			SDL_Texture* curTexture = m_sdl_helper->m_TileTextures[curpos].GetTexture();
 			m_sdl_helper->DrawTileTexture(curTexture, xpos, ypos);
-			//curpos++;
 		}
+	}
+	if (m_parent->m_location == GameLocation::Town)
+	{
+		DrawNPCs();
 	}
 }
 
@@ -139,11 +181,11 @@ void U5World::HandleNorth()
 		unsigned char curtile = m_parent->m_currentMap[m_xpos][m_ypos];
 		if (curtile == STAIRS_UP)
 		{
-			m_parent->ChangeLevel(m_parent->m_map_level + 1);
+			m_parent->ChangeLevel(1);
 		}
 		else if (curtile == STAIRS_DOWN)
 		{
-			m_parent->ChangeLevel(m_parent->m_map_level - 1);
+			m_parent->ChangeLevel(-1);
 		}
 	}
 }
@@ -160,11 +202,11 @@ void U5World::HandleSouth()
 		unsigned char curtile = m_parent->m_currentMap[m_xpos][m_ypos];
 		if (curtile == STAIRS_UP)
 		{
-			m_parent->ChangeLevel(m_parent->m_map_level - 1);
+			m_parent->ChangeLevel(-1);
 		}
 		else if (curtile == STAIRS_DOWN)
 		{
-			m_parent->ChangeLevel(m_parent->m_map_level + 1);
+			m_parent->ChangeLevel(1);
 		}
 	}
 }
@@ -182,11 +224,11 @@ void U5World::HandleEast()
 		unsigned char curtile = m_parent->m_currentMap[m_xpos][m_ypos];
 		if (curtile == STAIRS_LEFT)
 		{
-			m_parent->ChangeLevel(m_parent->m_map_level + 1);
+			m_parent->ChangeLevel(1);
 		}
 		else if (curtile == STAIRS_RIGHT)
 		{
-			m_parent->ChangeLevel(m_parent->m_map_level - 1);
+			m_parent->ChangeLevel(-1);
 		}
 	}
 }
@@ -204,11 +246,11 @@ void U5World::HandleWest()
 		unsigned char curtile = m_parent->m_currentMap[m_xpos][m_ypos];
 		if (curtile == STAIRS_LEFT)
 		{
-			m_parent->ChangeLevel(m_parent->m_map_level - 1);
+			m_parent->ChangeLevel(-1);
 		}
 		else if (curtile == STAIRS_RIGHT)
 		{
-			m_parent->ChangeLevel(m_parent->m_map_level + 1);
+			m_parent->ChangeLevel(1);
 		}
 	}
 }
@@ -226,19 +268,19 @@ void U5World::HandleNortheast()
 		unsigned char curtile = m_parent->m_currentMap[m_xpos][m_ypos];
 		if (curtile == STAIRS_UP)
 		{
-			m_parent->ChangeLevel(m_parent->m_map_level + 1);
+			m_parent->ChangeLevel(1);
 		}
 		else if (curtile == STAIRS_DOWN)
 		{
-			m_parent->ChangeLevel(m_parent->m_map_level - 1);
+			m_parent->ChangeLevel(-1);
 		}
 		else if (curtile == STAIRS_LEFT)
 		{
-			m_parent->ChangeLevel(m_parent->m_map_level + 1);
+			m_parent->ChangeLevel(1);
 		}
 		else if (curtile == STAIRS_RIGHT)
 		{
-			m_parent->ChangeLevel(m_parent->m_map_level - 1);
+			m_parent->ChangeLevel(-1);
 		}
 	}
 }
@@ -256,19 +298,19 @@ void U5World::HandleNorthwest()
 		unsigned char curtile = m_parent->m_currentMap[m_xpos][m_ypos];
 		if (curtile == STAIRS_UP)
 		{
-			m_parent->ChangeLevel(m_parent->m_map_level + 1);
+			m_parent->ChangeLevel(1);
 		}
 		else if (curtile == STAIRS_DOWN)
 		{
-			m_parent->ChangeLevel(m_parent->m_map_level - 1);
+			m_parent->ChangeLevel(-1);
 		}
 		else if (curtile == STAIRS_LEFT)
 		{
-			m_parent->ChangeLevel(m_parent->m_map_level - 1);
+			m_parent->ChangeLevel(-1);
 		}
 		else if (curtile == STAIRS_RIGHT)
 		{
-			m_parent->ChangeLevel(m_parent->m_map_level + 1);
+			m_parent->ChangeLevel(1);
 		}
 	}
 }
@@ -286,19 +328,19 @@ void U5World::HandleSoutheast()
 		unsigned char curtile = m_parent->m_currentMap[m_xpos][m_ypos];
 		if (curtile == STAIRS_UP)
 		{
-			m_parent->ChangeLevel(m_parent->m_map_level - 1);
+			m_parent->ChangeLevel(-1);
 		}
 		else if (curtile == STAIRS_DOWN)
 		{
-			m_parent->ChangeLevel(m_parent->m_map_level + 1);
+			m_parent->ChangeLevel(1);
 		}
 		else if (curtile == STAIRS_LEFT)
 		{
-			m_parent->ChangeLevel(m_parent->m_map_level + 1);
+			m_parent->ChangeLevel(1);
 		}
 		else if (curtile == STAIRS_RIGHT)
 		{
-			m_parent->ChangeLevel(m_parent->m_map_level - 1);
+			m_parent->ChangeLevel(-1);
 		}
 	}
 }
@@ -316,19 +358,19 @@ void U5World::HandleSouthwest()
 		unsigned char curtile = m_parent->m_currentMap[m_xpos][m_ypos];
 		if (curtile == STAIRS_UP)
 		{
-			m_parent->ChangeLevel(m_parent->m_map_level - 1);
+			m_parent->ChangeLevel(-1);
 		}
 		else if (curtile == STAIRS_DOWN)
 		{
-			m_parent->ChangeLevel(m_parent->m_map_level + 1);
+			m_parent->ChangeLevel(1);
 		}
 		else if (curtile == STAIRS_LEFT)
 		{
-			m_parent->ChangeLevel(m_parent->m_map_level - 1);
+			m_parent->ChangeLevel(-1);
 		}
 		else if (curtile == STAIRS_RIGHT)
 		{
-			m_parent->ChangeLevel(m_parent->m_map_level + 1);
+			m_parent->ChangeLevel(1);
 		}
 	}
 }
@@ -969,12 +1011,12 @@ void U5World::ProcessKlimb()
 		case LADDER_UP_TILE:
 			m_parent->m_console->PrintText(m_resources->m_data.game_strings_16[UP_STRING]);
 			m_parent->m_console->PrintText("\n", true);
-			m_parent->ChangeLevel(m_parent->m_map_level + 1);
+			m_parent->ChangeLevel(1);
 			return;
 		case LADDER_DOWN_TILE:
 			m_parent->m_console->PrintText(m_resources->m_data.game_strings_16[DOWN_STRING]);
 			m_parent->m_console->PrintText("\n", true);
-			m_parent->ChangeLevel(m_parent->m_map_level - 1);
+			m_parent->ChangeLevel(-1);
 			return;
 		default:
 			break;

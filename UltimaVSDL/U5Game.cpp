@@ -25,7 +25,8 @@ U5Game::U5Game(SDL3Helper* sdl_helper, UltimaVResource* u5_resources) :
 	m_old_location(GameLocation::World),
 	m_curLocation(nullptr),
 	m_map_level(0),
-	m_map_type(0)
+	m_map_type(0),
+	m_cur_level(0)
 {
 	m_world = std::make_unique<U5World>(sdl_helper, u5_resources);
 	m_world->SetParent(this);
@@ -98,6 +99,57 @@ void U5Game::Render()
 	m_sdl_helper->RenderTextureAt(m_sdl_helper->m_TargetTextures[TTV_MAIN_DISPLAY], HALF_TILE_WIDTH, HALF_TILE_HEIGHT, 11.0f * RENDER_TILE_WIDTH, 11.0f * RENDER_TILE_HEIGHT);
 	m_sdl_helper->RenderPresent();
 	m_sdl_helper->AnimateTiles(m_tickElapse);
+
+	// Update the NPC tiles individually
+
+	if (m_map_type < 0 || m_map_type >= 4)
+	{
+		return;
+	}
+	if (m_curNPCs == nullptr)
+	{
+		return;
+	}
+	for (int index = 1; index < 32; index++)
+	{
+		if (m_curNPCs->data[index].type >= 52)
+		{
+			if (m_curNPCs->data[index].type >= 180 && m_curNPCs->data[index].type <= 183)
+			{
+				return;
+			}
+			m_curNPCs->data[index].curNPCDelay += m_tickElapse;
+			bool changeTile = false;
+			if (m_curNPCs->data[index].curNPCDelay >= NPC_ANIMATE)
+			{
+				m_curNPCs->data[index].curNPCDelay %= NPC_ANIMATE;
+				changeTile = true;
+			}
+			if (changeTile)
+			{
+				int startTile = m_curNPCs->data[index].type - (m_curNPCs->data[index].type % 4);
+				int endTile = startTile + 3;
+
+				int val = m_utilities->GetRandom(0, 2);
+				if (val == 0)
+				{
+					m_curNPCs->data[index].type--;
+					if (m_curNPCs->data[index].type < static_cast<uint8_t>(startTile))
+					{
+						m_curNPCs->data[index].type = static_cast<uint8_t>(startTile);
+					}
+				}
+				else if (val == 1)
+				{
+					m_curNPCs->data[index].type++;
+					if (m_curNPCs->data[index].type > static_cast<uint8_t>(endTile))
+					{
+						m_curNPCs->data[index].type = static_cast<uint8_t>(endTile);
+					}
+				}
+			}
+		}
+	}
 }
 
 void U5Game::ProcessEvents()
@@ -119,7 +171,9 @@ void U5Game::GetElapsedTime()
 
 void U5Game::ChangeLevel(int map_level)
 {
-	if (map_level < 0 || map_level >= 16)
+	int temp_level = m_map_level + m_cur_level + map_level;
+
+	if (temp_level < 0 || temp_level >= 16)
 	{
 		return;
 	}
@@ -127,22 +181,23 @@ void U5Game::ChangeLevel(int map_level)
 	{
 		return;
 	}
-	m_map_level = map_level;
+
+	m_cur_level += map_level;
 
 	MapTypes curMapType = static_cast<MapTypes>(m_map_type);
 	switch (curMapType)
 	{
 	case MapTypes::Castle:
-		m_currentMap = m_resources->m_data.castle_maps[m_map_level];
+		m_currentMap = m_resources->m_data.castle_maps[temp_level];
 		break;
 	case MapTypes::Dwelling:
-		m_currentMap = m_resources->m_data.dwelling_maps[m_map_level];
+		m_currentMap = m_resources->m_data.dwelling_maps[temp_level];
 		break;
 	case MapTypes::Keep:
-		m_currentMap = m_resources->m_data.keep_maps[m_map_level];
+		m_currentMap = m_resources->m_data.keep_maps[temp_level];
 		break;
 	case MapTypes::Town:
-		m_currentMap = m_resources->m_data.town_maps[m_map_level];
+		m_currentMap = m_resources->m_data.town_maps[temp_level];
 		break;
 	default:
 		break;
@@ -159,6 +214,7 @@ void U5Game::LoadMap(int map_num)
 		return;
 	}
 
+	m_curNPCs = nullptr;
 	m_old_location = m_location;
 	// Underworld or Britannia 
 	if (map_num < 0)
@@ -182,6 +238,8 @@ void U5Game::LoadMap(int map_num)
 	std::vector<int> Map_Types = {};
 	m_map_type = map_num / 8;
 	m_map_level = 0;
+	m_cur_level = 0;
+	int curMap = map_num % 8;
 	if (map_num < MAX_TOWN_MAPS)
 	{
 		m_map_level = m_resources->m_data.location_z_index[map_num];
@@ -194,26 +252,46 @@ void U5Game::LoadMap(int map_num)
 		m_currentMap.clear();
 		m_currentMap = m_resources->m_data.castle_maps[m_map_level];
 		m_curLocation->SetPos(15, 30);
+		m_curNPCs = &m_resources->m_data.npc_info[static_cast<int>(curMapType)].info[curMap];
 		break;
 	case MapTypes::Dwelling:
 		m_location = GameLocation::Town;
 		m_currentMap.clear();
 		m_currentMap = m_resources->m_data.dwelling_maps[m_map_level];
 		m_curLocation->SetPos(15, 30);
+		m_curNPCs = &m_resources->m_data.npc_info[static_cast<int>(curMapType)].info[curMap];
 		break;
 	case MapTypes::Keep:
 		m_location = GameLocation::Town;
 		m_currentMap.clear();
 		m_currentMap = m_resources->m_data.keep_maps[m_map_level];
 		m_curLocation->SetPos(15, 30);
+		m_curNPCs = &m_resources->m_data.npc_info[static_cast<int>(curMapType)].info[curMap];
 		break;
 	case MapTypes::Town:
 		m_location = GameLocation::Town;
 		m_currentMap.clear();
 		m_currentMap = m_resources->m_data.town_maps[m_map_level];
 		m_curLocation->SetPos(15, 30);
+		m_curNPCs = &m_resources->m_data.npc_info[static_cast<int>(curMapType)].info[curMap];
 		break;
 	default:
 		break;
+	}
+
+	if (m_curNPCs != nullptr)
+	{
+		LoadNPCData();
+	}
+}
+
+void U5Game::LoadNPCData()
+{
+	for (int index = 0; index < 32; index++)
+	{
+		m_curNPCs->data[index].current_x = m_curNPCs->data[index].schedule.x_coordinates[1];
+		m_curNPCs->data[index].current_y = m_curNPCs->data[index].schedule.y_coordinates[1];
+		m_curNPCs->data[index].current_z = m_curNPCs->data[index].schedule.z_coordinates[1];
+		m_curNPCs->data[index].curNPCDelay = 0;
 	}
 }

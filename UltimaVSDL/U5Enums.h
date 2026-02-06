@@ -95,6 +95,8 @@ const int KLIMB_STRING = 34;
 const int LEAVE_TOWN_STRING = 9;
 const int ENTER_STRING = 31;
 
+const int BED_HEAD = 171;
+const int BED_SLEEPING = 282;
 const int STAIRS_UP = 196;
 const int STAIRS_LEFT = 197;
 const int STAIRS_DOWN = 198;

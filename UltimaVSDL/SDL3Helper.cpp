@@ -900,6 +900,11 @@ void SDL3Helper::LoadTileTextures(UltimaVResource* u5_resources)
 	m_TileTextures[189].CreateFireTexture(&u5_resources->m_Tiles[205], FIRE_ANIMATE, u5_resources->m_render_mode);
 	m_TileTextures[190].CreateFireTexture(&u5_resources->m_Tiles[206], FIRE_ANIMATE, u5_resources->m_render_mode);
 	m_TileTextures[191].CreateFireTexture(&u5_resources->m_Tiles[207], FIRE_ANIMATE, u5_resources->m_render_mode);
+
+	for (int index = 64 + 0x100; index < 180 + 0x100; index++)
+	{
+		m_TileTextures[index].CreateNPCRotationTextures(NPC_ANIMATE);
+	}
 }
 
 void SDL3Helper::LoadProportionalFontTextures(UltimaVResource* u5_resources)

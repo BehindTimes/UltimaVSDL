@@ -6,6 +6,7 @@
 #include <array>
 #include <utility>
 #include "U5Enums.h"
+#include <SDL3/SDL_stdinc.h>
 
 struct NPC_Schedule
 {
@@ -16,11 +17,21 @@ struct NPC_Schedule
 	uint8_t times[4];
 };
 
+struct NPC_Data
+{
+	NPC_Schedule schedule;
+	uint8_t facing_direction;
+	uint8_t current_x;
+	uint8_t current_y;
+	uint8_t current_z;
+	uint8_t type;
+	uint8_t dialog_number;
+	Uint64 curNPCDelay;
+};
+
 struct NPC_Info
 {
-	NPC_Schedule schedule[32];
-	uint8_t type[32]; // merchant, guard, etc.
-	uint8_t dialog_number[32];
+	NPC_Data data[32];
 };
 
 struct NPC_File
