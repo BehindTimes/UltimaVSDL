@@ -209,6 +209,8 @@ void U5Game::ChangeLevel(int map_level)
 
 void U5Game::LoadMap(int map_num)
 {
+	m_input->SetKeyDelay(250);
+
 	const int MAX_MAPS = 40;
 	const int MAX_TOWN_MAPS = 32;
 
@@ -280,6 +282,7 @@ void U5Game::LoadMap(int map_num)
 		m_curNPCs = &m_resources->m_data.npc_info[static_cast<int>(curMapType)].info[curMap];
 		break;
 	case MapTypes::Dungeon:
+		m_input->SetKeyDelay(500);
 		if (m_location == GameLocation::Underworld)
 		{
 			offset = 7;

@@ -39,9 +39,160 @@ void U5Dungeon::SetParent(U5Game* parent)
 	m_parent = parent;
 }
 
+bool U5Dungeon::DrawFirstLayer(std::pair<uint8_t, uint8_t> left, std::pair<uint8_t, uint8_t> middle, std::pair<uint8_t, uint8_t> right)
+{
+	auto& curTextures = m_sdl_helper->m_ImageDungeonTextures[static_cast<int>(m_dungeon_type)];
+	int window_width, window_height;
+	m_sdl_helper->GetScreenDimensions(window_width, window_height);
+	float vMult = window_height / static_cast<float>(ORIGINAL_GAME_HEIGHT);
+	float hMult = window_width / static_cast<float>(ORIGINAL_GAME_WIDTH);
+
+	switch (middle.first)
+	{
+	default:
+		break;
+	}
+
+	switch (left.first)
+	{
+	case 11:
+		m_sdl_helper->RenderTextureAt(curTextures[0], hMult * 24, vMult * 22, hMult * 24, vMult * 164);
+		break;
+	default:
+		m_sdl_helper->RenderTextureAt(curTextures[16], hMult * 24, vMult * 22, hMult * 24, vMult * 164);
+		break;
+	}
+
+	switch (right.first)
+	{
+	case 11:
+		m_sdl_helper->RenderFlipTextureAt(curTextures[0], hMult * 159, vMult * 22, hMult * 24, vMult * 164, 2);
+		break;
+	default:
+		m_sdl_helper->RenderFlipTextureAt(curTextures[16], hMult * 159, vMult * 22, hMult * 24, vMult * 164, 2);
+		break;
+	}
+	return true;
+}
+
+bool U5Dungeon::DrawSecondLayer(std::pair<uint8_t, uint8_t> left, std::pair<uint8_t, uint8_t> middle, std::pair<uint8_t, uint8_t> right)
+{
+	auto& curTextures = m_sdl_helper->m_ImageDungeonTextures[static_cast<int>(m_dungeon_type)];
+	int window_width, window_height;
+	m_sdl_helper->GetScreenDimensions(window_width, window_height);
+	float vMult = window_height / static_cast<float>(ORIGINAL_GAME_HEIGHT);
+	float hMult = window_width / static_cast<float>(ORIGINAL_GAME_WIDTH);
+	bool drawsides = false;
+
+	switch (middle.first)
+	{
+	case 11:
+		m_sdl_helper->RenderTextureAt(curTextures[9], hMult * 48, vMult * 22, hMult * 56, vMult * 164);
+		m_sdl_helper->RenderFlipTextureAt(curTextures[9], hMult * 103, vMult * 22, hMult * 56, vMult * 164, 2);
+		break;
+	default:
+		drawsides = true;
+		break;
+	};
+	if (drawsides)
+	{
+		switch (left.first)
+		{
+		case 11:
+			m_sdl_helper->RenderTextureAt(curTextures[1], hMult * 48, vMult * 22, hMult * 32, vMult * 164);
+			break;
+		default:
+			//m_sdl_helper->RenderTextureAt(curTextures[16], hMult * 24, vMult * 22, hMult * 24, vMult * 164);
+			break;
+		}
+
+		switch (right.first)
+		{
+		case 11:
+			m_sdl_helper->RenderFlipTextureAt(curTextures[1], hMult * 127, vMult * 22, hMult * 32, vMult * 164, 2);
+			break;
+		default:
+			//m_sdl_helper->RenderFlipTextureAt(curTextures[16], hMult * 159, vMult * 22, hMult * 24, vMult * 164, 2);
+			break;
+		}
+	}
+	return true;
+}
+
+bool U5Dungeon::DrawThirdLayer(std::pair<uint8_t, uint8_t> left, std::pair<uint8_t, uint8_t> middle, std::pair<uint8_t, uint8_t> right)
+{
+	auto& curTextures = m_sdl_helper->m_ImageDungeonTextures[static_cast<int>(m_dungeon_type)];
+	int window_width, window_height;
+	m_sdl_helper->GetScreenDimensions(window_width, window_height);
+	float vMult = window_height / static_cast<float>(ORIGINAL_GAME_HEIGHT);
+	float hMult = window_width / static_cast<float>(ORIGINAL_GAME_WIDTH);
+	bool drawsides = false;
+
+	switch (middle.first)
+	{
+	case 11:
+		//m_sdl_helper->RenderTextureAt(curTextures[9], hMult * 48, vMult * 22, hMult * 56, vMult * 164);
+		//m_sdl_helper->RenderFlipTextureAt(curTextures[9], hMult * 103, vMult * 22, hMult * 56, vMult * 164, 2);
+		break;
+	default:
+		drawsides = true;
+		break;
+	};
+	if (drawsides)
+	{
+		switch (left.first)
+		{
+		case 11:
+			m_sdl_helper->RenderTextureAt(curTextures[2], hMult * 80, vMult * 22, hMult * 16, vMult * 164);
+			break;
+		default:
+			m_sdl_helper->RenderTextureAt(curTextures[18], hMult * 80, vMult * 22, hMult * 16, vMult * 164);
+			break;
+		}
+
+		switch (right.first)
+		{
+		case 11:
+			m_sdl_helper->RenderFlipTextureAt(curTextures[2], hMult * 111, vMult * 22, hMult * 16, vMult * 164, 2);
+			break;
+		default:
+			m_sdl_helper->RenderFlipTextureAt(curTextures[18], hMult * 111, vMult * 22, hMult * 16, vMult * 164, 2);
+			break;
+		}
+	}
+
+	return true;
+}
+
+bool U5Dungeon::DrawFourthLayer(std::pair<uint8_t, uint8_t> left, std::pair<uint8_t, uint8_t> middle, std::pair<uint8_t, uint8_t> right)
+{
+	auto& curTextures = m_sdl_helper->m_ImageDungeonTextures[static_cast<int>(m_dungeon_type)];
+	int window_width, window_height;
+	m_sdl_helper->GetScreenDimensions(window_width, window_height);
+	float vMult = window_height / static_cast<float>(ORIGINAL_GAME_HEIGHT);
+	float hMult = window_width / static_cast<float>(ORIGINAL_GAME_WIDTH);
+	bool drawsides = false;
+
+	switch (middle.first)
+	{
+	case 11:
+		m_sdl_helper->RenderTextureAt(curTextures[11], hMult * 96, vMult * 22, hMult * 8, vMult * 164);
+		m_sdl_helper->RenderFlipTextureAt(curTextures[11], hMult * 103, vMult * 22, hMult * 8, vMult * 164, 2);
+		break;
+	default:
+		drawsides = true;
+		break;
+	};
+	if (drawsides)
+	{
+	}
+	return true;
+}
+
 void U5Dungeon::DrawRoom()
 {
-	std::pair<uint8_t, uint8_t> curMatrix[3][3];
+	std::pair<uint8_t, uint8_t> curMatrix[3][4];
+	std::pair<uint8_t, uint8_t> tempval;
 	auto& curTextures = m_sdl_helper->m_ImageDungeonTextures[static_cast<int>(m_dungeon_type)];
 	curMatrix[1][0] = m_parent->m_currentDungeonMap[m_xpos][m_ypos];
 	switch (m_dir)
@@ -57,6 +208,10 @@ void U5Dungeon::DrawRoom()
 		curMatrix[0][2] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos - 1) + 8) % 8][static_cast<size_t>((m_ypos - 2) + 8) % 8];
 		curMatrix[1][2] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos + 0) + 8) % 8][static_cast<size_t>((m_ypos - 2) + 8) % 8];
 		curMatrix[2][2] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos + 1) + 8) % 8][static_cast<size_t>((m_ypos - 2) + 8) % 8];
+
+		curMatrix[0][3] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos - 1) + 8) % 8][static_cast<size_t>((m_ypos - 3) + 8) % 8];
+		curMatrix[1][3] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos + 0) + 8) % 8][static_cast<size_t>((m_ypos - 3) + 8) % 8];
+		curMatrix[2][3] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos + 1) + 8) % 8][static_cast<size_t>((m_ypos - 3) + 8) % 8];
 		break;
 	case 'S':
 		curMatrix[0][0] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos - 1) + 8) % 8][m_ypos];
@@ -69,6 +224,10 @@ void U5Dungeon::DrawRoom()
 		curMatrix[0][2] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos + 1) + 8) % 8][static_cast<size_t>((m_ypos + 2) + 8) % 8];
 		curMatrix[1][2] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos + 0) + 8) % 8][static_cast<size_t>((m_ypos + 2) + 8) % 8];
 		curMatrix[2][2] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos - 1) + 8) % 8][static_cast<size_t>((m_ypos + 2) + 8) % 8];
+
+		curMatrix[0][3] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos + 1) + 8) % 8][static_cast<size_t>((m_ypos + 3) + 8) % 8];
+		curMatrix[1][3] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos + 0) + 8) % 8][static_cast<size_t>((m_ypos + 3) + 8) % 8];
+		curMatrix[2][3] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos - 1) + 8) % 8][static_cast<size_t>((m_ypos + 3) + 8) % 8];
 		break;
 	case 'E':
 		curMatrix[0][0] = m_parent->m_currentDungeonMap[m_xpos][((m_ypos - 1) + 8) % 8];
@@ -81,6 +240,10 @@ void U5Dungeon::DrawRoom()
 		curMatrix[0][2] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos + 2) + 8) % 8][static_cast<size_t>((m_ypos - 1) + 8) % 8];
 		curMatrix[1][2] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos + 2) + 8) % 8][static_cast<size_t>((m_ypos + 0) + 8) % 8];
 		curMatrix[2][2] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos + 2) + 8) % 8][static_cast<size_t>((m_ypos + 1) + 8) % 8];
+
+		curMatrix[0][3] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos + 3) + 8) % 8][static_cast<size_t>((m_ypos - 1) + 8) % 8];
+		curMatrix[1][3] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos + 3) + 8) % 8][static_cast<size_t>((m_ypos + 0) + 8) % 8];
+		curMatrix[2][3] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos + 3) + 8) % 8][static_cast<size_t>((m_ypos + 1) + 8) % 8];
 		break;
 	case 'W':
 		curMatrix[0][0] = m_parent->m_currentDungeonMap[m_xpos][((m_ypos + 1) + 8) % 8];
@@ -93,6 +256,10 @@ void U5Dungeon::DrawRoom()
 		curMatrix[0][2] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos - 2) + 8) % 8][static_cast<size_t>((m_ypos + 1) + 8) % 8];
 		curMatrix[1][2] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos - 2) + 8) % 8][static_cast<size_t>((m_ypos + 0) + 8) % 8];
 		curMatrix[2][2] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos - 2) + 8) % 8][static_cast<size_t>((m_ypos - 1) + 8) % 8];
+
+		curMatrix[0][3] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos - 3) + 8) % 8][static_cast<size_t>((m_ypos + 1) + 8) % 8];
+		curMatrix[1][3] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos - 3) + 8) % 8][static_cast<size_t>((m_ypos + 0) + 8) % 8];
+		curMatrix[2][3] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos - 3) + 8) % 8][static_cast<size_t>((m_ypos - 1) + 8) % 8];
 		break;
 	default:
 		break;
@@ -103,30 +270,32 @@ void U5Dungeon::DrawRoom()
 	float vMult = window_height / static_cast<float>(ORIGINAL_GAME_HEIGHT);
 	float hMult = window_width / static_cast<float>(ORIGINAL_GAME_WIDTH);
 
-	// Draw left
-	auto& curLeft = curMatrix[0][0];
-	switch (curLeft.first)
+	int max_depth = 3;
+	// Get the furthest to draw out
+	for (int index = 0; index < max_depth; index++)
 	{
-	case 11: // Wall
-		m_sdl_helper->RenderTextureAt(curTextures[0], hMult * 24, vMult * 22, hMult * 24, vMult * 164);
-		break;
+		auto& curMiddle = curMatrix[1][index];
+		if (curMiddle.first > 9)
+		{
+			max_depth = index;
+			break;
+		}
 	}
-	auto& curMiddle = curMatrix[1][1];
-	switch (curMiddle.first)
+	bool ret;
+	if (max_depth > 2)
 	{
-	case 11: // Wall
-		m_sdl_helper->RenderTextureAt(curTextures[9], hMult * 48, vMult * 22, hMult * 56, vMult * 164);
-		m_sdl_helper->RenderFlipTextureAt(curTextures[9], hMult * 103, vMult * 22, hMult * 56, vMult * 164, 2);
-		break;
+		ret = DrawFourthLayer(curMatrix[0][3], curMatrix[1][3], curMatrix[2][3]);
 	}
-	// Draw Right
-	auto& curRight = curMatrix[2][0];
-	switch (curRight.first)
+	if (max_depth > 1)
 	{
-	case 11: // Wall
-		m_sdl_helper->RenderFlipTextureAt(curTextures[0], hMult * 159, vMult * 22, hMult * 24, vMult * 164, 2);
-		break;
+		ret = DrawThirdLayer(curMatrix[0][2], curMatrix[1][2], curMatrix[2][2]);
 	}
+	if (max_depth > 0)
+	{
+		ret = DrawSecondLayer(curMatrix[0][1], curMatrix[1][1], curMatrix[2][1]);
+	}
+
+	ret = DrawFirstLayer(curMatrix[0][0], curMatrix[1][0], curMatrix[2][0]);
 }
 
 void U5Dungeon::Render()

@@ -4,6 +4,8 @@
 #include "SDL3Helper.h"
 #include "UltimaVResource.h"
 #include <functional>
+#include <cstdint>
+#include <utility>
 
 enum class DungeonType
 {
@@ -26,6 +28,10 @@ public:
 	void SetParent(U5Game* parent);
 private:
 	void DrawRoom();
+	bool DrawFirstLayer(std::pair<uint8_t, uint8_t> left, std::pair<uint8_t, uint8_t> middle, std::pair<uint8_t, uint8_t> right);
+	bool DrawSecondLayer(std::pair<uint8_t, uint8_t> left, std::pair<uint8_t, uint8_t> middle, std::pair<uint8_t, uint8_t> right);
+	bool DrawThirdLayer(std::pair<uint8_t, uint8_t> left, std::pair<uint8_t, uint8_t> middle, std::pair<uint8_t, uint8_t> right);
+	bool DrawFourthLayer(std::pair<uint8_t, uint8_t> left, std::pair<uint8_t, uint8_t> middle, std::pair<uint8_t, uint8_t> right);
 	void DrawBorder();
 	void ProcessAnyKeyHit();
 
