@@ -55,6 +55,10 @@ int UltimaVResource::LoadResources()
 	{
 		return -1;
 	}
+	if (0 != LoadDungeonImages())
+	{
+		return -1;
+	}
 	if (0 != LoadCharacterSets())
 	{
 		return -1;
@@ -104,6 +108,10 @@ int UltimaVResource::LoadResources()
 		return -1;
 	}
 	if (0 != LoadNPCs(MapTypes::Town))
+	{
+		return -1;
+	}
+	if (0 != LoadDungeons())
 	{
 		return -1;
 	}
@@ -241,7 +249,7 @@ int UltimaVResource::Parse16File(std::vector<U5ImageData>& bit_file_data, std::v
 	{
 		if (file_offsets[index] == 0)
 		{
-			return -4; // Only dungeons have missing offsets
+			continue; // Only dungeons have missing offsets
 		}
 		if (0 != ReadImage(data, file_offsets[index], numPixelsPerByte, bit_file_data[index]))
 		{
@@ -490,6 +498,48 @@ int UltimaVResource::LoadCharacterSets()
 			}
 		}
 	}
+	return 0;
+}
+
+int UltimaVResource::LoadDungeonImages()
+{
+	std::string strExt(".16");
+	int numPixelPerByte = 2;
+	if (m_render_mode == RenderMode::CGA)
+	{
+		strExt = std::string(".4");
+		numPixelPerByte = 4;
+	}
+	const std::vector<std::string> file_names = { "DNG1", "DNG2", "DNG3" };
+
+	m_ImageDungeonFileData.resize(file_names.size());
+
+	for (size_t index = 0; index < file_names.size(); index++)
+	{
+		std::filesystem::path file_path = m_options->m_game_directory / (file_names[index] + strExt);
+		if (!std::filesystem::exists(file_path))
+		{
+			return -1;
+		}
+		std::uintmax_t file_size = std::filesystem::file_size(file_path);
+		std::vector<unsigned char> buffer(file_size);
+		std::ifstream file(file_path, std::ios::binary);
+		file.read(reinterpret_cast<char*>(buffer.data()), static_cast<std::streamsize>(file_size));
+		file.close();
+
+		std::vector<unsigned char> buffer_lzw;
+		if (!LzwDecompressor::Extract(buffer, buffer_lzw))
+		{
+			return -2;
+		}
+		auto& curVec = m_ImageDungeonFileData[index];
+
+		if (0 != Parse16File(curVec, buffer_lzw, numPixelPerByte))
+		{
+			return -1;
+		}
+	}
+
 	return 0;
 }
 
@@ -774,70 +824,74 @@ int UltimaVResource::LoadDataOvl()
 	{
 		return -5;
 	}
-	if (!ReadStrings(buffer, m_data.game_strings_3, 0x6aea, 0x6d56))
+	if (!ReadStrings(buffer, m_data.game_strings_3, 0x2c8c, 0x2df8))
 	{
 		return -5;
 	}
-	if (!ReadStrings(buffer, m_data.game_strings_4, 0x6d84, 0x7010))
+	if (!ReadStrings(buffer, m_data.game_strings_4, 0x6aea, 0x6d56))
 	{
 		return -5;
 	}
-	if (!ReadStrings(buffer, m_data.game_strings_5, 0x702a, 0x70e8))
+	if (!ReadStrings(buffer, m_data.game_strings_5, 0x6d84, 0x7010))
 	{
 		return -5;
 	}
-
-	if (!ReadStrings(buffer, m_data.game_strings_6, 0x70f2, 0x71d1))
-	{
-		return -5;
-	}
-
-	if (!ReadStrings(buffer, m_data.game_strings_7, 0x71dc, 0x7208))
+	if (!ReadStrings(buffer, m_data.game_strings_6, 0x702a, 0x70e8))
 	{
 		return -5;
 	}
 
-	if (!ReadStrings(buffer, m_data.game_strings_8, 0x721c, 0x7384))
+	if (!ReadStrings(buffer, m_data.game_strings_7, 0x70f2, 0x71d1))
 	{
 		return -5;
 	}
 
-	if (!ReadStrings(buffer, m_data.game_strings_9, 0x7398, 0x74f5))
+	if (!ReadStrings(buffer, m_data.game_strings_8, 0x71dc, 0x7208))
 	{
 		return -5;
 	}
 
-	if (!ReadStrings(buffer, m_data.game_strings_10, 0x750a, 0x77f3))
+	if (!ReadStrings(buffer, m_data.game_strings_9, 0x721c, 0x7384))
 	{
 		return -5;
 	}
 
-	if (!ReadStrings(buffer, m_data.game_strings_11, 0x7808, 0x7850))
+	if (!ReadStrings(buffer, m_data.game_strings_10, 0x7398, 0x74f5))
 	{
 		return -5;
 	}
 
-	if (!ReadStrings(buffer, m_data.game_strings_12, 0x785c, 0x7a19))
+	if (!ReadStrings(buffer, m_data.game_strings_11, 0x750a, 0x77f3))
 	{
 		return -5;
 	}
 
-	if (!ReadStrings(buffer, m_data.game_strings_13, 0x7a26, 0x7f09))
+	if (!ReadStrings(buffer, m_data.game_strings_12, 0x7808, 0x7850))
 	{
 		return -5;
 	}
 
-	if (!ReadStrings(buffer, m_data.game_strings_14, 0x7f26, 0x820e))
+	if (!ReadStrings(buffer, m_data.game_strings_13, 0x785c, 0x7a19))
 	{
 		return -5;
 	}
 
-	if (!ReadStrings(buffer, m_data.game_strings_15, 0x8216, 0x848f))
+	if (!ReadStrings(buffer, m_data.game_strings_14, 0x7a26, 0x7f09))
 	{
 		return -5;
 	}
 
-	if (!ReadStrings(buffer, m_data.game_strings_16, 0x84aa, 0x9215))
+	if (!ReadStrings(buffer, m_data.game_strings_15, 0x7f26, 0x820e))
+	{
+		return -5;
+	}
+
+	if (!ReadStrings(buffer, m_data.game_strings_16, 0x8216, 0x848f))
+	{
+		return -5;
+	}
+
+	if (!ReadStrings(buffer, m_data.game_strings_17, 0x84aa, 0x9215))
 	{
 		return -5;
 	}
@@ -1322,3 +1376,41 @@ int UltimaVResource::LoadUnderworldMap()
 	return 0;
 }
 
+int UltimaVResource::LoadDungeons()
+{
+	std::string strStoryFile("DUNGEON.DAT");
+	std::filesystem::path file_path = m_options->m_game_directory / strStoryFile;
+	if (!std::filesystem::exists(file_path))
+	{
+		return -1;
+	}
+	std::uintmax_t file_size = std::filesystem::file_size(file_path);
+	std::vector<unsigned char> buffer(file_size);
+	std::ifstream file(file_path, std::ios::binary);
+	file.read(reinterpret_cast<char*>(buffer.data()), static_cast<std::streamsize>(file_size));
+	file.close();
+
+	const int NUM_LEVELS = 64;
+	const int NUM_X = 8;
+	const int NUM_Y = 8;
+	m_data.dungeon_maps.resize(NUM_LEVELS);
+	for (size_t curLevel = 0; curLevel < NUM_LEVELS; curLevel++)
+	{
+		size_t data_offset = curLevel * NUM_X * NUM_Y;
+		m_data.dungeon_maps[curLevel].resize(NUM_X);
+		for (size_t curX = 0; curX < NUM_X; curX++)
+		{
+			m_data.dungeon_maps[curLevel][curX].resize(NUM_Y);
+			for (size_t curY = 0; curY < NUM_Y; curY++)
+			{
+				size_t curPos = data_offset + (curY * NUM_X) + curX;
+				//m_data.dungeon_maps[curLevel][curX][curY] = buffer[curPos];
+				uint8_t upper_nibble = (buffer[curPos] >> 4) & 0xF;
+				uint8_t lower_nibble = buffer[curPos] & 0xF;
+				m_data.dungeon_maps[curLevel][curX][curY] = { upper_nibble, lower_nibble };
+			}
+		}
+	}
+
+	return 0;
+}

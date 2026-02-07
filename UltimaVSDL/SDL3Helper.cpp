@@ -338,10 +338,13 @@ void SDL3Helper::RenderTextureAt(SDL_Texture* texture, float x, float y, float w
 	if (texture)
 	{
 		SDL_RenderTexture(m_renderer, texture, NULL, &toRect);
+		SDL_SetRenderDrawColor(m_renderer, 0, 0, 255, 255);
+		//SDL_RenderFillRect(m_renderer, &toRect);
+		SDL_SetRenderDrawColor(m_renderer, 0, 0, 0, 0);
 	}
 }
 
-void SDL3Helper::RenderFlipTextureAt(SDL_Texture* texture, float x, float y, float width, float height, bool flip) const
+void SDL3Helper::RenderFlipTextureAt(SDL_Texture* texture, float x, float y, float width, float height, int flip) const
 {
 	SDL_FRect toRect{};
 	toRect.x = static_cast<float>(x);
@@ -352,9 +355,13 @@ void SDL3Helper::RenderFlipTextureAt(SDL_Texture* texture, float x, float y, flo
 	if (texture)
 	{
 		SDL_FlipMode flipmode = SDL_FLIP_NONE;
-		if (flip)
+		if (flip == 1)
 		{
 			flipmode = SDL_FLIP_VERTICAL;
+		}
+		else if (flip == 2)
+		{
+			flipmode = SDL_FLIP_HORIZONTAL;
 		}
 
 		SDL_RenderTextureRotated(m_renderer, texture, NULL, &toRect, 0, NULL, flipmode);
@@ -473,6 +480,11 @@ void SDL3Helper::CreateTextureFromMemoryWithMask(SDL_Texture*& texture, SDL_Text
 
 void SDL3Helper::CreateTextureFromMemory(SDL_Texture *&texture, const U5ImageData &curData, bool has_transparent, unsigned char transparent_color[3]) const
 {
+	// Dungeons have missing images
+	if (curData.height == 0 || curData.width == 0)
+	{
+		return;
+	}
 	texture = SDL_CreateTexture(m_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STATIC,
 		static_cast<int>(curData.width), static_cast<int>(curData.height));
 	SDL_SetTextureScaleMode(texture, SDL_SCALEMODE_NEAREST);
@@ -811,6 +823,20 @@ void SDL3Helper::TurnOnPixels(SDL_Texture* texture, std::vector<int>& vec_pixels
 	SDL_UnlockTexture(texture);
 }
 
+void SDL3Helper::LoadImageDungeonTextures(UltimaVResource* u5_resources)
+{
+	m_ImageDungeonTextures.resize(u5_resources->m_ImageDungeonFileData.size());
+	for (int indexBit = 0; indexBit < u5_resources->m_ImageDungeonFileData.size(); indexBit++)
+	{
+		m_ImageDungeonTextures[indexBit].resize(u5_resources->m_ImageDungeonFileData[indexBit].size());
+		for (int indexPic = 0; indexPic < u5_resources->m_ImageDungeonFileData[indexBit].size(); indexPic++)
+		{
+			U5ImageData& curData = u5_resources->m_ImageDungeonFileData[indexBit][indexPic];
+			CreateTextureFromMemory(m_ImageDungeonTextures[indexBit][indexPic], curData);
+		}
+	}
+}
+
 void SDL3Helper::LoadImage16FileTextures(UltimaVResource* u5_resources)
 {
 	m_Image16FileTextures.resize(u5_resources->m_Image16FileData.size());
@@ -970,6 +996,7 @@ void SDL3Helper::LoadImageData(UltimaVResource *u5_resources)
 	LoadPathFileTexture(u5_resources);
 	LoadTileTextures(u5_resources);
 	LoadImage16FileTextures(u5_resources);
+	LoadImageDungeonTextures(u5_resources);
 	LoadCharacterSetTextures(u5_resources);
 	LoadProportionalFontTextures(u5_resources);
 	LoadTargetTextures();

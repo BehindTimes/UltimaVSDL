@@ -12,6 +12,7 @@
 #include <vector>
 #include <algorithm>
 #include <iterator>
+#include <cstdint>
 #include "U5Console.h"
 
 extern std::unique_ptr<U5Utils> m_utilities;
@@ -26,11 +27,13 @@ U5Game::U5Game(SDL3Helper* sdl_helper, UltimaVResource* u5_resources) :
 	m_curLocation(nullptr),
 	m_map_level(0),
 	m_map_type(0),
-	m_cur_level(0)
+	m_cur_level(0),
+	m_curNPCs(nullptr)
 {
 	m_world = std::make_unique<U5World>(sdl_helper, u5_resources);
 	m_world->SetParent(this);
 	m_dungeon = std::make_unique<U5Dungeon>(sdl_helper, u5_resources);
+	m_dungeon->SetParent(this);
 	m_console = std::make_unique<U5Console>(sdl_helper, u5_resources);
 }
 
@@ -116,7 +119,7 @@ void U5Game::Render()
 		{
 			if (m_curNPCs->data[index].type >= 180 && m_curNPCs->data[index].type <= 183)
 			{
-				return;
+				continue;
 			}
 			m_curNPCs->data[index].curNPCDelay += m_tickElapse;
 			bool changeTile = false;
@@ -240,6 +243,7 @@ void U5Game::LoadMap(int map_num)
 	m_map_level = 0;
 	m_cur_level = 0;
 	int curMap = map_num % 8;
+	int offset = 0;
 	if (map_num < MAX_TOWN_MAPS)
 	{
 		m_map_level = m_resources->m_data.location_z_index[map_num];
@@ -274,6 +278,19 @@ void U5Game::LoadMap(int map_num)
 		m_currentMap = m_resources->m_data.town_maps[m_map_level];
 		m_curLocation->SetPos(15, 30);
 		m_curNPCs = &m_resources->m_data.npc_info[static_cast<int>(curMapType)].info[curMap];
+		break;
+	case MapTypes::Dungeon:
+		if (m_location == GameLocation::Underworld)
+		{
+			offset = 7;
+		}
+		m_location = GameLocation::Dungeon;
+		m_curLocation = m_dungeon.get();
+		m_currentDungeonMap.clear();
+		m_currentDungeonMap = m_resources->m_data.dungeon_maps[static_cast<size_t>((map_num - MAX_TOWN_MAPS) * 8) + offset];
+		m_curLocation->SetPos(1, 1);
+		m_curLocation->SetDir('N');
+		m_dungeon->LoadDungeonType(DungeonType::CAVE);
 		break;
 	default:
 		break;

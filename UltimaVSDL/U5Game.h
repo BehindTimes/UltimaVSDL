@@ -10,6 +10,7 @@
 #include "U5Enums.h"
 #include "U5Console.h"
 #include <utility>
+#include <cstdint>
 
 class U5Game : public GameObject
 {
@@ -26,6 +27,7 @@ public:
 	void ChangeLevel(int map_level);
 
 	std::vector < std::vector<unsigned char> > m_currentMap;
+	std::vector < std::vector<std::pair<uint8_t, uint8_t>>> m_currentDungeonMap;
 	NPC_Info* m_curNPCs;
 	GameLocation m_location;
 	std::unique_ptr<U5Console> m_console;

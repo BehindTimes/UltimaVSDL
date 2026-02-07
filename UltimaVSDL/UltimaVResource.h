@@ -112,6 +112,7 @@ struct U5Data
 	std::vector<std::string> game_strings_14;
 	std::vector<std::string> game_strings_15;
 	std::vector<std::string> game_strings_16;
+	std::vector<std::string> game_strings_17;
 	std::vector<std::string> intro_strings;
 	std::array<unsigned char, 0x100> map_chunks;
 	std::vector<std::vector<unsigned char>> world_map;
@@ -120,6 +121,7 @@ struct U5Data
 	std::vector<std::vector<std::vector<unsigned char>>> keep_maps;
 	std::vector<std::vector<std::vector<unsigned char>>> dwelling_maps;
 	std::vector<std::vector<std::vector<unsigned char>>> castle_maps;
+	std::vector<std::vector<std::vector<std::pair<uint8_t, uint8_t>>>> dungeon_maps;
 	std::array<std::pair<int, int>, 0x28> location_info;
 	std::array<std::string, 0x28> location_names;
 	std::array<int, 0x20> location_z_index;
@@ -193,6 +195,8 @@ public:
 	std::vector<std::vector<U5ImageData>> m_BitFileData;
 	std::vector<unsigned char> m_PathFileData;
 	std::vector<std::vector<U5ImageData>> m_Image16FileData;
+	std::vector<std::vector<U5ImageData>> m_ImageDungeonFileData;
+
 	std::vector<std::vector<std::vector<U5ImageData>>> m_CharacterSetsData;
 	std::vector<U5PaddedImageData> m_ProportionalFontData;
 	std::vector<U5ImageData> m_Tiles;
@@ -209,6 +213,7 @@ private:
 	int LoadPathFile();
 	int LoadNPCs(MapTypes map_type);
 	int Load16Images();
+	int LoadDungeonImages();
 	int LoadStory(std::vector<unsigned char> &buffer);
 	int LoadEnding(std::vector<unsigned char>& buffer);
 	int LoadDataOvl();
@@ -216,6 +221,7 @@ private:
 	int LoadProportionalFont();
 	int LoadMiscMaps();
 	int LoadTiles();
+	int LoadDungeons();
 	int LoadWorldMap();
 	int LoadUnderworldMap();
 	int LoadMap(MapTypes map_type);

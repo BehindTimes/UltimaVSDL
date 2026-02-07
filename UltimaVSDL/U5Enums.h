@@ -73,6 +73,12 @@ const int SOUTH_STRING = 6;
 const int EAST_STRING = 7;
 const int WEST_STRING = 8;
 
+const int DIR_NORTH_STRING = 0;
+const int DIR_SOUTH_STRING = 2;
+const int DIR_EAST_STRING = 1;
+const int DIR_WEST_STRING = 3;
+const int DIR_STRING = 6;
+
 const int WHAT_STRING = 23;
 
 const int KEEP_STRING = 0x23;

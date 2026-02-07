@@ -35,7 +35,7 @@ public:
 	void UpdateTicks();
 	Uint64 GetCurrentTick() const;
 	void ClearScreen() const;
-	void RenderFlipTextureAt(SDL_Texture* texture, float x, float y, float width, float height, bool flip) const;
+	void RenderFlipTextureAt(SDL_Texture* texture, float x, float y, float width, float height, int flip) const;
 	void RenderTextureAt(SDL_Texture* texture, float x, float y, float width, float height) const;
 	void RenderTextureFromTo(SDL_Texture* texture, float from_x, float from_y, float from_width, float from_height,
 		float to_x, float to_y, float to_width, float to_height) const;
@@ -61,6 +61,7 @@ public:
 	SDL_Renderer* m_renderer;
 	std::vector<std::vector<SDL_Texture*>> m_BitFileTextures;
 	std::vector<std::vector<SDL_Texture*>> m_Image16FileTextures;
+	std::vector<std::vector<SDL_Texture*>> m_ImageDungeonTextures;
 	std::vector<SDL_Texture*> m_TargetTextures;
 	std::vector<std::vector<std::vector<SDL_Texture*>>> m_CharacterSetsTextures;
 	std::vector<SDL_Texture*> m_ArrowTextures;
@@ -82,6 +83,7 @@ private:
 	void LoadBitFileTextures(UltimaVResource* u5_resources);
 	void LoadCharacterSetTextures(UltimaVResource* u5_resources);
 	void LoadImage16FileTextures(UltimaVResource* u5_resources);
+	void LoadImageDungeonTextures(UltimaVResource* u5_resources);
 	void LoadProportionalFontTextures(UltimaVResource* u5_resources);
 	void LoadFadeTexture(U5ImageData& data, SDL_Texture*& texture, bool alpha, bool has_transparent = false, unsigned char transparent_color[3] = {}) const;
 	void LoadMaskTexture(U5ImageData& data, SDL_Texture*& texture, bool alpha) const;

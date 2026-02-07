@@ -54,14 +54,9 @@ void GameBase::DrawBorder()
 	m_sdl_helper->DrawTileRect(23, 1, 1, 23, color_array[0], color_array[1], color_array[2]);
 
 	SDL_SetRenderDrawColor(m_sdl_helper->m_renderer, 0xFF, 0xFF, 0xFF, 0xFF);
-	line = { HALF_TILE_WIDTH - LINE_THICKNESS, HALF_TILE_HEIGHT - LINE_THICKNESS, LINE_THICKNESS, (22 * HALF_TILE_WIDTH) + LINE_THICKNESS };
+	line = { HALF_TILE_WIDTH - LINE_THICKNESS, HALF_TILE_HEIGHT - LINE_THICKNESS, LINE_THICKNESS, (22 * HALF_TILE_WIDTH) + 2 * LINE_THICKNESS };
 	SDL_RenderFillRect(m_sdl_helper->m_renderer, &line);
-	line = { HALF_TILE_WIDTH - LINE_THICKNESS, HALF_TILE_HEIGHT * 23, (6 * HALF_TILE_WIDTH) + (LINE_THICKNESS), LINE_THICKNESS };
-	SDL_RenderFillRect(m_sdl_helper->m_renderer, &line);
-
-	line = { HALF_TILE_WIDTH * 23, HALF_TILE_HEIGHT - LINE_THICKNESS, LINE_THICKNESS, (22 * HALF_TILE_WIDTH) + LINE_THICKNESS };
-	SDL_RenderFillRect(m_sdl_helper->m_renderer, &line);
-	line = { HALF_TILE_WIDTH * 17, HALF_TILE_HEIGHT * 23, (6 * HALF_TILE_WIDTH) + (LINE_THICKNESS), LINE_THICKNESS };
+	line = { HALF_TILE_WIDTH * 23, HALF_TILE_HEIGHT - LINE_THICKNESS, LINE_THICKNESS, (22 * HALF_TILE_WIDTH) + 2 * LINE_THICKNESS };
 	SDL_RenderFillRect(m_sdl_helper->m_renderer, &line);
 
 	line = { HALF_TILE_WIDTH * 24, HALF_TILE_HEIGHT - LINE_THICKNESS, (15 * HALF_TILE_WIDTH) + (LINE_THICKNESS), LINE_THICKNESS };
@@ -100,8 +95,18 @@ void GameBase::SetPos(int x, int y)
 	m_ypos = y;
 }
 
-void GameBase::GetPos(int &x, int &y)
+void GameBase::GetPos(int &x, int &y) const
 {
 	x = m_xpos;
 	y = m_ypos;
+}
+
+void GameBase::SetDir(int dir)
+{
+	m_dir = dir;
+}
+
+void GameBase::GetDir(int& dir) const
+{
+	dir = m_dir;
 }

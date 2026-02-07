@@ -33,10 +33,12 @@ U5World::U5World(SDL3Helper* sdl_helper, UltimaVResource* u5_resources) :
 {
 	//m_xpos = 50;
 	//m_ypos = 50;
-	m_xpos = 86;
-	m_ypos = 110;
+	//m_xpos = 86;
+	//m_ypos = 110;
 	//m_xpos = 176;
 	//m_ypos = 210;
+	m_xpos = 91;
+	m_ypos = 68;
 	m_DisplayOffset.first = 0;
 	m_DisplayOffset.second = 0;
 
@@ -893,6 +895,11 @@ void U5World::DrawBorder()
 	line = { HALF_TILE_WIDTH * 17, HALF_TILE_HEIGHT - LINE_THICKNESS, (6 * HALF_TILE_WIDTH) + (LINE_THICKNESS), LINE_THICKNESS };
 	SDL_RenderFillRect(m_sdl_helper->m_renderer, &line);
 
+	line = { HALF_TILE_WIDTH, HALF_TILE_HEIGHT * 23, (6 * HALF_TILE_WIDTH), LINE_THICKNESS };
+	SDL_RenderFillRect(m_sdl_helper->m_renderer, &line);
+	line = { HALF_TILE_WIDTH * 17, HALF_TILE_HEIGHT * 23, (6 * HALF_TILE_WIDTH), LINE_THICKNESS };
+	SDL_RenderFillRect(m_sdl_helper->m_renderer, &line);
+
 	m_sdl_helper->DrawTileTexture8(m_sdl_helper->m_ArrowTextures[0], 16, 0);
 	m_sdl_helper->DrawTileTexture8(m_sdl_helper->m_ArrowTextures[0], 16, 23);
 	m_sdl_helper->DrawTileTexture8(m_sdl_helper->m_ArrowTextures[1], 7, 0);
@@ -995,10 +1002,10 @@ void U5World::ProcessScroll()
 void U5World::ProcessKlimb()
 {
 	m_input->SetRequireAllKeysUp();
-	m_parent->m_console->PrintText(m_resources->m_data.game_strings_3[KLIMB_STRING]);
+	m_parent->m_console->PrintText(m_resources->m_data.game_strings_4[KLIMB_STRING]);
 	if (m_parent->m_location == GameLocation::World)
 	{
-		m_parent->m_console->PrintText(m_resources->m_data.game_strings_16[WITH_WHAT_STRING]);
+		m_parent->m_console->PrintText(m_resources->m_data.game_strings_17[WITH_WHAT_STRING]);
 		m_parent->m_console->PrintText("\n", true);
 		return;
 	}
@@ -1009,12 +1016,12 @@ void U5World::ProcessKlimb()
 		switch (curpos)
 		{
 		case LADDER_UP_TILE:
-			m_parent->m_console->PrintText(m_resources->m_data.game_strings_16[UP_STRING]);
+			m_parent->m_console->PrintText(m_resources->m_data.game_strings_17[UP_STRING]);
 			m_parent->m_console->PrintText("\n", true);
 			m_parent->ChangeLevel(1);
 			return;
 		case LADDER_DOWN_TILE:
-			m_parent->m_console->PrintText(m_resources->m_data.game_strings_16[DOWN_STRING]);
+			m_parent->m_console->PrintText(m_resources->m_data.game_strings_17[DOWN_STRING]);
 			m_parent->m_console->PrintText("\n", true);
 			m_parent->ChangeLevel(-1);
 			return;
