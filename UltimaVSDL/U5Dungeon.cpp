@@ -49,6 +49,14 @@ bool U5Dungeon::DrawFirstLayer(std::pair<uint8_t, uint8_t> left, std::pair<uint8
 
 	switch (middle.first)
 	{
+	case 1:
+		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][0], hMult * 65, vMult * 25, hMult * 40, vMult * 80, 1);
+		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][0], hMult * 104, vMult * 25, hMult * 40, vMult * 80, 3);
+		break;
+	case 11: // Should never happen, but handle incase of modding
+		m_sdl_helper->RenderTextureAt(curTextures[12], hMult * 48, vMult * 22, hMult * 56, vMult * 164);
+		m_sdl_helper->RenderFlipTextureAt(curTextures[12], hMult * 103, vMult * 22, hMult * 56, vMult * 164, 2);
+		break;
 	default:
 		break;
 	}
@@ -193,7 +201,6 @@ void U5Dungeon::DrawRoom()
 {
 	std::pair<uint8_t, uint8_t> curMatrix[3][4];
 	std::pair<uint8_t, uint8_t> tempval;
-	auto& curTextures = m_sdl_helper->m_ImageDungeonTextures[static_cast<int>(m_dungeon_type)];
 	curMatrix[1][0] = m_parent->m_currentDungeonMap[m_xpos][m_ypos];
 	switch (m_dir)
 	{
@@ -230,8 +237,8 @@ void U5Dungeon::DrawRoom()
 		curMatrix[2][3] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos - 1) + 8) % 8][static_cast<size_t>((m_ypos + 3) + 8) % 8];
 		break;
 	case 'E':
-		curMatrix[0][0] = m_parent->m_currentDungeonMap[m_xpos][((m_ypos - 1) + 8) % 8];
-		curMatrix[2][0] = m_parent->m_currentDungeonMap[m_xpos][((m_ypos + 1) + 8) % 8];
+		curMatrix[0][0] = m_parent->m_currentDungeonMap[m_xpos][static_cast<size_t>((m_ypos - 1) + 8) % 8];
+		curMatrix[2][0] = m_parent->m_currentDungeonMap[m_xpos][static_cast<size_t>((m_ypos + 1) + 8) % 8];
 
 		curMatrix[0][1] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos + 1) + 8) % 8][static_cast<size_t>((m_ypos - 1) + 8) % 8];
 		curMatrix[1][1] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos + 1) + 8) % 8][static_cast<size_t>((m_ypos + 0) + 8) % 8];
@@ -246,8 +253,8 @@ void U5Dungeon::DrawRoom()
 		curMatrix[2][3] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos + 3) + 8) % 8][static_cast<size_t>((m_ypos + 1) + 8) % 8];
 		break;
 	case 'W':
-		curMatrix[0][0] = m_parent->m_currentDungeonMap[m_xpos][((m_ypos + 1) + 8) % 8];
-		curMatrix[2][0] = m_parent->m_currentDungeonMap[m_xpos][((m_ypos - 1) + 8) % 8];
+		curMatrix[0][0] = m_parent->m_currentDungeonMap[m_xpos][static_cast<size_t>((m_ypos + 1) + 8) % 8];
+		curMatrix[2][0] = m_parent->m_currentDungeonMap[m_xpos][static_cast<size_t>((m_ypos - 1) + 8) % 8];
 
 		curMatrix[0][1] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos - 1) + 8) % 8][static_cast<size_t>((m_ypos + 1) + 8) % 8];
 		curMatrix[1][1] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos - 1) + 8) % 8][static_cast<size_t>((m_ypos + 0) + 8) % 8];
@@ -267,8 +274,6 @@ void U5Dungeon::DrawRoom()
 
 	int window_width, window_height;
 	m_sdl_helper->GetScreenDimensions(window_width, window_height);
-	float vMult = window_height / static_cast<float>(ORIGINAL_GAME_HEIGHT);
-	float hMult = window_width / static_cast<float>(ORIGINAL_GAME_WIDTH);
 
 	int max_depth = 3;
 	// Get the furthest to draw out

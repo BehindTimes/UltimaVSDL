@@ -59,6 +59,10 @@ int UltimaVResource::LoadResources()
 	{
 		return -1;
 	}
+	if (0 != LoadMaskedImages())
+	{
+		return -1;
+	}
 	if (0 != LoadCharacterSets())
 	{
 		return -1;
@@ -176,21 +180,21 @@ int UltimaVResource::ReadImage(std::vector<unsigned char>& data, size_t offset, 
 	bufWidth = (bufNum - (outImage.width % bufNum)) % bufNum;
 
 	int modnum = 0;
-	int byteInc = 0;
+	int bitInc = 0;
 	if (numPixelsPerByte == 8)
 	{
 		modnum = 0b1;
-		byteInc = 1;
+		bitInc = 1;
 	}
 	else if (numPixelsPerByte == 4)
 	{
 		modnum = 0b11;
-		byteInc = 2;
+		bitInc = 2;
 	}
 	else if (numPixelsPerByte == 2)
 	{
 		modnum = 0b1111;
-		byteInc = 4;
+		bitInc = 4;
 	}
 	else
 	{
@@ -213,15 +217,72 @@ int UltimaVResource::ReadImage(std::vector<unsigned char>& data, size_t offset, 
 		for (uint32_t indexX = 0; indexX < data_size / outImage.height; indexX++)
 		{
 			unsigned char curByte = data[curPos];
-			for (int byteIndex = 0; byteIndex < 8; byteIndex += byteInc)
+			for (int byteIndex = 0; byteIndex < 8; byteIndex += bitInc)
 			{
-				int curColor = (static_cast<int>(curByte) >> ((8 - byteInc) - byteIndex)) & modnum;
-				if (indexX * numPixelsPerByte + (byteIndex / byteInc) < outImage.width)
+				int curColor = (static_cast<int>(curByte) >> ((8 - bitInc) - byteIndex)) & modnum;
+				if (indexX * numPixelsPerByte + (byteIndex / bitInc) < outImage.width)
 				{
-					outImage.pixel_data[static_cast<size_t>(indexY * outImage.width + indexX * numPixelsPerByte + (byteIndex / byteInc))] = static_cast<unsigned char>(curColor);
+					outImage.pixel_data[static_cast<size_t>(indexY * outImage.width + indexX * numPixelsPerByte + (byteIndex / bitInc))] = static_cast<unsigned char>(curColor);
 				}
 			}
 			curPos++;
+		}
+	}
+	return 0;
+}
+
+int UltimaVResource::ParseMaskFile(std::vector<U5ImageData>& bit_file_data, std::vector<unsigned char>& data, int numPixelsPerByte)
+{
+	if (data.size() < 2)
+	{
+		return -1;
+	}
+	size_t curPos = 0;
+	uint32_t numImages = ReadInt16(data.begin(), curPos);
+	if (numImages == 0 || numImages > 32)
+	{
+		return -2;
+	}
+	bit_file_data.resize(numImages);
+	std::vector<size_t> file_offsets;
+	if (0 != ReadOffsets(data, 2, numImages * 2, file_offsets, curPos))
+	{
+		return -3;
+	}
+	for (uint32_t index = 0; index < numImages; index++)
+	{
+		if (file_offsets[index] == 0)
+		{
+			return -4; // Only dungeons have missing offsets
+		}
+		if (0 != ReadImage(data, file_offsets[static_cast<size_t>(index * 2)], numPixelsPerByte, bit_file_data[index]))
+		{
+			return -5; // Invalid data
+		}
+		U5ImageData mask_data;
+		if (0 != ReadImage(data, file_offsets[static_cast<size_t>(index * 2) + 1], 8, mask_data))
+		{
+			return -5; // Invalid data
+		}
+		if (0 != MergeMask(bit_file_data[index], mask_data))
+		{
+			return -6; // Invalid mask
+		}
+	}
+	return 0;
+}
+
+int UltimaVResource::MergeMask(U5ImageData& outImage, U5ImageData& mask)
+{
+	if (outImage.pixel_data.size() != mask.pixel_data.size())
+	{
+		return -1;
+	}
+	for (size_t index = 0; index < outImage.pixel_data.size(); index++)
+	{
+		if (mask.pixel_data[index] == 1)
+		{
+			outImage.pixel_data[index] |= 0x80;
 		}
 	}
 	return 0;
@@ -496,6 +557,47 @@ int UltimaVResource::LoadCharacterSets()
 			{
 				return -2;
 			}
+		}
+	}
+	return 0;
+}
+
+int UltimaVResource::LoadMaskedImages()
+{
+	std::string strExt(".16");
+	int numPixelPerByte = 2;
+	if (m_render_mode == RenderMode::CGA)
+	{
+		strExt = std::string(".4");
+		numPixelPerByte = 4;
+	}
+	const std::vector<std::string> file_names = { "ITEMS", "MON0", "MON1", "MON2", "MON3", "MON4", "MON5", "MON6", "MON7" };
+
+	m_ImageMaskFileData.resize(file_names.size());
+
+	for (size_t index = 0; index < file_names.size(); index++)
+	{
+		std::filesystem::path file_path = m_options->m_game_directory / (file_names[index] + strExt);
+		if (!std::filesystem::exists(file_path))
+		{
+			return -1;
+		}
+		std::uintmax_t file_size = std::filesystem::file_size(file_path);
+		std::vector<unsigned char> buffer(file_size);
+		std::ifstream file(file_path, std::ios::binary);
+		file.read(reinterpret_cast<char*>(buffer.data()), static_cast<std::streamsize>(file_size));
+		file.close();
+
+		std::vector<unsigned char> buffer_lzw;
+		if (!LzwDecompressor::Extract(buffer, buffer_lzw))
+		{
+			return -2;
+		}
+		auto& curVec = m_ImageMaskFileData[index];
+
+		if (0 != ParseMaskFile(curVec, buffer_lzw, numPixelPerByte))
+		{
+			return -1;
 		}
 	}
 	return 0;

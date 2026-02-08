@@ -93,6 +93,18 @@ void SDL3Helper::Cleanup()
 	}
 	m_Image16FileTextures.clear();
 
+	for (auto& curImage : m_ImageMaskTextures)
+	{
+		for (auto& curTexture : curImage)
+		{
+			if (curTexture)
+			{
+				SDL_DestroyTexture(curTexture);
+			}
+		}
+	}
+	m_ImageMaskTextures.clear();
+
 	for (auto& curCharType : m_CharacterSetsTextures)
 	{
 		for (auto& curImage : curCharType)
@@ -363,6 +375,10 @@ void SDL3Helper::RenderFlipTextureAt(SDL_Texture* texture, float x, float y, flo
 		{
 			flipmode = SDL_FLIP_HORIZONTAL;
 		}
+		else if (flip == 3)
+		{
+			flipmode = SDL_FLIP_HORIZONTAL_AND_VERTICAL;
+		}
 
 		SDL_RenderTextureRotated(m_renderer, texture, NULL, &toRect, 0, NULL, flipmode);
 	}
@@ -499,6 +515,8 @@ void SDL3Helper::CreateTextureFromMemory(SDL_Texture *&texture, const U5ImageDat
 		for (size_t x = 0; x < curData.width; x++)
 		{
 			unsigned char curByte = curData.pixel_data[y * curData.width + x];
+			bool IsMask = curByte & 0xF0;
+			curByte &= 0xF;
 			unsigned char colorArray[3] = {};
 			if (curData.mode == 8)
 			{
@@ -535,6 +553,10 @@ void SDL3Helper::CreateTextureFromMemory(SDL_Texture *&texture, const U5ImageDat
 				{
 					alpha = 0;
 				}
+			}
+			if (IsMask)
+			{
+				alpha = 0;
 			}
 			
 			// ABGR
@@ -837,6 +859,20 @@ void SDL3Helper::LoadImageDungeonTextures(UltimaVResource* u5_resources)
 	}
 }
 
+void SDL3Helper::LoadImageMaskTextures(UltimaVResource* u5_resources)
+{
+	m_ImageMaskTextures.resize(u5_resources->m_ImageMaskFileData.size());
+	for (int indexBit = 0; indexBit < u5_resources->m_ImageMaskFileData.size(); indexBit++)
+	{
+		m_ImageMaskTextures[indexBit].resize(u5_resources->m_ImageMaskFileData[indexBit].size());
+		for (int indexPic = 0; indexPic < u5_resources->m_ImageMaskFileData[indexBit].size(); indexPic++)
+		{
+			U5ImageData& curData = u5_resources->m_ImageMaskFileData[indexBit][indexPic];
+			CreateTextureFromMemory(m_ImageMaskTextures[indexBit][indexPic], curData);
+		}
+	}
+}
+
 void SDL3Helper::LoadImage16FileTextures(UltimaVResource* u5_resources)
 {
 	m_Image16FileTextures.resize(u5_resources->m_Image16FileData.size());
@@ -997,6 +1033,7 @@ void SDL3Helper::LoadImageData(UltimaVResource *u5_resources)
 	LoadTileTextures(u5_resources);
 	LoadImage16FileTextures(u5_resources);
 	LoadImageDungeonTextures(u5_resources);
+	LoadImageMaskTextures(u5_resources);
 	LoadCharacterSetTextures(u5_resources);
 	LoadProportionalFontTextures(u5_resources);
 	LoadTargetTextures();

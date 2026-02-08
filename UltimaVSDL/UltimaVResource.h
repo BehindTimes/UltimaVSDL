@@ -196,6 +196,7 @@ public:
 	std::vector<unsigned char> m_PathFileData;
 	std::vector<std::vector<U5ImageData>> m_Image16FileData;
 	std::vector<std::vector<U5ImageData>> m_ImageDungeonFileData;
+	std::vector<std::vector<U5ImageData>> m_ImageMaskFileData;
 
 	std::vector<std::vector<std::vector<U5ImageData>>> m_CharacterSetsData;
 	std::vector<U5PaddedImageData> m_ProportionalFontData;
@@ -214,6 +215,7 @@ private:
 	int LoadNPCs(MapTypes map_type);
 	int Load16Images();
 	int LoadDungeonImages();
+	int LoadMaskedImages();
 	int LoadStory(std::vector<unsigned char> &buffer);
 	int LoadEnding(std::vector<unsigned char>& buffer);
 	int LoadDataOvl();
@@ -230,6 +232,8 @@ private:
 	int ParseCharacterFile(std::vector<U5ImageData>& bit_file_data, std::vector<unsigned char>& data, int width, int height);
 	int ParseBitFile(std::vector<U5ImageData> &bit_file_data, std::vector<unsigned char> &data);
 	int Parse16File(std::vector<U5ImageData>& bit_file_data, std::vector<unsigned char>& data, int numPixelsPerByte);
+	int ParseMaskFile(std::vector<U5ImageData>& bit_file_data, std::vector<unsigned char>& data, int numPixelsPerByte);
+	int MergeMask(U5ImageData& outImage, U5ImageData& mask);
 	uint32_t ReadInt16(std::vector<unsigned char>::iterator data, size_t &curPos);
 	uint32_t ReadInt32(std::vector<unsigned char>::iterator data, size_t &curPos);
 	int ReadOffsets(std::vector<unsigned char> &data, int offsetSize, int numOffsets, std::vector<size_t> &file_offsets, size_t &curPos);

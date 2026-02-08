@@ -62,6 +62,7 @@ public:
 	std::vector<std::vector<SDL_Texture*>> m_BitFileTextures;
 	std::vector<std::vector<SDL_Texture*>> m_Image16FileTextures;
 	std::vector<std::vector<SDL_Texture*>> m_ImageDungeonTextures;
+	std::vector<std::vector<SDL_Texture*>> m_ImageMaskTextures;
 	std::vector<SDL_Texture*> m_TargetTextures;
 	std::vector<std::vector<std::vector<SDL_Texture*>>> m_CharacterSetsTextures;
 	std::vector<SDL_Texture*> m_ArrowTextures;
@@ -84,6 +85,7 @@ private:
 	void LoadCharacterSetTextures(UltimaVResource* u5_resources);
 	void LoadImage16FileTextures(UltimaVResource* u5_resources);
 	void LoadImageDungeonTextures(UltimaVResource* u5_resources);
+	void LoadImageMaskTextures(UltimaVResource* u5_resources);
 	void LoadProportionalFontTextures(UltimaVResource* u5_resources);
 	void LoadFadeTexture(U5ImageData& data, SDL_Texture*& texture, bool alpha, bool has_transparent = false, unsigned char transparent_color[3] = {}) const;
 	void LoadMaskTexture(U5ImageData& data, SDL_Texture*& texture, bool alpha) const;
