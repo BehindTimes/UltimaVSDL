@@ -209,7 +209,7 @@ void U5Game::ChangeLevel(int map_level)
 
 void U5Game::LoadMap(int map_num)
 {
-	m_input->SetKeyDelay(250);
+	m_input->SetKeyDelay(125);
 
 	const int MAX_MAPS = 40;
 	const int MAX_TOWN_MAPS = 32;
@@ -282,7 +282,7 @@ void U5Game::LoadMap(int map_num)
 		m_curNPCs = &m_resources->m_data.npc_info[static_cast<int>(curMapType)].info[curMap];
 		break;
 	case MapTypes::Dungeon:
-		m_input->SetKeyDelay(350);
+		m_input->SetKeyDelay(250);
 		if (m_location == GameLocation::Underworld)
 		{
 			offset = 7;
@@ -291,9 +291,9 @@ void U5Game::LoadMap(int map_num)
 		m_curLocation = m_dungeon.get();
 		m_currentDungeonMap.clear();
 		m_currentDungeonMap = m_resources->m_data.dungeon_maps[static_cast<size_t>((map_num - MAX_TOWN_MAPS) * 8) + offset];
-		m_curLocation->SetPos(1, 1);
+		m_dungeon->LoadDungeonType(DungeonType::CAVE);
 		m_curLocation->SetDir('N');
-		m_dungeon->LoadDungeonType(DungeonType::DUNGEON);
+		m_curLocation->SetPos(1, 1);
 		break;
 	default:
 		break;

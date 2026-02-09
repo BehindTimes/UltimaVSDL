@@ -39,6 +39,86 @@ void U5Dungeon::SetParent(U5Game* parent)
 	m_parent = parent;
 }
 
+void U5Dungeon::SetPos(int x, int y)
+{
+	GameBase::SetPos(x, y);
+	CalcCurMatrix();
+}
+
+void U5Dungeon::CalcCurMatrix()
+{
+	m_curMatrix[1][0] = m_parent->m_currentDungeonMap[m_xpos][m_ypos];
+	switch (m_dir)
+	{
+	case 'N':
+		m_curMatrix[0][0] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos - 1) + 8) % 8][m_ypos];
+		m_curMatrix[2][0] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos + 1) + 8) % 8][m_ypos];
+
+		m_curMatrix[0][1] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos - 1) + 8) % 8][static_cast<size_t>((m_ypos - 1) + 8) % 8];
+		m_curMatrix[1][1] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos + 0) + 8) % 8][static_cast<size_t>((m_ypos - 1) + 8) % 8];
+		m_curMatrix[2][1] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos + 1) + 8) % 8][static_cast<size_t>((m_ypos - 1) + 8) % 8];
+
+		m_curMatrix[0][2] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos - 1) + 8) % 8][static_cast<size_t>((m_ypos - 2) + 8) % 8];
+		m_curMatrix[1][2] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos + 0) + 8) % 8][static_cast<size_t>((m_ypos - 2) + 8) % 8];
+		m_curMatrix[2][2] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos + 1) + 8) % 8][static_cast<size_t>((m_ypos - 2) + 8) % 8];
+
+		m_curMatrix[0][3] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos - 1) + 8) % 8][static_cast<size_t>((m_ypos - 3) + 8) % 8];
+		m_curMatrix[1][3] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos + 0) + 8) % 8][static_cast<size_t>((m_ypos - 3) + 8) % 8];
+		m_curMatrix[2][3] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos + 1) + 8) % 8][static_cast<size_t>((m_ypos - 3) + 8) % 8];
+		break;
+	case 'S':
+		m_curMatrix[0][0] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos + 1) + 8) % 8][m_ypos];
+		m_curMatrix[2][0] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos - 1) + 8) % 8][m_ypos];
+
+		m_curMatrix[0][1] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos + 1) + 8) % 8][static_cast<size_t>((m_ypos + 1) + 8) % 8];
+		m_curMatrix[1][1] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos + 0) + 8) % 8][static_cast<size_t>((m_ypos + 1) + 8) % 8];
+		m_curMatrix[2][1] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos - 1) + 8) % 8][static_cast<size_t>((m_ypos + 1) + 8) % 8];
+
+		m_curMatrix[0][2] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos + 1) + 8) % 8][static_cast<size_t>((m_ypos + 2) + 8) % 8];
+		m_curMatrix[1][2] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos + 0) + 8) % 8][static_cast<size_t>((m_ypos + 2) + 8) % 8];
+		m_curMatrix[2][2] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos - 1) + 8) % 8][static_cast<size_t>((m_ypos + 2) + 8) % 8];
+
+		m_curMatrix[0][3] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos + 1) + 8) % 8][static_cast<size_t>((m_ypos + 3) + 8) % 8];
+		m_curMatrix[1][3] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos + 0) + 8) % 8][static_cast<size_t>((m_ypos + 3) + 8) % 8];
+		m_curMatrix[2][3] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos - 1) + 8) % 8][static_cast<size_t>((m_ypos + 3) + 8) % 8];
+		break;
+	case 'E':
+		m_curMatrix[0][0] = m_parent->m_currentDungeonMap[m_xpos][static_cast<size_t>((m_ypos - 1) + 8) % 8];
+		m_curMatrix[2][0] = m_parent->m_currentDungeonMap[m_xpos][static_cast<size_t>((m_ypos + 1) + 8) % 8];
+
+		m_curMatrix[0][1] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos + 1) + 8) % 8][static_cast<size_t>((m_ypos - 1) + 8) % 8];
+		m_curMatrix[1][1] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos + 1) + 8) % 8][static_cast<size_t>((m_ypos + 0) + 8) % 8];
+		m_curMatrix[2][1] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos + 1) + 8) % 8][static_cast<size_t>((m_ypos + 1) + 8) % 8];
+
+		m_curMatrix[0][2] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos + 2) + 8) % 8][static_cast<size_t>((m_ypos - 1) + 8) % 8];
+		m_curMatrix[1][2] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos + 2) + 8) % 8][static_cast<size_t>((m_ypos + 0) + 8) % 8];
+		m_curMatrix[2][2] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos + 2) + 8) % 8][static_cast<size_t>((m_ypos + 1) + 8) % 8];
+
+		m_curMatrix[0][3] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos + 3) + 8) % 8][static_cast<size_t>((m_ypos - 1) + 8) % 8];
+		m_curMatrix[1][3] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos + 3) + 8) % 8][static_cast<size_t>((m_ypos + 0) + 8) % 8];
+		m_curMatrix[2][3] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos + 3) + 8) % 8][static_cast<size_t>((m_ypos + 1) + 8) % 8];
+		break;
+	case 'W':
+		m_curMatrix[0][0] = m_parent->m_currentDungeonMap[m_xpos][static_cast<size_t>((m_ypos + 1) + 8) % 8];
+		m_curMatrix[2][0] = m_parent->m_currentDungeonMap[m_xpos][static_cast<size_t>((m_ypos - 1) + 8) % 8];
+
+		m_curMatrix[0][1] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos - 1) + 8) % 8][static_cast<size_t>((m_ypos + 1) + 8) % 8];
+		m_curMatrix[1][1] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos - 1) + 8) % 8][static_cast<size_t>((m_ypos + 0) + 8) % 8];
+		m_curMatrix[2][1] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos - 1) + 8) % 8][static_cast<size_t>((m_ypos - 1) + 8) % 8];
+
+		m_curMatrix[0][2] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos - 2) + 8) % 8][static_cast<size_t>((m_ypos + 1) + 8) % 8];
+		m_curMatrix[1][2] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos - 2) + 8) % 8][static_cast<size_t>((m_ypos + 0) + 8) % 8];
+		m_curMatrix[2][2] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos - 2) + 8) % 8][static_cast<size_t>((m_ypos - 1) + 8) % 8];
+
+		m_curMatrix[0][3] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos - 3) + 8) % 8][static_cast<size_t>((m_ypos + 1) + 8) % 8];
+		m_curMatrix[1][3] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos - 3) + 8) % 8][static_cast<size_t>((m_ypos + 0) + 8) % 8];
+		m_curMatrix[2][3] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos - 3) + 8) % 8][static_cast<size_t>((m_ypos - 1) + 8) % 8];
+		break;
+	default:
+		break;
+	}
+}
+
 bool U5Dungeon::DrawFirstLayer(std::pair<uint8_t, uint8_t> left, std::pair<uint8_t, uint8_t> middle, std::pair<uint8_t, uint8_t> right)
 {
 	auto& curTextures = m_sdl_helper->m_ImageDungeonTextures[static_cast<int>(m_dungeon_type)];
@@ -51,48 +131,24 @@ bool U5Dungeon::DrawFirstLayer(std::pair<uint8_t, uint8_t> left, std::pair<uint8
 	switch (middle.first)
 	{
 	case 1: // ladder up
-		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][0], hMult * 65, vMult * 24, hMult * 40, vMult * 80, 1);
-		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][0], hMult * 104, vMult * 24, hMult * 40, vMult * 80, 3);
 		drawsides = true;
 		break;
 	case 2: // ladder down
-		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][0], hMult * 65, vMult * 104, hMult * 40, vMult * 80, 0);
-		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][0], hMult * 104, vMult * 104, hMult * 40, vMult * 80, 2);
 		drawsides = true;
 		break;
 	case 3: // ladder up/down
-		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][0], hMult * 65, vMult * 24, hMult * 40, vMult * 80, 1);
-		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][0], hMult * 104, vMult * 24, hMult * 40, vMult * 80, 3);
-		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][0], hMult * 65, vMult * 104, hMult * 40, vMult * 80, 0);
-		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][0], hMult * 104, vMult * 104, hMult * 40, vMult * 80, 2);
 		drawsides = true;
 		break;
 	case 4: // chest
-		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][12], hMult * 65, vMult * 160, hMult * 40, vMult * 24, 0);
-		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][12], hMult * 104, vMult * 160, hMult * 40, vMult * 24, 2);
 		drawsides = true;
 		break;
 	case 5: // fountain
-		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][4], hMult * 65, vMult * 104, hMult * 40, vMult * 80, 0);
-		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][4], hMult * 104, vMult * 104, hMult * 40, vMult * 80, 2);
 		drawsides = true;
 		break;
 	case 6: // pit
-		switch (middle.second)
-		{
-		case 0:
-			m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][8], hMult * 65, vMult * 160, hMult * 40, vMult * 24, 0);
-			m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][8], hMult * 104, vMult * 160, hMult * 40, vMult * 24, 2);
-			drawsides = true;
-			break;
-		default:
-			drawsides = true;
-			break;
-		}
+		drawsides = true;
 		break;
 	case 7: // open chest
-		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][16], hMult * 65, vMult * 160, hMult * 40, vMult * 24, 0);
-		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][16], hMult * 104, vMult * 160, hMult * 40, vMult * 24, 2);
 		drawsides = true;
 		break;
 	case 11: // Should never happen, but handle incase of modding
@@ -148,6 +204,50 @@ bool U5Dungeon::DrawFirstLayer(std::pair<uint8_t, uint8_t> left, std::pair<uint8
 			break;
 		}
 	}
+
+	// Draw items last
+	switch (middle.first)
+	{
+	case 1:
+		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][0], hMult * 64, vMult * 24, hMult * 40, vMult * 80, 1);
+		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][0], hMult * 103, vMult * 24, hMult * 40, vMult * 80, 3);
+		break;
+	case 2:
+		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][0], hMult * 64, vMult * 104, hMult * 40, vMult * 80, 0);
+		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][0], hMult * 103, vMult * 104, hMult * 40, vMult * 80, 2);
+		break;
+	case 3:
+		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][0], hMult * 64, vMult * 24, hMult * 40, vMult * 80, 1);
+		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][0], hMult * 103, vMult * 24, hMult * 40, vMult * 80, 3);
+		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][0], hMult * 64, vMult * 104, hMult * 40, vMult * 80, 0);
+		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][0], hMult * 103, vMult * 104, hMult * 40, vMult * 80, 2);
+		break;
+	case 4:
+		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][12], hMult * 65, vMult * 160, hMult * 40, vMult * 24, 0);
+		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][12], hMult * 104, vMult * 160, hMult * 40, vMult * 24, 2);
+		break;
+	case 5:
+		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][4], hMult * 65, vMult * 104, hMult * 40, vMult * 80, 0);
+		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][4], hMult * 104, vMult * 104, hMult * 40, vMult * 80, 2);
+		break;
+	case 6:
+		switch (middle.second)
+		{
+		case 0:
+			m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][8], hMult * 65, vMult * 160, hMult * 40, vMult * 24, 0);
+			m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][8], hMult * 104, vMult * 160, hMult * 40, vMult * 24, 2);
+			break;
+		default:
+			break;
+		}
+		break;
+	case 7:
+		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][16], hMult * 65, vMult * 160, hMult * 40, vMult * 24, 0);
+		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][16], hMult * 104, vMult * 160, hMult * 40, vMult * 24, 2);
+		break;
+	default:
+		break;
+	}
 	
 	return true;
 }
@@ -163,6 +263,15 @@ bool U5Dungeon::DrawSecondLayer(std::pair<uint8_t, uint8_t> left, std::pair<uint
 
 	switch (middle.first)
 	{
+	case 1:
+		drawsides = true;
+		break;
+	case 2:
+		drawsides = true;
+		break;
+	case 3:
+		drawsides = true;
+		break;
 	case 11:
 		m_sdl_helper->RenderTextureAt(curTextures[9], hMult * 48, vMult * 22, hMult * 56, vMult * 164);
 		m_sdl_helper->RenderFlipTextureAt(curTextures[9], hMult * 103, vMult * 22, hMult * 56, vMult * 164, 2);
@@ -211,6 +320,28 @@ bool U5Dungeon::DrawSecondLayer(std::pair<uint8_t, uint8_t> left, std::pair<uint
 			break;
 		}
 	}
+
+	// Draw items last
+	switch (middle.first)
+	{
+	case 1:
+		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][1], hMult * 80, vMult * 48, hMult * 24, vMult * 56, 1);
+		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][1], hMult * 103, vMult * 48, hMult * 24, vMult * 56, 3);
+		break;
+	case 2:
+		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][1], hMult * 80, vMult * 104, hMult * 24, vMult * 56, 0);
+		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][1], hMult * 103, vMult * 104, hMult * 24, vMult * 56, 2);
+		break;
+	case 3:
+		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][1], hMult * 80, vMult * 48, hMult * 24, vMult * 56, 1);
+		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][1], hMult * 103, vMult * 48, hMult * 24, vMult * 56, 3);
+		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][1], hMult * 80, vMult * 104, hMult * 24, vMult * 56, 0);
+		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][1], hMult * 103, vMult * 104, hMult * 24, vMult * 56, 2);
+		break;
+	default:
+		break;
+	}
+
 	return true;
 }
 
@@ -225,6 +356,16 @@ bool U5Dungeon::DrawThirdLayer(std::pair<uint8_t, uint8_t> left, std::pair<uint8
 
 	switch (middle.first)
 	{
+	case 1:
+		// The ladder is an item, but we draw it last so that walls don't overlap its pixels.
+		drawsides = true;
+		break;
+	case 2:
+		drawsides = true;
+		break;
+	case 3:
+		drawsides = true;
+		break;
 	case 11:
 		m_sdl_helper->RenderTextureAt(curTextures[10], hMult * 80, vMult * 22, hMult * 24, vMult * 164);
 		m_sdl_helper->RenderFlipTextureAt(curTextures[10], hMult * 103, vMult * 22, hMult * 24, vMult * 164, 2);
@@ -274,6 +415,26 @@ bool U5Dungeon::DrawThirdLayer(std::pair<uint8_t, uint8_t> left, std::pair<uint8
 		}
 	}
 
+	// Draw items last
+	switch (middle.first)
+	{
+	case 1:
+		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][2], hMult * 88, vMult * 80, hMult * 16, vMult * 24, 1);
+		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][2], hMult * 103, vMult * 80, hMult * 16, vMult * 24, 3);
+		break;
+	case 2:
+		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][2], hMult * 88, vMult * 104, hMult * 16, vMult * 24, 0);
+		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][2], hMult * 103, vMult * 104, hMult * 16, vMult * 24, 2);
+		break;
+	case 3:
+		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][2], hMult * 88, vMult * 80, hMult * 16, vMult * 24, 1);
+		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][2], hMult * 103, vMult * 80, hMult * 16, vMult * 24, 3);
+		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][2], hMult * 88, vMult * 104, hMult * 16, vMult * 24, 0);
+		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][2], hMult * 103, vMult * 104, hMult * 16, vMult * 24, 2);
+		break;default:
+			break;
+	}
+
 	return true;
 }
 
@@ -288,6 +449,16 @@ bool U5Dungeon::DrawFourthLayer(std::pair<uint8_t, uint8_t> left, std::pair<uint
 
 	switch (middle.first)
 	{
+	case 1:
+		// The ladder is an item, but we draw it last so that walls don't overlap its pixels.
+		drawsides = true;
+		break;
+	case 2:
+		drawsides = true;
+		break;
+	case 3:
+		drawsides = true;
+		break;
 	case 11:
 		m_sdl_helper->RenderTextureAt(curTextures[11], hMult * 96, vMult * 22, hMult * 8, vMult * 164);
 		m_sdl_helper->RenderFlipTextureAt(curTextures[11], hMult * 103, vMult * 22, hMult * 8, vMult * 164, 2);
@@ -336,83 +507,33 @@ bool U5Dungeon::DrawFourthLayer(std::pair<uint8_t, uint8_t> left, std::pair<uint
 			break;
 		}
 	}
+	// Draw items last
+	switch (middle.first)
+	{
+	case 1:
+		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][3], hMult * 96, vMult * 96, hMult * 8, vMult * 8, 1);
+		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][3], hMult * 103, vMult * 96, hMult * 8, vMult * 8, 3);
+		break;
+	case 2:
+		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][3], hMult * 96, vMult * 104, hMult * 8, vMult * 8, 0);
+		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][3], hMult * 103, vMult * 104, hMult * 8, vMult * 8, 2);
+		break;
+	case 3:
+		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][3], hMult * 96, vMult * 96, hMult * 8, vMult * 8, 1);
+		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][3], hMult * 103, vMult * 96, hMult * 8, vMult * 8, 3);
+		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][3], hMult * 96, vMult * 104, hMult * 8, vMult * 8, 0);
+		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][3], hMult * 103, vMult * 104, hMult * 8, vMult * 8, 2);
+	break; default:
+		break;
+	}
+
 	return true;
 }
 
 void U5Dungeon::DrawRoom()
 {
-	std::pair<uint8_t, uint8_t> curMatrix[3][4];
+	
 	std::pair<uint8_t, uint8_t> tempval;
-	curMatrix[1][0] = m_parent->m_currentDungeonMap[m_xpos][m_ypos];
-	switch (m_dir)
-	{
-	case 'N':
-		curMatrix[0][0] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos - 1) + 8) % 8][m_ypos];
-		curMatrix[2][0] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos + 1) + 8) % 8][m_ypos];
-
-		curMatrix[0][1] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos - 1) + 8) % 8][static_cast<size_t>((m_ypos - 1) + 8) % 8];
-		curMatrix[1][1] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos + 0) + 8) % 8][static_cast<size_t>((m_ypos - 1) + 8) % 8];
-		curMatrix[2][1] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos + 1) + 8) % 8][static_cast<size_t>((m_ypos - 1) + 8) % 8];
-
-		curMatrix[0][2] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos - 1) + 8) % 8][static_cast<size_t>((m_ypos - 2) + 8) % 8];
-		curMatrix[1][2] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos + 0) + 8) % 8][static_cast<size_t>((m_ypos - 2) + 8) % 8];
-		curMatrix[2][2] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos + 1) + 8) % 8][static_cast<size_t>((m_ypos - 2) + 8) % 8];
-
-		curMatrix[0][3] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos - 1) + 8) % 8][static_cast<size_t>((m_ypos - 3) + 8) % 8];
-		curMatrix[1][3] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos + 0) + 8) % 8][static_cast<size_t>((m_ypos - 3) + 8) % 8];
-		curMatrix[2][3] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos + 1) + 8) % 8][static_cast<size_t>((m_ypos - 3) + 8) % 8];
-		break;
-	case 'S':
-		curMatrix[0][0] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos + 1) + 8) % 8][m_ypos];
-		curMatrix[2][0] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos - 1) + 8) % 8][m_ypos];
-
-		curMatrix[0][1] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos + 1) + 8) % 8][static_cast<size_t>((m_ypos + 1) + 8) % 8];
-		curMatrix[1][1] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos + 0) + 8) % 8][static_cast<size_t>((m_ypos + 1) + 8) % 8];
-		curMatrix[2][1] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos - 1) + 8) % 8][static_cast<size_t>((m_ypos + 1) + 8) % 8];
-
-		curMatrix[0][2] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos + 1) + 8) % 8][static_cast<size_t>((m_ypos + 2) + 8) % 8];
-		curMatrix[1][2] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos + 0) + 8) % 8][static_cast<size_t>((m_ypos + 2) + 8) % 8];
-		curMatrix[2][2] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos - 1) + 8) % 8][static_cast<size_t>((m_ypos + 2) + 8) % 8];
-
-		curMatrix[0][3] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos + 1) + 8) % 8][static_cast<size_t>((m_ypos + 3) + 8) % 8];
-		curMatrix[1][3] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos + 0) + 8) % 8][static_cast<size_t>((m_ypos + 3) + 8) % 8];
-		curMatrix[2][3] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos - 1) + 8) % 8][static_cast<size_t>((m_ypos + 3) + 8) % 8];
-		break;
-	case 'E':
-		curMatrix[0][0] = m_parent->m_currentDungeonMap[m_xpos][static_cast<size_t>((m_ypos - 1) + 8) % 8];
-		curMatrix[2][0] = m_parent->m_currentDungeonMap[m_xpos][static_cast<size_t>((m_ypos + 1) + 8) % 8];
-
-		curMatrix[0][1] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos + 1) + 8) % 8][static_cast<size_t>((m_ypos - 1) + 8) % 8];
-		curMatrix[1][1] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos + 1) + 8) % 8][static_cast<size_t>((m_ypos + 0) + 8) % 8];
-		curMatrix[2][1] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos + 1) + 8) % 8][static_cast<size_t>((m_ypos + 1) + 8) % 8];
-
-		curMatrix[0][2] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos + 2) + 8) % 8][static_cast<size_t>((m_ypos - 1) + 8) % 8];
-		curMatrix[1][2] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos + 2) + 8) % 8][static_cast<size_t>((m_ypos + 0) + 8) % 8];
-		curMatrix[2][2] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos + 2) + 8) % 8][static_cast<size_t>((m_ypos + 1) + 8) % 8];
-
-		curMatrix[0][3] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos + 3) + 8) % 8][static_cast<size_t>((m_ypos - 1) + 8) % 8];
-		curMatrix[1][3] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos + 3) + 8) % 8][static_cast<size_t>((m_ypos + 0) + 8) % 8];
-		curMatrix[2][3] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos + 3) + 8) % 8][static_cast<size_t>((m_ypos + 1) + 8) % 8];
-		break;
-	case 'W':
-		curMatrix[0][0] = m_parent->m_currentDungeonMap[m_xpos][static_cast<size_t>((m_ypos + 1) + 8) % 8];
-		curMatrix[2][0] = m_parent->m_currentDungeonMap[m_xpos][static_cast<size_t>((m_ypos - 1) + 8) % 8];
-
-		curMatrix[0][1] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos - 1) + 8) % 8][static_cast<size_t>((m_ypos + 1) + 8) % 8];
-		curMatrix[1][1] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos - 1) + 8) % 8][static_cast<size_t>((m_ypos + 0) + 8) % 8];
-		curMatrix[2][1] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos - 1) + 8) % 8][static_cast<size_t>((m_ypos - 1) + 8) % 8];
-
-		curMatrix[0][2] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos - 2) + 8) % 8][static_cast<size_t>((m_ypos + 1) + 8) % 8];
-		curMatrix[1][2] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos - 2) + 8) % 8][static_cast<size_t>((m_ypos + 0) + 8) % 8];
-		curMatrix[2][2] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos - 2) + 8) % 8][static_cast<size_t>((m_ypos - 1) + 8) % 8];
-
-		curMatrix[0][3] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos - 3) + 8) % 8][static_cast<size_t>((m_ypos + 1) + 8) % 8];
-		curMatrix[1][3] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos - 3) + 8) % 8][static_cast<size_t>((m_ypos + 0) + 8) % 8];
-		curMatrix[2][3] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos - 3) + 8) % 8][static_cast<size_t>((m_ypos - 1) + 8) % 8];
-		break;
-	default:
-		break;
-	}
 
 	int window_width, window_height;
 	m_sdl_helper->GetScreenDimensions(window_width, window_height);
@@ -421,7 +542,7 @@ void U5Dungeon::DrawRoom()
 	// Get the furthest to draw out
 	for (int index = 0; index < max_depth; index++)
 	{
-		auto& curMiddle = curMatrix[1][index];
+		auto& curMiddle = m_curMatrix[1][index];
 		if (curMiddle.first > 9 && curMiddle.first != 14)
 		{
 			max_depth = index;
@@ -431,18 +552,18 @@ void U5Dungeon::DrawRoom()
 	bool ret;
 	if (max_depth > 2)
 	{
-		ret = DrawFourthLayer(curMatrix[0][3], curMatrix[1][3], curMatrix[2][3]);
+		ret = DrawFourthLayer(m_curMatrix[0][3], m_curMatrix[1][3], m_curMatrix[2][3]);
 	}
 	if (max_depth > 1)
 	{
-		ret = DrawThirdLayer(curMatrix[0][2], curMatrix[1][2], curMatrix[2][2]);
+		ret = DrawThirdLayer(m_curMatrix[0][2], m_curMatrix[1][2], m_curMatrix[2][2]);
 	}
 	if (max_depth > 0)
 	{
-		ret = DrawSecondLayer(curMatrix[0][1], curMatrix[1][1], curMatrix[2][1]);
+		ret = DrawSecondLayer(m_curMatrix[0][1], m_curMatrix[1][1], m_curMatrix[2][1]);
 	}
 
-	ret = DrawFirstLayer(curMatrix[0][0], curMatrix[1][0], curMatrix[2][0]);
+	ret = DrawFirstLayer(m_curMatrix[0][0], m_curMatrix[1][0], m_curMatrix[2][0]);
 }
 
 void U5Dungeon::Render()
@@ -622,8 +743,7 @@ void U5Dungeon::GoForward()
 	{
 		return;
 	}
-	m_xpos = tempos.first;
-	m_ypos = tempos.second;
+	SetPos(tempos.first, tempos.second);
 }
 
 void U5Dungeon::GoBackward()
@@ -656,8 +776,7 @@ void U5Dungeon::GoBackward()
 	{
 		return;
 	}
-	m_xpos = tempos.first;
-	m_ypos = tempos.second;
+	SetPos(tempos.first, tempos.second);
 }
 
 void U5Dungeon::TurnLeft()
@@ -679,6 +798,7 @@ void U5Dungeon::TurnLeft()
 	default:
 		break;
 	}
+	CalcCurMatrix();
 }
 
 void U5Dungeon::TurnRight()
@@ -700,4 +820,5 @@ void U5Dungeon::TurnRight()
 	default:
 		break;
 	}
+	CalcCurMatrix();
 }

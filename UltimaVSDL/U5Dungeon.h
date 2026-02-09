@@ -26,6 +26,8 @@ public:
 	virtual void ProcessEvents() override;
 	void LoadDungeonType(DungeonType type);
 	void SetParent(U5Game* parent);
+	void CalcCurMatrix();
+	void SetPos(int x, int y) override;
 private:
 	void DrawRoom();
 	bool DrawFirstLayer(std::pair<uint8_t, uint8_t> left, std::pair<uint8_t, uint8_t> middle, std::pair<uint8_t, uint8_t> right);
@@ -45,5 +47,7 @@ private:
 
 	DungeonType m_dungeon_type;
 	U5Game* m_parent;
+
+	std::pair<uint8_t, uint8_t> m_curMatrix[3][4];
 };
 

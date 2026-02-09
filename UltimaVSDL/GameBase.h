@@ -11,7 +11,7 @@ public:
 	explicit GameBase(SDL3Helper* sdl_helper, UltimaVResource* u5_resources);
 	virtual ~GameBase();
 	std::pair<float, float> m_DisplayOffset;
-	void SetPos(int x, int y);
+	virtual void SetPos(int x, int y);
 	void GetPos(int &x, int &y) const;
 	void SetDir(int dir);
 	void GetDir(int& dir) const;
