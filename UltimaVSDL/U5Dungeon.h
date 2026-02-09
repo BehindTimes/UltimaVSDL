@@ -35,8 +35,11 @@ private:
 	void DrawBorder();
 	void ProcessAnyKeyHit();
 
+	int checkValidLocation(const std::pair<int, int>& pos_info);
 	void TurnLeft();
 	void TurnRight();
+	void GoForward();
+	void GoBackward();
 
 	std::function<void()> m_process_key;
 

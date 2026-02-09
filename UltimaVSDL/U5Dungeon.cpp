@@ -86,6 +86,7 @@ bool U5Dungeon::DrawFirstLayer(std::pair<uint8_t, uint8_t> left, std::pair<uint8
 			drawsides = true;
 			break;
 		default:
+			drawsides = true;
 			break;
 		}
 		break;
@@ -166,6 +167,10 @@ bool U5Dungeon::DrawSecondLayer(std::pair<uint8_t, uint8_t> left, std::pair<uint
 		m_sdl_helper->RenderTextureAt(curTextures[9], hMult * 48, vMult * 22, hMult * 56, vMult * 164);
 		m_sdl_helper->RenderFlipTextureAt(curTextures[9], hMult * 103, vMult * 22, hMult * 56, vMult * 164, 2);
 		break;
+	case 12:
+		m_sdl_helper->RenderTextureAt(curTextures[25], hMult * 48, vMult * 22, hMult * 56, vMult * 164);
+		m_sdl_helper->RenderFlipTextureAt(curTextures[25], hMult * 103, vMult * 22, hMult * 56, vMult * 164, 2);
+		break;
 	default:
 		drawsides = true;
 		break;
@@ -221,8 +226,12 @@ bool U5Dungeon::DrawThirdLayer(std::pair<uint8_t, uint8_t> left, std::pair<uint8
 	switch (middle.first)
 	{
 	case 11:
-		//m_sdl_helper->RenderTextureAt(curTextures[9], hMult * 48, vMult * 22, hMult * 56, vMult * 164);
-		//m_sdl_helper->RenderFlipTextureAt(curTextures[9], hMult * 103, vMult * 22, hMult * 56, vMult * 164, 2);
+		m_sdl_helper->RenderTextureAt(curTextures[10], hMult * 80, vMult * 22, hMult * 24, vMult * 164);
+		m_sdl_helper->RenderFlipTextureAt(curTextures[10], hMult * 103, vMult * 22, hMult * 24, vMult * 164, 2);
+		break;
+	case 12:
+		m_sdl_helper->RenderTextureAt(curTextures[26], hMult * 80, vMult * 22, hMult * 24, vMult * 164);
+		m_sdl_helper->RenderFlipTextureAt(curTextures[26], hMult * 103, vMult * 22, hMult * 24, vMult * 164, 2);
 		break;
 	default:
 		drawsides = true;
@@ -282,6 +291,10 @@ bool U5Dungeon::DrawFourthLayer(std::pair<uint8_t, uint8_t> left, std::pair<uint
 	case 11:
 		m_sdl_helper->RenderTextureAt(curTextures[11], hMult * 96, vMult * 22, hMult * 8, vMult * 164);
 		m_sdl_helper->RenderFlipTextureAt(curTextures[11], hMult * 103, vMult * 22, hMult * 8, vMult * 164, 2);
+		break;
+	case 12:
+		m_sdl_helper->RenderTextureAt(curTextures[27], hMult * 96, vMult * 22, hMult * 8, vMult * 164);
+		m_sdl_helper->RenderFlipTextureAt(curTextures[27], hMult * 103, vMult * 22, hMult * 8, vMult * 164, 2);
 		break;
 	default:
 		drawsides = true;
@@ -350,8 +363,8 @@ void U5Dungeon::DrawRoom()
 		curMatrix[2][3] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos + 1) + 8) % 8][static_cast<size_t>((m_ypos - 3) + 8) % 8];
 		break;
 	case 'S':
-		curMatrix[0][0] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos - 1) + 8) % 8][m_ypos];
-		curMatrix[2][0] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos + 1) + 8) % 8][m_ypos];
+		curMatrix[0][0] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos + 1) + 8) % 8][m_ypos];
+		curMatrix[2][0] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos - 1) + 8) % 8][m_ypos];
 
 		curMatrix[0][1] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos + 1) + 8) % 8][static_cast<size_t>((m_ypos + 1) + 8) % 8];
 		curMatrix[1][1] = m_parent->m_currentDungeonMap[static_cast<size_t>((m_xpos + 0) + 8) % 8][static_cast<size_t>((m_ypos + 1) + 8) % 8];
@@ -550,10 +563,10 @@ void U5Dungeon::ProcessAnyKeyHit()
 		switch (curKey)
 		{
 		case SDLK_UP:
-			//GoForward();
+			GoForward();
 			break;
 		case SDLK_DOWN:
-			//GoBackward();
+			GoBackward();
 			break;
 		case SDLK_LEFT:
 			TurnLeft();
@@ -572,6 +585,79 @@ void U5Dungeon::ProcessAnyKeyHit()
 			break;
 		}
 	}
+}
+
+int U5Dungeon::checkValidLocation(const std::pair<int, int>& pos_info)
+{
+	return 0;
+}
+
+void U5Dungeon::GoForward()
+{
+	std::pair<int, int> tempos = { m_xpos, m_ypos };
+	switch (m_dir)
+	{
+	case 'N':
+		tempos.second--;
+		tempos.second += 8;
+		tempos.second %= 8;
+		break;
+	case 'S':
+		tempos.second++;
+		tempos.second %= 8;
+		break;
+	case 'E':
+		tempos.first++;
+		tempos.first %= 8;
+		break;
+	case 'W':
+		tempos.first--;
+		tempos.first += 8;
+		tempos.first %= 8;
+		break;
+	default:
+		break;
+	}
+	if (0 != checkValidLocation(tempos))
+	{
+		return;
+	}
+	m_xpos = tempos.first;
+	m_ypos = tempos.second;
+}
+
+void U5Dungeon::GoBackward()
+{
+	std::pair<int, int> tempos = { m_xpos, m_ypos };
+	switch (m_dir)
+	{
+	case 'S':
+		tempos.second--;
+		tempos.second += 8;
+		tempos.second %= 8;
+		break;
+	case 'N':
+		tempos.second++;
+		tempos.second %= 8;
+		break;
+	case 'W':
+		tempos.first++;
+		tempos.first %= 8;
+		break;
+	case 'E':
+		tempos.first--;
+		tempos.first += 8;
+		tempos.first %= 8;
+		break;
+	default:
+		break;
+	}
+	if (0 != checkValidLocation(tempos))
+	{
+		return;
+	}
+	m_xpos = tempos.first;
+	m_ypos = tempos.second;
 }
 
 void U5Dungeon::TurnLeft()
