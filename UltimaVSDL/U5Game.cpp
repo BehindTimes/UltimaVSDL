@@ -174,36 +174,72 @@ void U5Game::GetElapsedTime()
 
 void U5Game::ChangeLevel(int map_level)
 {
-	int temp_level = m_map_level + m_cur_level + map_level;
-
-	if (temp_level < 0 || temp_level >= 16)
-	{
-		return;
-	}
-	if (m_map_type < 0 || m_map_type > 4)
-	{
-		return;
-	}
-
-	m_cur_level += map_level;
-
 	MapTypes curMapType = static_cast<MapTypes>(m_map_type);
-	switch (curMapType)
+	if (curMapType == MapTypes::Dungeon)
 	{
-	case MapTypes::Castle:
-		m_currentMap = m_resources->m_data.castle_maps[temp_level];
-		break;
-	case MapTypes::Dwelling:
-		m_currentMap = m_resources->m_data.dwelling_maps[temp_level];
-		break;
-	case MapTypes::Keep:
-		m_currentMap = m_resources->m_data.keep_maps[temp_level];
-		break;
-	case MapTypes::Town:
-		m_currentMap = m_resources->m_data.town_maps[temp_level];
-		break;
-	default:
-		break;
+		int temp_level = (m_map_level % 8) + m_cur_level + map_level;
+		if (temp_level < 0) // Exit to Britannia
+		{
+			m_curLocation = m_world.get();
+			LoadMap(-1);
+			m_console->PrintText(m_resources->m_data.game_strings_4[EXIT_TO_STRING]);
+			m_console->PrintText(m_resources->m_data.game_strings_1[BRITANNIA_STRING]);
+			m_console->NewPrompt();
+			return;
+		}
+		else if (temp_level > 7) // Exit to Underworld
+		{
+			m_curLocation = m_world.get();
+			LoadMap(-2);
+			m_console->PrintText(m_resources->m_data.game_strings_4[EXIT_TO_STRING]);
+			m_console->PrintText(m_resources->m_data.game_strings_1[UNDERWORLD_STRING]);
+			m_console->NewPrompt();
+			return;
+		}
+		temp_level = m_map_level + m_cur_level + map_level;
+
+		if (temp_level < 0 || temp_level >= m_resources->m_data.dungeon_maps.size())
+		{
+			return;
+		}
+		m_cur_level += map_level;
+		m_currentDungeonMap = m_resources->m_data.dungeon_maps[static_cast<size_t>(temp_level)];
+		m_curLocation->SetPos(-1, -1);
+		m_console->NewPrompt();
+	}
+	else
+	{
+		int temp_level = m_map_level + m_cur_level + map_level;
+
+		if (temp_level < 0 || temp_level >= 16)
+		{
+			return;
+		}
+		if (m_map_type < 0 || m_map_type > 4)
+		{
+			return;
+		}
+
+		m_cur_level += map_level;
+
+
+		switch (curMapType)
+		{
+		case MapTypes::Castle:
+			m_currentMap = m_resources->m_data.castle_maps[temp_level];
+			break;
+		case MapTypes::Dwelling:
+			m_currentMap = m_resources->m_data.dwelling_maps[temp_level];
+			break;
+		case MapTypes::Keep:
+			m_currentMap = m_resources->m_data.keep_maps[temp_level];
+			break;
+		case MapTypes::Town:
+			m_currentMap = m_resources->m_data.town_maps[temp_level];
+			break;
+		default:
+			break;
+		}
 	}
 }
 
@@ -234,6 +270,9 @@ void U5Game::LoadMap(int map_num)
 		else if (map_num == -2) // Underworld
 		{
 			m_location = GameLocation::Underworld;
+			m_currentMap.clear();
+			m_currentMap = m_resources->m_data.underworld_map;
+			m_curLocation->SetPos(m_old_position.first, m_old_position.second);
 		}
 		return;
 	}
@@ -290,6 +329,8 @@ void U5Game::LoadMap(int map_num)
 		m_location = GameLocation::Dungeon;
 		m_curLocation = m_dungeon.get();
 		m_currentDungeonMap.clear();
+		m_map_level = (map_num - MAX_TOWN_MAPS) * 8;
+		m_cur_level = offset;
 		m_currentDungeonMap = m_resources->m_data.dungeon_maps[static_cast<size_t>((map_num - MAX_TOWN_MAPS) * 8) + offset];
 		m_dungeon->LoadDungeonType(DungeonType::CAVE);
 		m_curLocation->SetDir('N');

@@ -16,6 +16,7 @@ public:
 
 	void Render(Uint64 tickElapse);
 	void PrintText(std::string text, bool showElem = false, bool partial = false);
+	void NewPrompt();
 	void ShowPrompt();
 	void BlockPrompt(bool block);
 private:

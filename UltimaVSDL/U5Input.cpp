@@ -212,6 +212,14 @@ SDL_Keycode U5Input::GetKeyCode() const
 					return kc1 < kc2 ? SDLK_KP_9 : SDLK_KP_3;
 				}
 				break;
+			case SDLK_LCTRL:
+			case SDLK_RCTRL:
+				kc1 = std::find(m_curKeyCodes.begin(), m_curKeyCodes.end(), SDLK_M);
+				if (kc1 != m_curKeyCodes.end())
+				{
+					return SDLK_F24;
+				}
+				break;
 			default:
 				return m_curKeyCodes[0];
 			}

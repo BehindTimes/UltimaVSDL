@@ -36,12 +36,17 @@ private:
 	bool DrawFourthLayer(std::pair<uint8_t, uint8_t> left, std::pair<uint8_t, uint8_t> middle, std::pair<uint8_t, uint8_t> right);
 	void DrawBorder();
 	void ProcessAnyKeyHit();
+	int ProcessUpDown();
+
+	void HandleKlimb();
 
 	int checkValidLocation(const std::pair<int, int>& pos_info);
 	void TurnLeft();
 	void TurnRight();
+	void TurnAround();
 	void GoForward();
 	void GoBackward();
+	void Klimb();
 
 	std::function<void()> m_process_key;
 

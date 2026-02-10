@@ -46,6 +46,11 @@ void U5Console::BlockPrompt(bool block)
 	m_blockPrompt = block;
 }
 
+void U5Console::NewPrompt()
+{
+	PrintText("\n", true);
+}
+
 void U5Console::Render(Uint64 tickElapse)
 {
 	m_tickElapse = tickElapse;

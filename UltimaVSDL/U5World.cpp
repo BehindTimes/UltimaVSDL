@@ -127,7 +127,7 @@ void U5World::Render()
 		{
 			int curX;
 			int curY;
-			if (m_parent->m_location == GameLocation::World)
+			if (m_parent->m_location == GameLocation::World || m_parent->m_location == GameLocation::Underworld)
 			{
 				curX = static_cast<int>((static_cast<unsigned long long>(mapX) + xpos + m_parent->m_currentMap.size()) % m_parent->m_currentMap.size());
 				curY = static_cast<int>((static_cast<unsigned long long>(mapY) + ypos + m_parent->m_currentMap[0].size()) % m_parent->m_currentMap[0].size());
@@ -387,7 +387,7 @@ void U5World::ProcessNorth()
 	m_vec_pos.back().new_position.first = m_xpos;
 	tempval = m_ypos;
 	tempval--;
-	if (m_parent->m_location == GameLocation::World)
+	if (m_parent->m_location == GameLocation::World || m_parent->m_location == GameLocation::Underworld)
 	{
 		tempval += static_cast<int>(m_parent->m_currentMap[0].size());
 		tempval %= static_cast<int>(m_parent->m_currentMap[0].size());
@@ -405,7 +405,7 @@ void U5World::ProcessNorth()
 		m_parent->m_console->PrintText(m_resources->m_data.game_strings_1[NORTH_STRING]);
 		if (check_location == 0)
 		{
-			m_parent->m_console->PrintText("\n", true);
+			m_parent->m_console->NewPrompt();
 			m_process_key = std::bind(&U5World::HandleNorth, this);
 		}
 		if (0 > check_location)
@@ -425,7 +425,7 @@ void U5World::ProcessSouth()
 	m_vec_pos.back().new_position.first = m_xpos;
 	tempval = m_ypos;
 	tempval++;
-	if (m_parent->m_location == GameLocation::World)
+	if (m_parent->m_location == GameLocation::World || m_parent->m_location == GameLocation::Underworld)
 	{
 		tempval %= static_cast<int>(m_parent->m_currentMap[0].size());
 	}
@@ -441,7 +441,7 @@ void U5World::ProcessSouth()
 		m_parent->m_console->PrintText(m_resources->m_data.game_strings_1[SOUTH_STRING]);
 		if (check_location == 0)
 		{
-			m_parent->m_console->PrintText("\n", true);
+			m_parent->m_console->NewPrompt();
 			m_process_key = std::bind(&U5World::HandleSouth, this);
 		}
 		if (0 > check_location)
@@ -461,7 +461,7 @@ void U5World::ProcessEast()
 	m_vec_pos.back().new_position.second = m_ypos;
 	tempval = m_xpos;
 	tempval++;
-	if (m_parent->m_location == GameLocation::World)
+	if (m_parent->m_location == GameLocation::World || m_parent->m_location == GameLocation::Underworld)
 	{
 		tempval %= m_parent->m_currentMap.size();
 	}
@@ -477,7 +477,7 @@ void U5World::ProcessEast()
 		m_parent->m_console->PrintText(m_resources->m_data.game_strings_1[EAST_STRING]);
 		if (check_location == 0)
 		{
-			m_parent->m_console->PrintText("\n", true);
+			m_parent->m_console->NewPrompt();
 			m_process_key = std::bind(&U5World::HandleEast, this);
 		}
 		if (0 > check_location)
@@ -497,7 +497,7 @@ void U5World::ProcessWest()
 	m_vec_pos.back().new_position.second = m_ypos;
 	tempval = m_xpos;
 	tempval--;
-	if (m_parent->m_location == GameLocation::World)
+	if (m_parent->m_location == GameLocation::World || m_parent->m_location == GameLocation::Underworld)
 	{
 		tempval += static_cast<int>(m_parent->m_currentMap.size());
 		tempval %= static_cast<int>(m_parent->m_currentMap.size());
@@ -514,7 +514,7 @@ void U5World::ProcessWest()
 		m_parent->m_console->PrintText(m_resources->m_data.game_strings_1[WEST_STRING]);
 		if (check_location == 0)
 		{
-			m_parent->m_console->PrintText("\n", true);
+			m_parent->m_console->NewPrompt();
 			m_process_key = std::bind(&U5World::HandleWest, this);
 		}
 		if (0 > check_location)
@@ -533,7 +533,7 @@ void U5World::ProcessNorthEast()
 	m_vec_pos.back().old_position.second = m_ypos;
 	tempval = m_ypos;
 	tempval--;
-	if (m_parent->m_location == GameLocation::World)
+	if (m_parent->m_location == GameLocation::World || m_parent->m_location == GameLocation::Underworld)
 	{
 		tempval += static_cast<int>(m_parent->m_currentMap[0].size());
 		tempval %= static_cast<int>(m_parent->m_currentMap[0].size());
@@ -541,7 +541,7 @@ void U5World::ProcessNorthEast()
 	m_vec_pos.back().new_position.second = tempval;
 	tempval = m_xpos;
 	tempval++;
-	if (m_parent->m_location == GameLocation::World)
+	if (m_parent->m_location == GameLocation::World || m_parent->m_location == GameLocation::Underworld)
 	{
 		tempval %= static_cast<int>(m_parent->m_currentMap.size());
 	}
@@ -557,7 +557,7 @@ void U5World::ProcessNorthEast()
 		m_parent->m_console->PrintText("Northeast\n");
 		if (check_location == 0)
 		{
-			m_parent->m_console->PrintText("\n", true);
+			m_parent->m_console->NewPrompt();
 			m_process_key = std::bind(&U5World::HandleNortheast, this);
 		}
 		if (0 > check_location)
@@ -576,7 +576,7 @@ void U5World::ProcessNorthWest()
 	m_vec_pos.back().old_position.second = m_ypos;
 	tempval = m_ypos;
 	tempval--;
-	if (m_parent->m_location == GameLocation::World)
+	if (m_parent->m_location == GameLocation::World || m_parent->m_location == GameLocation::Underworld)
 	{
 		tempval += static_cast<int>(m_parent->m_currentMap[0].size());
 		tempval %= static_cast<int>(m_parent->m_currentMap[0].size());
@@ -584,7 +584,7 @@ void U5World::ProcessNorthWest()
 	m_vec_pos.back().new_position.second = tempval;
 	tempval = m_xpos;
 	tempval--;
-	if (m_parent->m_location == GameLocation::World)
+	if (m_parent->m_location == GameLocation::World || m_parent->m_location == GameLocation::Underworld)
 	{
 		tempval += static_cast<int>(m_parent->m_currentMap.size());
 		tempval %= static_cast<int>(m_parent->m_currentMap.size());
@@ -601,7 +601,7 @@ void U5World::ProcessNorthWest()
 		m_parent->m_console->PrintText("Northwest\n");
 		if (check_location == 0)
 		{
-			m_parent->m_console->PrintText("\n", true);
+			m_parent->m_console->NewPrompt();
 			m_process_key = std::bind(&U5World::HandleNorthwest, this);
 		}
 		if (0 > check_location)
@@ -620,14 +620,14 @@ void U5World::ProcessSouthEast()
 	m_vec_pos.back().old_position.second = m_ypos;
 	tempval = m_ypos;
 	tempval++;
-	if (m_parent->m_location == GameLocation::World)
+	if (m_parent->m_location == GameLocation::World || m_parent->m_location == GameLocation::Underworld)
 	{
 		tempval %= m_parent->m_currentMap[0].size();
 	}
 	m_vec_pos.back().new_position.second = tempval;
 	tempval = m_xpos;
 	tempval++;
-	if (m_parent->m_location == GameLocation::World)
+	if (m_parent->m_location == GameLocation::World || m_parent->m_location == GameLocation::Underworld)
 	{
 		tempval %= m_parent->m_currentMap.size();
 	}
@@ -643,7 +643,7 @@ void U5World::ProcessSouthEast()
 		m_parent->m_console->PrintText("Southeast\n");
 		if (check_location == 0)
 		{
-			m_parent->m_console->PrintText("\n", true);
+			m_parent->m_console->NewPrompt();
 			m_process_key = std::bind(&U5World::HandleSoutheast, this);
 		}
 		if (0 > check_location)
@@ -662,14 +662,14 @@ void U5World::ProcessSouthWest()
 	m_vec_pos.back().old_position.second = m_ypos;
 	tempval = m_ypos;
 	tempval++;
-	if (m_parent->m_location == GameLocation::World)
+	if (m_parent->m_location == GameLocation::World || m_parent->m_location == GameLocation::Underworld)
 	{
 		tempval %= static_cast<int>(m_parent->m_currentMap[0].size());
 	}
 	m_vec_pos.back().new_position.second = tempval;
 	tempval = m_xpos;
 	tempval--;
-	if (m_parent->m_location == GameLocation::World)
+	if (m_parent->m_location == GameLocation::World || m_parent->m_location == GameLocation::Underworld)
 	{
 		tempval += static_cast<int>(m_parent->m_currentMap.size());
 		tempval %= static_cast<int>(m_parent->m_currentMap.size());
@@ -686,7 +686,7 @@ void U5World::ProcessSouthWest()
 		m_parent->m_console->PrintText("Southwest\n");
 		if (check_location == 0)
 		{
-			m_parent->m_console->PrintText("\n", true);
+			m_parent->m_console->NewPrompt();
 			m_process_key = std::bind(&U5World::HandleSouthwest, this);
 		}
 		if (0 > check_location)
@@ -713,28 +713,28 @@ void U5World::HandleKlimb()
 	case 'U':
 		m_parent->m_console->PrintText(m_resources->m_data.game_strings_1[NORTH_STRING]);
 		m_parent->m_console->PrintText(m_resources->m_data.game_strings_1[WHAT_STRING]);
-		m_parent->m_console->PrintText("\n", true);
+		m_parent->m_console->NewPrompt();
 		m_process_key = std::bind(&U5World::ProcessAnyKeyHit, this);
 		m_input->SetRequireAllKeysUp();
 		break;
 	case 'D':
 		m_parent->m_console->PrintText(m_resources->m_data.game_strings_1[SOUTH_STRING]);
 		m_parent->m_console->PrintText(m_resources->m_data.game_strings_1[WHAT_STRING]);
-		m_parent->m_console->PrintText("\n", true);
+		m_parent->m_console->NewPrompt();
 		m_process_key = std::bind(&U5World::ProcessAnyKeyHit, this);
 		m_input->SetRequireAllKeysUp();
 		break;
 	case 'L':
 		m_parent->m_console->PrintText(m_resources->m_data.game_strings_1[WEST_STRING]);
 		m_parent->m_console->PrintText(m_resources->m_data.game_strings_1[WHAT_STRING]);
-		m_parent->m_console->PrintText("\n", true);
+		m_parent->m_console->NewPrompt();
 		m_process_key = std::bind(&U5World::ProcessAnyKeyHit, this);
 		m_input->SetRequireAllKeysUp();
 		break;
 	case 'R':
 		m_parent->m_console->PrintText(m_resources->m_data.game_strings_1[EAST_STRING]);
 		m_parent->m_console->PrintText(m_resources->m_data.game_strings_1[WHAT_STRING]);
-		m_parent->m_console->PrintText("\n", true);
+		m_parent->m_console->NewPrompt();
 		m_process_key = std::bind(&U5World::ProcessAnyKeyHit, this);
 		m_input->SetRequireAllKeysUp();
 		break;
@@ -753,19 +753,21 @@ void U5World::HandleLeaveTown()
 		if (m_parent->m_old_location == GameLocation::World)
 		{
 			m_parent->m_console->PrintText(m_resources->m_data.game_strings_1[BRITANNIA_STRING]);
+			m_parent->m_console->NewPrompt();
+			m_parent->LoadMap(-1);
 		}
 		else if (m_parent->m_old_location == GameLocation::Underworld)
 		{
 			m_parent->m_console->PrintText(m_resources->m_data.game_strings_1[UNDERWORLD_STRING]);
+			m_parent->m_console->NewPrompt();
+			m_parent->LoadMap(-2);
 		}
-		m_parent->m_console->PrintText("\n", true);
-		m_parent->LoadMap(-1);
 	}
 	else if (ret == 'N')
 	{
 		m_process_key = std::bind(&U5World::ProcessAnyKeyHit, this);
 		m_parent->m_console->PrintText(m_resources->m_data.game_strings_1[NO_STRING]);
-		m_parent->m_console->PrintText("\n", true);
+		m_parent->m_console->NewPrompt();
 	}
 }
 
@@ -1003,10 +1005,10 @@ void U5World::ProcessKlimb()
 {
 	m_input->SetRequireAllKeysUp();
 	m_parent->m_console->PrintText(m_resources->m_data.game_strings_4[KLIMB_STRING]);
-	if (m_parent->m_location == GameLocation::World)
+	if (m_parent->m_location == GameLocation::World || m_parent->m_location == GameLocation::Underworld)
 	{
 		m_parent->m_console->PrintText(m_resources->m_data.game_strings_17[WITH_WHAT_STRING]);
-		m_parent->m_console->PrintText("\n", true);
+		m_parent->m_console->NewPrompt();
 		return;
 	}
 	if (m_xpos >= 0 && m_ypos >= 0 && m_xpos < m_parent->m_currentMap.size() && m_ypos < m_parent->m_currentMap[0].size())
@@ -1017,12 +1019,12 @@ void U5World::ProcessKlimb()
 		{
 		case LADDER_UP_TILE:
 			m_parent->m_console->PrintText(m_resources->m_data.game_strings_17[UP_STRING]);
-			m_parent->m_console->PrintText("\n", true);
+			m_parent->m_console->NewPrompt();
 			m_parent->ChangeLevel(1);
 			return;
 		case LADDER_DOWN_TILE:
 			m_parent->m_console->PrintText(m_resources->m_data.game_strings_17[DOWN_STRING]);
-			m_parent->m_console->PrintText("\n", true);
+			m_parent->m_console->NewPrompt();
 			m_parent->ChangeLevel(-1);
 			return;
 		default:
@@ -1115,14 +1117,14 @@ void U5World::ProcessEnter()
 				m_parent->m_console->PrintText(m_resources->m_data.location_names[curMap]);
 				m_parent->m_console->PrintText("\n", false);
 			}
-			m_parent->m_console->PrintText("\n", true);
+			m_parent->m_console->NewPrompt();
 		}
 	}
 	else
 	{
 		m_parent->m_console->PrintText(m_resources->m_data.game_strings_2[31]);
 		m_parent->m_console->PrintText(m_resources->m_data.game_strings_2[46]);
-		m_parent->m_console->PrintText("\n", true);
+		m_parent->m_console->NewPrompt();
 	}
 }
 

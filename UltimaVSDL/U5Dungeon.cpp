@@ -41,7 +41,11 @@ void U5Dungeon::SetParent(U5Game* parent)
 
 void U5Dungeon::SetPos(int x, int y)
 {
-	GameBase::SetPos(x, y);
+	if (x >= 0 && y >= 0)
+	{
+		GameBase::SetPos(x, y);
+	}
+	
 	CalcCurMatrix();
 }
 
@@ -623,31 +627,23 @@ void U5Dungeon::DrawBorder()
 
 	GameBase::DrawBorder();
 
-	if (m_xpos >= 100)
-	{
-		int tempval = (m_xpos / 100) % 10;
-		m_sdl_helper->DrawTileTexture8(m_sdl_helper->m_CharacterSetsTextures[0][0][static_cast<size_t>('0' + tempval)], 8, 0);
-	}
 	if (m_xpos >= 10)
 	{
 		int tempval = (m_xpos / 10) % 10;
-		m_sdl_helper->DrawTileTexture8(m_sdl_helper->m_CharacterSetsTextures[0][0][static_cast<size_t>('0' + tempval)], 9, 0);
+		m_sdl_helper->DrawTileTexture8(m_sdl_helper->m_CharacterSetsTextures[0][0][static_cast<size_t>('0' + tempval)], 8, 0);
 	}
 	int tempval1 = (m_xpos) % 10;
-	m_sdl_helper->DrawTileTexture8(m_sdl_helper->m_CharacterSetsTextures[0][0][static_cast<size_t>('0' + tempval1)], 10, 0);
+	m_sdl_helper->DrawTileTexture8(m_sdl_helper->m_CharacterSetsTextures[0][0][static_cast<size_t>('0' + tempval1)], 9, 0);
 
-	if (m_ypos >= 100)
-	{
-		int tempval = (m_ypos / 100) % 10;
-		m_sdl_helper->DrawTileTexture8(m_sdl_helper->m_CharacterSetsTextures[0][0][static_cast<size_t>('0' + tempval)], 12, 0);
-	}
 	if (m_ypos >= 10)
 	{
 		int tempval = (m_ypos / 10) % 10;
-		m_sdl_helper->DrawTileTexture8(m_sdl_helper->m_CharacterSetsTextures[0][0][static_cast<size_t>('0' + tempval)], 13, 0);
+		m_sdl_helper->DrawTileTexture8(m_sdl_helper->m_CharacterSetsTextures[0][0][static_cast<size_t>('0' + tempval)], 11, 0);
 	}
 	int tempval2 = (m_ypos) % 10;
-	m_sdl_helper->DrawTileTexture8(m_sdl_helper->m_CharacterSetsTextures[0][0][static_cast<size_t>('0' + tempval2)], 14, 0);
+	m_sdl_helper->DrawTileTexture8(m_sdl_helper->m_CharacterSetsTextures[0][0][static_cast<size_t>('0' + tempval2)], 12, 0);
+
+	m_sdl_helper->DrawTileTexture8(m_sdl_helper->m_CharacterSetsTextures[0][0][static_cast<size_t>('0' + m_parent->m_cur_level)], 15, 0);
 
 	m_sdl_helper->DrawTiledText(m_resources->m_data.game_strings_3[DIR_STRING], 7, 23);
 	int dir_val;
@@ -695,11 +691,14 @@ void U5Dungeon::ProcessAnyKeyHit()
 		case SDLK_RIGHT:
 			TurnRight();
 			break;
+		case SDLK_F24:
+			TurnAround();
+			break;
 		case SDLK_E:
 			//ProcessEnter();
 			break;
 		case SDLK_K:
-			//ProcessKlimb();
+			Klimb();
 			break;
 		default:
 			m_input->m_isValid = false;
@@ -711,6 +710,70 @@ void U5Dungeon::ProcessAnyKeyHit()
 int U5Dungeon::checkValidLocation(const std::pair<int, int>& pos_info)
 {
 	return 0;
+}
+
+int U5Dungeon::ProcessUpDown()
+{
+	m_input->m_isValid = true;
+	SDL_Keycode curKey = m_input->GetKeyCode();
+	switch (curKey)
+	{
+	case SDLK_UP:
+	case SDLK_U:
+		return 'U';
+	case SDLK_DOWN:
+	case SDLK_D:
+		return 'D';
+	default:
+		m_input->m_isValid = false;
+		break;
+	}
+	return -1;
+}
+
+void U5Dungeon::HandleKlimb()
+{
+	int ret = ProcessUpDown();
+	m_input->SetRequireAllKeysUp();
+	if (ret == 'U')
+	{
+		m_process_key = std::bind(&U5Dungeon::ProcessAnyKeyHit, this);
+		m_parent->m_console->PrintText(m_resources->m_data.game_strings_17[UP_STRING]);
+		m_parent->ChangeLevel(-1);
+	}
+	else if (ret == 'D')
+	{
+		m_process_key = std::bind(&U5Dungeon::ProcessAnyKeyHit, this);
+		m_parent->m_console->PrintText(m_resources->m_data.game_strings_17[DOWN_STRING]);
+		m_parent->ChangeLevel(1);
+	}
+}
+
+void U5Dungeon::Klimb()
+{
+	uint8_t curTile = m_curMatrix[1][0].first;
+	m_input->SetRequireAllKeysUp();
+	switch (curTile)
+	{
+	case 1: // Ladder up
+		m_parent->m_console->PrintText(m_resources->m_data.game_strings_4[KLIMB_STRING]);
+		m_parent->m_console->PrintText(m_resources->m_data.game_strings_17[UP_STRING]);
+		m_parent->ChangeLevel(-1);
+		break;
+	case 2: // Ladder down
+		m_parent->m_console->PrintText(m_resources->m_data.game_strings_4[KLIMB_STRING]);
+		m_parent->m_console->PrintText(m_resources->m_data.game_strings_17[DOWN_STRING]);
+		m_parent->ChangeLevel(1);
+		break;
+	case 3: // Prompt up/down
+		m_parent->m_console->PrintText(m_resources->m_data.game_strings_4[KLIMB_PROMPT]);
+		m_process_key = std::bind(&U5Dungeon::HandleKlimb, this);
+		break;
+	default:
+		m_parent->m_console->PrintText(m_resources->m_data.game_strings_4[KLIMB_WHAT]);
+		m_parent->m_console->NewPrompt();
+		break;
+	}
 }
 
 void U5Dungeon::GoForward()
@@ -744,6 +807,8 @@ void U5Dungeon::GoForward()
 		return;
 	}
 	SetPos(tempos.first, tempos.second);
+	m_parent->m_console->PrintText(m_resources->m_data.game_strings_3[DUNGEON_ADVANCE]);
+	m_parent->m_console->NewPrompt();
 }
 
 void U5Dungeon::GoBackward()
@@ -777,6 +842,32 @@ void U5Dungeon::GoBackward()
 		return;
 	}
 	SetPos(tempos.first, tempos.second);
+	m_parent->m_console->PrintText(m_resources->m_data.game_strings_3[DUNGEON_BACKUP]);
+	m_parent->m_console->NewPrompt();
+}
+
+void U5Dungeon::TurnAround()
+{
+	switch (m_dir)
+	{
+	case 'N':
+		m_dir = 'S';
+		break;
+	case 'S':
+		m_dir = 'N';
+		break;
+	case 'E':
+		m_dir = 'W';
+		break;
+	case 'W':
+		m_dir = 'E';
+		break;
+	default:
+		break;
+	}
+	CalcCurMatrix();
+	m_parent->m_console->PrintText(m_resources->m_data.game_strings_3[DUNGEON_TURN_AROUND]);
+	m_parent->m_console->NewPrompt();
 }
 
 void U5Dungeon::TurnLeft()
@@ -799,10 +890,13 @@ void U5Dungeon::TurnLeft()
 		break;
 	}
 	CalcCurMatrix();
+	m_parent->m_console->PrintText(m_resources->m_data.game_strings_3[DUNGEON_TURN_LEFT]);
+	m_parent->m_console->NewPrompt();
 }
 
 void U5Dungeon::TurnRight()
 {
+	// TO DO: Check if valid location
 	switch (m_dir)
 	{
 	case 'N':
@@ -821,4 +915,6 @@ void U5Dungeon::TurnRight()
 		break;
 	}
 	CalcCurMatrix();
+	m_parent->m_console->PrintText(m_resources->m_data.game_strings_3[DUNGEON_TURN_RIGHT]);
+	m_parent->m_console->NewPrompt();
 }

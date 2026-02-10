@@ -92,6 +92,12 @@ const int DIR_EAST_STRING = 1;
 const int DIR_WEST_STRING = 3;
 const int DIR_STRING = 6;
 
+const int DUNGEON_TURN_RIGHT = 11;
+const int DUNGEON_TURN_LEFT = 14;
+const int DUNGEON_ADVANCE = 9;
+const int DUNGEON_BACKUP = 12;
+const int DUNGEON_TURN_AROUND = 15;
+
 const int WHAT_STRING = 23;
 
 const int KEEP_STRING = 0x23;
@@ -110,7 +116,10 @@ const int NO_STRING = 13;
 const int UP_STRING = 201;
 const int DOWN_STRING = 202;
 const int WITH_WHAT_STRING = 222;
+const int EXIT_TO_STRING = 27;
+const int KLIMB_PROMPT = 32;
 const int KLIMB_STRING = 34;
+const int KLIMB_WHAT = 36;
 const int LEAVE_TOWN_STRING = 9;
 const int ENTER_STRING = 31;
 
