@@ -711,6 +711,93 @@ void U5World::ProcessLeaveTown()
 	m_process_key = std::bind(&U5World::HandleLeaveTown, this);
 }
 
+void U5World::PrintSign(int x, int y, int z)
+{
+	bool found = false;
+	int tempindex = 0;
+	for (int index = 0; index < m_parent->m_sign_data.size(); index++)
+	{
+		if (m_parent->m_sign_data[index].x == x && m_parent->m_sign_data[index].y == y && m_parent->m_sign_data[index].z == z)
+		{
+			tempindex = index;
+			found = true;
+			break;
+		}
+	}
+	if (!found)
+	{
+		return;
+	}
+	if (m_parent->m_sign_data[tempindex].text != std::string("\n"))
+	{
+		m_parent->m_console->PrintText(m_parent->m_sign_data[tempindex].text, false, false, false);
+	}
+	else
+	{
+		if (m_parent->m_sign_data.size() > tempindex + 1)
+		{
+			m_parent->m_console->PrintText(m_parent->m_sign_data[tempindex + 1].text, false, false, false);
+		}
+	}
+}
+
+void U5World::HandleLook()
+{
+	int ret = ProcessDirection();
+	int tempx = m_xpos;
+	int tempy = m_ypos;
+
+	m_input->m_isValid = false;
+
+	switch (ret)
+	{
+	case 'U':
+		m_parent->m_console->PrintText(m_resources->m_data.game_strings_1[NORTH_STRING]);
+		tempy--;
+		break;
+	case 'D':
+		m_parent->m_console->PrintText(m_resources->m_data.game_strings_1[SOUTH_STRING]);
+		tempy++;
+		break;
+	case 'L':
+		m_parent->m_console->PrintText(m_resources->m_data.game_strings_1[WEST_STRING]);
+		tempx--;
+		break;
+	case 'R':
+		m_parent->m_console->PrintText(m_resources->m_data.game_strings_1[EAST_STRING]);
+		tempx++;
+		break;
+	default:
+		return;
+	}
+
+	m_process_key = std::bind(&U5World::ProcessAnyKeyHit, this);
+	m_input->SetRequireAllKeysUp();
+	// Check for NPCs and items, then check the map tile
+
+	// Finally, check the map tile
+	if (m_parent->m_location == GameLocation::World || m_parent->m_location == GameLocation::Underworld)
+	{
+		tempx = static_cast<int>((tempx + m_parent->m_currentMap.size()) % m_parent->m_currentMap.size());
+		tempy = static_cast<int>((tempy + m_parent->m_currentMap[0].size()) % m_parent->m_currentMap[0].size());
+	}
+	else
+	{
+		if (tempx < 0 || tempy < 0 || tempx > 31 || tempy > 31)
+		{
+			tempx = 31;
+			tempy = 31;
+		}
+	}
+	unsigned char curpos = m_parent->m_currentMap[tempx][tempy];
+
+	if (curpos == 164 || curpos == 248) // sign
+	{
+		PrintSign(tempx, tempy, m_parent->m_cur_level);
+	}
+	m_parent->m_console->NewPrompt();
+}
+
 void U5World::HandleKlimb()
 {
 	int ret = ProcessDirection();
@@ -863,6 +950,9 @@ void U5World::ProcessAnyKeyHit()
 			break;
 		case SDLK_K:
 			ProcessKlimb();
+			break;
+		case SDLK_L:
+			ProcessLook();
 			break;
 		default:
 			m_input->m_isValid = false;
@@ -1041,6 +1131,14 @@ void U5World::ProcessKlimb()
 		}
 	}
 	m_process_key = std::bind(&U5World::HandleKlimb, this);
+}
+
+void U5World::ProcessLook()
+{
+	m_input->SetRequireAllKeysUp();
+	m_parent->m_console->PrintText(m_resources->m_data.game_strings_18[LOOK_STRING]);
+	m_parent->m_console->PrintText(m_resources->m_data.game_strings_16[HYPHEN_STRING]);
+	m_process_key = std::bind(&U5World::HandleLook, this);
 }
 
 void U5World::ProcessEnter()

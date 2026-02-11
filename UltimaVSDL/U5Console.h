@@ -15,7 +15,7 @@ public:
 	~U5Console();
 
 	void Render(Uint64 tickElapse);
-	void PrintText(std::string text, bool showElem = false, bool partial = false);
+	void PrintText(std::string text, bool showElem = false, bool partial = false, bool pretty_print = true);
 	void NewPrompt();
 	void ShowPrompt();
 	void BlockPrompt(bool block);
@@ -25,7 +25,7 @@ private:
 	void ProcessScroll();
 	bool CheckText();
 	int GetCursorStartPos();
-	std::vector<std::string> FormatText(std::string text, int startElem = 0);
+	std::vector<std::string> FormatText(std::string text, int startElem = 0, bool pretty_print = true);
 
 	SDL3Helper* m_sdl_helper;
 	UltimaVResource* m_resources;

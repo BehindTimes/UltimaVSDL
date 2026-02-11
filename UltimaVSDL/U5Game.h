@@ -35,6 +35,7 @@ public:
 	std::pair<int, int> m_old_position;
 	int m_map_level;
 	int m_cur_level;
+	std::vector< U5SignData> m_sign_data;
 
 private:
 	void LoadNPCData();

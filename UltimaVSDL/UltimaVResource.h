@@ -113,6 +113,7 @@ struct U5Data
 	std::vector<std::string> game_strings_15;
 	std::vector<std::string> game_strings_16;
 	std::vector<std::string> game_strings_17;
+	std::vector<std::string> game_strings_18;
 	std::vector<std::string> intro_strings;
 	std::array<unsigned char, 0x100> map_chunks;
 	std::vector<std::vector<unsigned char>> world_map;
@@ -259,5 +260,6 @@ private:
 	void LoadStoryText(const std::vector<unsigned char>& buffer, size_t pos, std::vector<unsigned char>& text);
 	bool ReadStrings(const std::vector<unsigned char>& buffer, std::vector<std::string>& str_vec, size_t start_pos, size_t end_pos);
 	std::string ReadNextString(std::vector<unsigned char>::iterator data, std::vector<unsigned char>::iterator end);
+	void SwapCharset(std::string& curString);
 };
 

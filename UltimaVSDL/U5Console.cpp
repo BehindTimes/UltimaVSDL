@@ -129,7 +129,7 @@ bool U5Console::CheckText()
 	return m_scroll;
 }
 
-std::vector<std::string> U5Console::FormatText(std::string text, int startElem)
+std::vector<std::string> U5Console::FormatText(std::string text, int startElem, bool pretty_print)
 {
 	const int CONSOLE_SIZE = 16;
 	size_t max_len = static_cast<size_t>(CONSOLE_SIZE - startElem);
@@ -146,13 +146,16 @@ std::vector<std::string> U5Console::FormatText(std::string text, int startElem)
 
 		bool found = false;
 		int found_pos = -1;
-		for (size_t curIndex = max_len; curIndex > 0; curIndex--)
+		if (pretty_print)
 		{
-			if (text[curIndex] == ' ')
+			for (size_t curIndex = max_len; curIndex > 0; curIndex--)
 			{
-				found = true;
-				found_pos = static_cast<int>(curIndex);
-				break;
+				if (text[curIndex] == ' ')
+				{
+					found = true;
+					found_pos = static_cast<int>(curIndex);
+					break;
+				}
 			}
 		}
 		if (found)
@@ -167,7 +170,7 @@ std::vector<std::string> U5Console::FormatText(std::string text, int startElem)
 			{
 				ret.emplace_back(std::string("\n"));
 			}
-			ret.emplace_back(text.substr(0, CONSOLE_SIZE - 1));
+			ret.emplace_back(text.substr(0, CONSOLE_SIZE));
 			ret.emplace_back(std::string("\n"));
 			text.erase(0, CONSOLE_SIZE);
 		}
@@ -196,7 +199,7 @@ int U5Console::GetCursorStartPos()
 	return curpos + 1;
 }
 
-void U5Console::PrintText(std::string text, bool showElem, bool partial)
+void U5Console::PrintText(std::string text, bool showElem, bool partial, bool pretty_print)
 {
 	auto strVals = m_utilities->splitString(text, '\n', true);
 
@@ -212,7 +215,7 @@ void U5Console::PrintText(std::string text, bool showElem, bool partial)
 			}
 			else
 			{
-				auto tempVals = FormatText(elem, first ? GetCursorStartPos() : 0);
+				auto tempVals = FormatText(elem, first ? GetCursorStartPos() : 0, pretty_print);
 				first = false;
 				for (auto& elem1 : tempVals)
 				{

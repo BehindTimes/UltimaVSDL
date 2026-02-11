@@ -228,7 +228,6 @@ void U5Game::ChangeLevel(int map_level)
 
 		m_cur_level += map_level;
 
-
 		switch (curMapType)
 		{
 		case MapTypes::Castle:
@@ -266,6 +265,7 @@ void U5Game::LoadMap(int map_num)
 	// Underworld or Britannia 
 	if (map_num < 0)
 	{
+		m_sign_data = m_resources->m_SignData[0];
 		if (map_num == -1) // Britannia
 		{
 			m_location = GameLocation::World;
@@ -294,6 +294,7 @@ void U5Game::LoadMap(int map_num)
 	if (map_num < MAX_TOWN_MAPS)
 	{
 		m_map_level = m_resources->m_data.location_z_index[map_num];
+		m_sign_data = m_resources->m_SignData[map_num + 1];
 	}
 	MapTypes curMapType = static_cast<MapTypes>(m_map_type);
 	switch (curMapType)

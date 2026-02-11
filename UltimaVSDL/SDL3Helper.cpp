@@ -245,9 +245,17 @@ void SDL3Helper::DrawTiledText(std::string text, int x_tile, int y_tile)
 
 	for (size_t index = 0; index < text.size(); index++)
 	{
-		if (text[index] < 128)
+		unsigned char cur_letter = static_cast<unsigned char>(text[index]);
+		if (cur_letter < 128)
 		{
-			texture = m_CharacterSetsTextures[0][0][text[index]];
+			texture = m_CharacterSetsTextures[0][0][cur_letter];
+			toRect.x = (x_tile * HALF_TILE_WIDTH) + static_cast<float>(index * HALF_TILE_WIDTH);
+			SDL_RenderTexture(m_renderer, texture, NULL, &toRect);
+		}
+		else
+		{
+			unsigned char templetter = cur_letter - 128;
+			texture = m_CharacterSetsTextures[1][0][templetter];
 			toRect.x = (x_tile * HALF_TILE_WIDTH) + static_cast<float>(index * HALF_TILE_WIDTH);
 			SDL_RenderTexture(m_renderer, texture, NULL, &toRect);
 		}

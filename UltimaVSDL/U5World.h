@@ -50,6 +50,7 @@ private:
 	void ProcessSouthEast();
 	void ProcessSouthWest();
 	void ProcessKlimb();
+	void ProcessLook();
 
 	void ProcessAnyKeyHit();
 	int ProcessYesNo();
@@ -58,6 +59,7 @@ private:
 	void ProcessLeaveTown();
 	void HandleLeaveTown();
 	void HandleKlimb();
+	void HandleLook();
 
 	void HandleNorth();
 	void HandleSouth();
@@ -70,6 +72,8 @@ private:
 
 	void PreMove();
 	void PostMove();
+
+	void PrintSign(int x, int y, int z);
 
 	std::function<void()> m_process_key;
 

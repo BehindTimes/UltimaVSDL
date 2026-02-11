@@ -981,6 +981,11 @@ int UltimaVResource::LoadDataOvl()
 		return -5;
 	}
 
+	if (!ReadStrings(buffer, m_data.game_strings_18, 0x9338, 0xa45a))
+	{
+		return -5;
+	}
+
 	/*if (!ReadStrings(buffer, m_data.intro_strings, 0x750a, 0xa459))
 	{
 		return -5;
@@ -1537,6 +1542,7 @@ int UltimaVResource::LoadSigns()
 			}
 			std::vector<unsigned char>::iterator iter = buffer.begin() + curPos;
 			std::string strOut = ReadNextString(iter, buffer.end());
+			SwapCharset(strOut);
 			curPos += strOut.size();
 			if (curPos >= buffer.size())
 			{
@@ -1548,4 +1554,38 @@ int UltimaVResource::LoadSigns()
 	}
 
 	return 0;
+}
+
+void UltimaVResource::SwapCharset(std::string& curString)
+{
+	for (size_t index = 0; index < curString.size(); index++)
+	{
+		unsigned char c = static_cast<unsigned char>(curString[index]);
+		if (c >= 128)
+		{
+			c -= 128;
+		}
+		else
+		{
+			if (c != 0xa)
+			{
+				c += 128;
+			}
+		}
+		curString[index] = static_cast<char>(c);
+
+		if (index > 0)
+		{
+			if (c == 0xa7)
+			{
+				unsigned char d = static_cast<unsigned char>(curString[index - 1]);
+				if (d == 0xa6)
+				{
+					char cline = 0xec;
+					curString[index - 1] = cline;
+					curString[index] = cline;
+				}
+			}
+		}
+	}
 }
