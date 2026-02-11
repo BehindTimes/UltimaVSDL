@@ -136,18 +136,24 @@ void U5Game::Render()
 				int val = m_utilities->GetRandom(0, 2);
 				if (val == 0)
 				{
-					m_curNPCs->data[index].type--;
-					if (m_curNPCs->data[index].type < static_cast<uint8_t>(startTile))
+					if (m_curNPCs->data[index].type > 0)
 					{
-						m_curNPCs->data[index].type = static_cast<uint8_t>(startTile);
+						m_curNPCs->data[index].type--;
+						if (m_curNPCs->data[index].type < static_cast<uint8_t>(startTile))
+						{
+							m_curNPCs->data[index].type = static_cast<uint8_t>(startTile);
+						}
 					}
 				}
 				else if (val == 1)
 				{
-					m_curNPCs->data[index].type++;
-					if (m_curNPCs->data[index].type > static_cast<uint8_t>(endTile))
+					if (m_curNPCs->data[index].type < 0xFF)
 					{
-						m_curNPCs->data[index].type = static_cast<uint8_t>(endTile);
+						m_curNPCs->data[index].type++;
+						if (m_curNPCs->data[index].type > static_cast<uint8_t>(endTile))
+						{
+							m_curNPCs->data[index].type = static_cast<uint8_t>(endTile);
+						}
 					}
 				}
 			}

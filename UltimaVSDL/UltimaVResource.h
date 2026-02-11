@@ -210,6 +210,7 @@ private:
 	
 	void Cleanup();
 
+	int LoadBuffer(const std::string strFile, std::vector<unsigned char>& buffer);
 	int LoadBitFiles();
 	int LoadPathFile();
 	int LoadNPCs(MapTypes map_type);
@@ -228,6 +229,7 @@ private:
 	int LoadUnderworldMap();
 	int LoadMap(MapTypes map_type);
 	int LoadMapChunk(unsigned char cur_chunk_val, size_t curChunkX, size_t curChunkY, std::vector<std::vector<unsigned char>>& map, const std::vector<unsigned char>& buffer);
+	int LoadSigns();
 
 	int ParseCharacterFile(std::vector<U5ImageData>& bit_file_data, std::vector<unsigned char>& data, int width, int height);
 	int ParseBitFile(std::vector<U5ImageData> &bit_file_data, std::vector<unsigned char> &data);

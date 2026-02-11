@@ -135,23 +135,11 @@ bool U5Dungeon::DrawFirstLayer(std::pair<uint8_t, uint8_t> left, std::pair<uint8
 	switch (middle.first)
 	{
 	case 1: // ladder up
-		drawsides = true;
-		break;
 	case 2: // ladder down
-		drawsides = true;
-		break;
 	case 3: // ladder up/down
-		drawsides = true;
-		break;
 	case 4: // chest
-		drawsides = true;
-		break;
 	case 5: // fountain
-		drawsides = true;
-		break;
 	case 6: // pit
-		drawsides = true;
-		break;
 	case 7: // open chest
 		drawsides = true;
 		break;
@@ -231,30 +219,36 @@ bool U5Dungeon::DrawFirstLayer(std::pair<uint8_t, uint8_t> left, std::pair<uint8
 		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][0], hMult * 103, vMult * 104, hMult * 40, vMult * 80, 2);
 		break;
 	case 4:
-		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][12], hMult * 65, vMult * 160, hMult * 40, vMult * 24, 0);
-		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][12], hMult * 104, vMult * 160, hMult * 40, vMult * 24, 2);
+		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][12], hMult * 64, vMult * 160, hMult * 40, vMult * 24, 0);
+		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][12], hMult * 103, vMult * 160, hMult * 40, vMult * 24, 2);
 		break;
 	case 5:
-		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][4], hMult * 65, vMult * 104, hMult * 40, vMult * 80, 0);
-		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][4], hMult * 104, vMult * 104, hMult * 40, vMult * 80, 2);
+		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][4], hMult * 64, vMult * 104, hMult * 40, vMult * 80, 0);
+		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][4], hMult * 103, vMult * 104, hMult * 40, vMult * 80, 2);
 		break;
 	case 6:
-		switch (middle.second)
+		switch (middle.second & 0b111)
 		{
 		case 0:
-			m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][8], hMult * 65, vMult * 160, hMult * 40, vMult * 24, 0);
-			m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][8], hMult * 104, vMult * 160, hMult * 40, vMult * 24, 2);
+			m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][8], hMult * 64, vMult * 160, hMult * 40, vMult * 24, 0);
+			m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][8], hMult * 103, vMult * 160, hMult * 40, vMult * 24, 2);
 			break;
 		default:
 			break;
 		}
 		break;
 	case 7:
-		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][16], hMult * 65, vMult * 160, hMult * 40, vMult * 24, 0);
-		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][16], hMult * 104, vMult * 160, hMult * 40, vMult * 24, 2);
+		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][16], hMult * 64, vMult * 160, hMult * 40, vMult * 24, 0);
+		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][16], hMult * 103, vMult * 160, hMult * 40, vMult * 24, 2);
 		break;
 	default:
 		break;
+	}
+
+	if (middle.second & 0x8) // Draw a pit above
+	{
+		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][8], hMult * 64, vMult * 24, hMult * 40, vMult * 24, 1);
+		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][8], hMult * 103, vMult * 24, hMult * 40, vMult * 24, 3);
 	}
 	
 	return true;
@@ -271,13 +265,13 @@ bool U5Dungeon::DrawSecondLayer(std::pair<uint8_t, uint8_t> left, std::pair<uint
 
 	switch (middle.first)
 	{
-	case 1:
-		drawsides = true;
-		break;
-	case 2:
-		drawsides = true;
-		break;
-	case 3:
+	case 1: // ladder up
+	case 2: // ladder down
+	case 3: // ladder up/down
+	case 4: // chest
+	case 5: // fountain
+	case 6: // pit
+	case 7: // open chest
 		drawsides = true;
 		break;
 	case 11:
@@ -350,8 +344,37 @@ bool U5Dungeon::DrawSecondLayer(std::pair<uint8_t, uint8_t> left, std::pair<uint
 		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][1], hMult * 80, vMult * 104, hMult * 24, vMult * 56, 0);
 		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][1], hMult * 103, vMult * 104, hMult * 24, vMult * 56, 2);
 		break;
+	case 4:
+		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][13], hMult * 80, vMult * 128, hMult * 24, vMult * 32, 0);
+		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][13], hMult * 103, vMult * 128, hMult * 24, vMult * 32, 2);
+		break;
+	case 5:
+		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][5], hMult * 80, vMult * 104, hMult * 24, vMult * 56, 0);
+		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][5], hMult * 103, vMult * 104, hMult * 24, vMult * 56, 2);
+		break;
+	case 6:
+		switch (middle.second & 0b111)
+		{
+		case 0:
+			m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][9], hMult * 80, vMult * 128, hMult * 24, vMult * 32, 0);
+			m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][9], hMult * 103, vMult * 128, hMult * 24, vMult * 32, 2);
+			break;
+		default:
+			break;
+		}
+		break;
+	case 7:
+		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][17], hMult * 80, vMult * 128, hMult * 24, vMult * 32, 0);
+		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][17], hMult * 103, vMult * 128, hMult * 24, vMult * 32, 2);
+		break;
 	default:
 		break;
+	}
+
+	if (middle.second & 0x8) // Draw a pit above
+	{
+		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][9], hMult * 80, vMult * 48, hMult * 24, vMult * 32, 1);
+		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][9], hMult * 103, vMult * 48, hMult * 24, vMult * 32, 3);
 	}
 
 	return true;
@@ -368,14 +391,13 @@ bool U5Dungeon::DrawThirdLayer(std::pair<uint8_t, uint8_t> left, std::pair<uint8
 
 	switch (middle.first)
 	{
-	case 1:
-		// The ladder is an item, but we draw it last so that walls don't overlap its pixels.
-		drawsides = true;
-		break;
-	case 2:
-		drawsides = true;
-		break;
-	case 3:
+	case 1: // ladder up
+	case 2: // ladder down
+	case 3: // ladder up/down
+	case 4: // chest
+	case 5: // fountain
+	case 6: // pit
+	case 7: // open chest
 		drawsides = true;
 		break;
 	case 11:
@@ -447,8 +469,38 @@ bool U5Dungeon::DrawThirdLayer(std::pair<uint8_t, uint8_t> left, std::pair<uint8
 		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][2], hMult * 103, vMult * 80, hMult * 16, vMult * 24, 3);
 		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][2], hMult * 88, vMult * 104, hMult * 16, vMult * 24, 0);
 		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][2], hMult * 103, vMult * 104, hMult * 16, vMult * 24, 2);
-		break;default:
+		break;
+	case 4:
+		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][14], hMult * 88, vMult * 112, hMult * 16, vMult * 16, 0);
+		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][14], hMult * 103, vMult * 112, hMult * 16, vMult * 16, 2);
+		break;
+	case 5:
+		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][6], hMult * 88, vMult * 104, hMult * 16, vMult * 24, 0);
+		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][6], hMult * 103, vMult * 104, hMult * 16, vMult * 24, 2);
+		break;
+	case 6:
+		switch (middle.second & 0b111)
+		{
+		case 0:
+			m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][10], hMult * 88, vMult * 112, hMult * 16, vMult * 16, 0);
+			m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][10], hMult * 103, vMult * 112, hMult * 16, vMult * 16, 2);
 			break;
+		default:
+			break;
+		}
+		break;
+	case 7:
+		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][18], hMult * 88, vMult * 112, hMult * 16, vMult * 16, 0);
+		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][18], hMult * 103, vMult * 112, hMult * 16, vMult * 16, 2);
+		break;
+	default:
+		break;
+	}
+
+	if (middle.second & 0x8) // Draw a pit above
+	{
+		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][10], hMult * 88, vMult * 80, hMult * 16, vMult * 16, 1);
+		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][10], hMult * 103, vMult * 80, hMult * 16, vMult * 16, 3);
 	}
 
 	return true;
@@ -465,14 +517,13 @@ bool U5Dungeon::DrawFourthLayer(std::pair<uint8_t, uint8_t> left, std::pair<uint
 
 	switch (middle.first)
 	{
-	case 1:
-		// The ladder is an item, but we draw it last so that walls don't overlap its pixels.
-		drawsides = true;
-		break;
-	case 2:
-		drawsides = true;
-		break;
-	case 3:
+	case 1: // ladder up
+	case 2: // ladder down
+	case 3: // ladder up/down
+	case 4: // chest
+	case 5: // fountain
+	case 6: // pit
+	case 7: // open chest
 		drawsides = true;
 		break;
 	case 11:
@@ -544,8 +595,38 @@ bool U5Dungeon::DrawFourthLayer(std::pair<uint8_t, uint8_t> left, std::pair<uint
 		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][3], hMult * 103, vMult * 96, hMult * 8, vMult * 8, 3);
 		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][3], hMult * 96, vMult * 104, hMult * 8, vMult * 8, 0);
 		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][3], hMult * 103, vMult * 104, hMult * 8, vMult * 8, 2);
-	break; default:
 		break;
+	case 4:
+		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][15], hMult * 96, vMult * 104, hMult * 8, vMult * 8, 0);
+		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][15], hMult * 103, vMult * 104, hMult * 8, vMult * 8, 2);
+		break;
+	case 5:
+		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][7], hMult * 96, vMult * 104, hMult * 8, vMult * 8, 0);
+		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][7], hMult * 103, vMult * 104, hMult * 8, vMult * 8, 2);
+		break;
+	case 6:
+		switch (middle.second & 0b111)
+		{
+		case 0:
+			m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][11], hMult * 96, vMult * 104, hMult * 8, vMult * 8, 0);
+			m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][11], hMult * 103, vMult * 104, hMult * 8, vMult * 8, 2);
+			break;
+		default:
+			break;
+		}
+		break;
+	case 7:
+		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][19], hMult * 88, vMult * 112, hMult * 16, vMult * 16, 0);
+		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][19], hMult * 103, vMult * 112, hMult * 16, vMult * 16, 2);
+		break;
+	default:
+		break;
+	}
+
+	if (middle.second & 0x8) // Draw a pit above
+	{
+		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][11], hMult * 96, vMult * 96, hMult * 8, vMult * 8, 1);
+		m_sdl_helper->RenderFlipTextureAt(m_sdl_helper->m_ImageMaskTextures[IMV_ITEMS][11], hMult * 103, vMult * 96, hMult * 8, vMult * 8, 3);
 	}
 
 	return true;

@@ -119,6 +119,10 @@ int UltimaVResource::LoadResources()
 	{
 		return -1;
 	}
+	if (0 != LoadSigns())
+	{
+		return -1;
+	}
 
 	return 0;
 }
@@ -390,21 +394,27 @@ int UltimaVResource::ParseCharacterFile(std::vector<U5ImageData>& bit_file_data,
 	return 0;
 }
 
-int UltimaVResource::LoadPathFile()
+int UltimaVResource::LoadBuffer(const std::string strFile, std::vector<unsigned char>& buffer)
 {
-	const std::string file_name = "BRITISH.PTH";
-	std::filesystem::path file_path = m_options->m_game_directory / file_name;
+	std::filesystem::path file_path = m_options->m_game_directory / strFile;
 	if (!std::filesystem::exists(file_path))
 	{
 		return -1;
 	}
 	std::uintmax_t file_size = std::filesystem::file_size(file_path);
+	buffer.resize(file_size);
 	std::ifstream file(file_path, std::ios::binary);
-	m_PathFileData.resize(file_size);
-	file.read(reinterpret_cast<char*>(m_PathFileData.data()), static_cast<std::streamsize>(file_size));
+	file.read(reinterpret_cast<char*>(buffer.data()), static_cast<std::streamsize>(file_size));
 	file.close();
 
 	return 0;
+}
+
+int UltimaVResource::LoadPathFile()
+{
+	int ret = LoadBuffer("BRITISH.PTH", m_PathFileData);
+
+	return ret;
 }
 
 int UltimaVResource::LoadBitFiles()
@@ -416,16 +426,13 @@ int UltimaVResource::LoadBitFiles()
 
 	for (std::string strFile : file_names)
 	{
-		std::filesystem::path file_path = m_options->m_game_directory / strFile;
-		if (!std::filesystem::exists(file_path))
+		std::vector<unsigned char> buffer;
+		int ret = LoadBuffer(strFile, buffer);
+
+		if (0 != ret)
 		{
-			return -1;
+			return ret;
 		}
-		std::uintmax_t file_size = std::filesystem::file_size(file_path);
-		std::vector<unsigned char> buffer(file_size);
-		std::ifstream file(file_path, std::ios::binary);
-		file.read(reinterpret_cast<char*>(buffer.data()), static_cast<std::streamsize>(file_size));
-		file.close();
 
 		if (strFile == file_names[2])
 		{
@@ -456,17 +463,13 @@ int UltimaVResource::LoadBitFiles()
 
 int UltimaVResource::LoadProportionalFont()
 {
-	std::string strStoryFile("PROPORT.PCS");
-	std::filesystem::path file_path = m_options->m_game_directory / strStoryFile;
-	if (!std::filesystem::exists(file_path))
+	std::vector<unsigned char> buffer;
+	int ret = LoadBuffer("PROPORT.PCS", buffer);
+
+	if (0 != ret)
 	{
-		return -1;
+		return ret;
 	}
-	std::uintmax_t file_size = std::filesystem::file_size(file_path);
-	std::vector<unsigned char> buffer(file_size);
-	std::ifstream file(file_path, std::ios::binary);
-	file.read(reinterpret_cast<char*>(buffer.data()), static_cast<std::streamsize>(file_size));
-	file.close();
 
 	std::vector<unsigned char> buffer_lzw;
 	if (!LzwDecompressor::Extract(buffer, buffer_lzw))
@@ -540,16 +543,13 @@ int UltimaVResource::LoadCharacterSets()
 		m_CharacterSetsData[index].resize(file_extensions.size());
 		for (size_t ext_index = 0; ext_index < file_names.size(); ext_index++)
 		{
-			std::filesystem::path file_path = m_options->m_game_directory / (file_names[index] + file_extensions[ext_index]);
-			if (!std::filesystem::exists(file_path))
+			std::vector<unsigned char> buffer;
+			int ret = LoadBuffer(file_names[index] + file_extensions[ext_index], buffer);
+
+			if (0 != ret)
 			{
-				return -1;
+				return ret;
 			}
-			std::uintmax_t file_size = std::filesystem::file_size(file_path);
-			std::vector<unsigned char> buffer(file_size);
-			std::ifstream file(file_path, std::ios::binary);
-			file.read(reinterpret_cast<char*>(buffer.data()), static_cast<std::streamsize>(file_size));
-			file.close();
 
 			m_CharacterSetsData[index][ext_index].resize(NUM_CHARACTERS);
 
@@ -577,16 +577,13 @@ int UltimaVResource::LoadMaskedImages()
 
 	for (size_t index = 0; index < file_names.size(); index++)
 	{
-		std::filesystem::path file_path = m_options->m_game_directory / (file_names[index] + strExt);
-		if (!std::filesystem::exists(file_path))
+		std::vector<unsigned char> buffer;
+		int ret = LoadBuffer(file_names[index] + strExt, buffer);
+
+		if (0 != ret)
 		{
-			return -1;
+			return ret;
 		}
-		std::uintmax_t file_size = std::filesystem::file_size(file_path);
-		std::vector<unsigned char> buffer(file_size);
-		std::ifstream file(file_path, std::ios::binary);
-		file.read(reinterpret_cast<char*>(buffer.data()), static_cast<std::streamsize>(file_size));
-		file.close();
 
 		std::vector<unsigned char> buffer_lzw;
 		if (!LzwDecompressor::Extract(buffer, buffer_lzw))
@@ -618,16 +615,13 @@ int UltimaVResource::LoadDungeonImages()
 
 	for (size_t index = 0; index < file_names.size(); index++)
 	{
-		std::filesystem::path file_path = m_options->m_game_directory / (file_names[index] + strExt);
-		if (!std::filesystem::exists(file_path))
+		std::vector<unsigned char> buffer;
+		int ret = LoadBuffer(file_names[index] + strExt, buffer);
+
+		if (0 != ret)
 		{
-			return -1;
+			return ret;
 		}
-		std::uintmax_t file_size = std::filesystem::file_size(file_path);
-		std::vector<unsigned char> buffer(file_size);
-		std::ifstream file(file_path, std::ios::binary);
-		file.read(reinterpret_cast<char*>(buffer.data()), static_cast<std::streamsize>(file_size));
-		file.close();
 
 		std::vector<unsigned char> buffer_lzw;
 		if (!LzwDecompressor::Extract(buffer, buffer_lzw))
@@ -662,16 +656,13 @@ int UltimaVResource::Load16Images()
 
 	for (size_t index = 0; index < file_names.size(); index++)
 	{
-		std::filesystem::path file_path = m_options->m_game_directory / (file_names[index] + strExt);
-		if (!std::filesystem::exists(file_path))
+		std::vector<unsigned char> buffer;
+		int ret = LoadBuffer(file_names[index] + strExt, buffer);
+
+		if (0 != ret)
 		{
-			return -1;
+			return ret;
 		}
-		std::uintmax_t file_size = std::filesystem::file_size(file_path);
-		std::vector<unsigned char> buffer(file_size);
-		std::ifstream file(file_path, std::ios::binary);
-		file.read(reinterpret_cast<char*>(buffer.data()), static_cast<std::streamsize>(file_size));
-		file.close();
 
 		std::vector<unsigned char> buffer_lzw;
 		if (!LzwDecompressor::Extract(buffer, buffer_lzw))
@@ -720,18 +711,13 @@ int UltimaVResource::LoadEnding(std::vector<unsigned char>& data_buffer)
 	const size_t STORY_PIC_Y = 0x3e10;
 	const size_t STORY_ACTION = 0x3e16;
 
-	std::string strStoryFile("END.DAT");
+	std::vector<unsigned char> buffer;
+	int ret = LoadBuffer("END.DAT", buffer);
 
-	std::filesystem::path file_path = m_options->m_game_directory / strStoryFile;
-	if (!std::filesystem::exists(file_path))
+	if (0 != ret)
 	{
-		return -1;
+		return ret;
 	}
-	std::uintmax_t file_size = std::filesystem::file_size(file_path);
-	std::vector<unsigned char> buffer(file_size);
-	std::ifstream file(file_path, std::ios::binary);
-	file.read(reinterpret_cast<char*>(buffer.data()), static_cast<std::streamsize>(file_size));
-	file.close();
 
 	for (size_t index = 0; index < NUM_STORIES; index++)
 	{
@@ -786,18 +772,13 @@ int UltimaVResource::LoadStory(std::vector<unsigned char> &data_buffer)
 	const size_t STORY_PIC_Y = 0x30ea;
 	const size_t STORY_ACTION = 0x3100;
 
-	std::string strStoryFile("STORY.DAT");
+	std::vector<unsigned char> buffer;
+	int ret = LoadBuffer("STORY.DAT", buffer);
 
-	std::filesystem::path file_path = m_options->m_game_directory / strStoryFile;
-	if (!std::filesystem::exists(file_path))
+	if (0 != ret)
 	{
-		return -1;
+		return ret;
 	}
-	std::uintmax_t file_size = std::filesystem::file_size(file_path);
-	std::vector<unsigned char> buffer(file_size);
-	std::ifstream file(file_path, std::ios::binary);
-	file.read(reinterpret_cast<char*>(buffer.data()), static_cast<std::streamsize>(file_size));
-	file.close();
 
 	LoadStoryText(data_buffer, INTRO_OFFSET_IN_DATA_1, m_data.intro_string_1);
 	LoadStoryText(data_buffer, INTRO_OFFSET_IN_DATA_2, m_data.intro_string_2);
@@ -881,17 +862,14 @@ bool UltimaVResource::ReadStrings(const std::vector<unsigned char>& buffer, std:
 
 int UltimaVResource::LoadDataOvl()
 {
-	std::string strStoryFile("DATA.OVL");
-	std::filesystem::path file_path = m_options->m_game_directory / strStoryFile;
-	if (!std::filesystem::exists(file_path))
+	std::vector<unsigned char> buffer;
+	int ret = LoadBuffer("DATA.OVL", buffer);
+
+	if (0 != ret)
 	{
-		return -1;
+		return ret;
 	}
-	std::uintmax_t file_size = std::filesystem::file_size(file_path);
-	std::vector<unsigned char> buffer(file_size);
-	std::ifstream file(file_path, std::ios::binary);
-	file.read(reinterpret_cast<char*>(buffer.data()), static_cast<std::streamsize>(file_size));
-	file.close();
+
 	// The file should be 48464 (0xbd50) bytes long, but who knows if someone will ever hack the
 	// file, so just have a basic sanity check
 	if (buffer.size() < 0xA000)
@@ -1056,17 +1034,14 @@ int UltimaVResource::LoadTiles()
 		bitInc = 4;
 		modnum = 0b1111;
 	}
-	std::string strStoryFile = std::string("TILES") + strExt;
-	std::filesystem::path file_path = m_options->m_game_directory / strStoryFile;
-	if (!std::filesystem::exists(file_path))
+
+	std::vector<unsigned char> buffer;
+	int ret = LoadBuffer(std::string("TILES") + strExt, buffer);
+
+	if (0 != ret)
 	{
-		return -1;
+		return ret;
 	}
-	std::uintmax_t file_size = std::filesystem::file_size(file_path);
-	std::vector<unsigned char> buffer(file_size);
-	std::ifstream file(file_path, std::ios::binary);
-	file.read(reinterpret_cast<char*>(buffer.data()), static_cast<std::streamsize>(file_size));
-	file.close();
 
 	std::vector<unsigned char> buffer_lzw;
 	if (!LzwDecompressor::Extract(buffer, buffer_lzw))
@@ -1123,17 +1098,13 @@ int UltimaVResource::LoadTiles()
 
 int UltimaVResource::LoadMiscMaps()
 {
-	std::string strStoryFile("MISCMAPS.DAT");
-	std::filesystem::path file_path = m_options->m_game_directory / strStoryFile;
-	if (!std::filesystem::exists(file_path))
+	std::vector<unsigned char> buffer;
+	int ret = LoadBuffer("MISCMAPS.DAT", buffer);
+
+	if (0 != ret)
 	{
-		return -1;
+		return ret;
 	}
-	std::uintmax_t file_size = std::filesystem::file_size(file_path);
-	std::vector<unsigned char> buffer(file_size);
-	std::ifstream file(file_path, std::ios::binary);
-	file.read(reinterpret_cast<char*>(buffer.data()), static_cast<std::streamsize>(file_size));
-	file.close();
 
 	// Invalid file
 	if(buffer.size() < 0x4C0)
@@ -1283,16 +1254,14 @@ int UltimaVResource::LoadNPCs(MapTypes map_type)
 		return -1;
 	}
 
-	std::filesystem::path file_path = m_options->m_game_directory / strStoryFile;
-	if (!std::filesystem::exists(file_path))
+	std::vector<unsigned char> buffer;
+	int ret = LoadBuffer(strStoryFile, buffer);
+
+	if (0 != ret)
 	{
-		return -1;
+		return ret;
 	}
-	std::uintmax_t file_size = std::filesystem::file_size(file_path);
-	std::vector<unsigned char> buffer(file_size);
-	std::ifstream file(file_path, std::ios::binary);
-	file.read(reinterpret_cast<char*>(buffer.data()), static_cast<std::streamsize>(file_size));
-	file.close();
+
 	if (buffer.size() != 4608)
 	{
 		return -2;
@@ -1371,16 +1340,14 @@ int UltimaVResource::LoadMap(MapTypes map_type)
 		return -1;
 	}
 
-	std::filesystem::path file_path = m_options->m_game_directory / strStoryFile;
-	if (!std::filesystem::exists(file_path))
+	std::vector<unsigned char> buffer;
+	int ret = LoadBuffer(strStoryFile, buffer);
+
+	if (0 != ret)
 	{
-		return -1;
+		return ret;
 	}
-	std::uintmax_t file_size = std::filesystem::file_size(file_path);
-	std::vector<unsigned char> buffer(file_size);
-	std::ifstream file(file_path, std::ios::binary);
-	file.read(reinterpret_cast<char*>(buffer.data()), static_cast<std::streamsize>(file_size));
-	file.close();
+
 	if (buffer.size() != 16384)
 	{
 		return -2;
@@ -1413,17 +1380,13 @@ int UltimaVResource::LoadMap(MapTypes map_type)
 
 int UltimaVResource::LoadWorldMap()
 {
-	std::string strStoryFile("BRIT.DAT");
-	std::filesystem::path file_path = m_options->m_game_directory / strStoryFile;
-	if (!std::filesystem::exists(file_path))
+	std::vector<unsigned char> buffer;
+	int ret = LoadBuffer("BRIT.DAT", buffer);
+
+	if (0 != ret)
 	{
-		return -1;
+		return ret;
 	}
-	std::uintmax_t file_size = std::filesystem::file_size(file_path);
-	std::vector<unsigned char> buffer(file_size);
-	std::ifstream file(file_path, std::ios::binary);
-	file.read(reinterpret_cast<char*>(buffer.data()), static_cast<std::streamsize>(file_size));
-	file.close();
 
 	const size_t CHUNK_WIDTH = 16;
 	const size_t CHUNK_HEIGHT = 16;
@@ -1446,17 +1409,13 @@ int UltimaVResource::LoadWorldMap()
 
 int UltimaVResource::LoadUnderworldMap()
 {
-	std::string strStoryFile("UNDER.DAT");
-	std::filesystem::path file_path = m_options->m_game_directory / strStoryFile;
-	if (!std::filesystem::exists(file_path))
+	std::vector<unsigned char> buffer;
+	int ret = LoadBuffer("UNDER.DAT", buffer);
+
+	if (0 != ret)
 	{
-		return -1;
+		return ret;
 	}
-	std::uintmax_t file_size = std::filesystem::file_size(file_path);
-	std::vector<unsigned char> buffer(file_size);
-	std::ifstream file(file_path, std::ios::binary);
-	file.read(reinterpret_cast<char*>(buffer.data()), static_cast<std::streamsize>(file_size));
-	file.close();
 
 	const size_t CHUNK_WIDTH = 16;
 	const size_t CHUNK_HEIGHT = 16;
@@ -1480,17 +1439,13 @@ int UltimaVResource::LoadUnderworldMap()
 
 int UltimaVResource::LoadDungeons()
 {
-	std::string strStoryFile("DUNGEON.DAT");
-	std::filesystem::path file_path = m_options->m_game_directory / strStoryFile;
-	if (!std::filesystem::exists(file_path))
+	std::vector<unsigned char> buffer;
+	int ret = LoadBuffer("DUNGEON.DAT", buffer);
+
+	if (0 != ret)
 	{
-		return -1;
+		return ret;
 	}
-	std::uintmax_t file_size = std::filesystem::file_size(file_path);
-	std::vector<unsigned char> buffer(file_size);
-	std::ifstream file(file_path, std::ios::binary);
-	file.read(reinterpret_cast<char*>(buffer.data()), static_cast<std::streamsize>(file_size));
-	file.close();
 
 	const int NUM_LEVELS = 64;
 	const int NUM_X = 8;
@@ -1512,6 +1467,19 @@ int UltimaVResource::LoadDungeons()
 				m_data.dungeon_maps[curLevel][curX][curY] = { upper_nibble, lower_nibble };
 			}
 		}
+	}
+
+	return 0;
+}
+
+int UltimaVResource::LoadSigns()
+{
+	std::vector<unsigned char> buffer;
+	int ret = LoadBuffer("SIGNS.DAT", buffer);
+
+	if (0 != ret)
+	{
+		return ret;
 	}
 
 	return 0;

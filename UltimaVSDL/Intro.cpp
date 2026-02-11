@@ -540,18 +540,24 @@ void Intro::RenderDemo()
 				int val = m_utilities->GetRandom(0, 2);
 				if (val == 0)
 				{
-					curNPC.second.tile--;
-					if (curNPC.second.tile < startTile)
+					if (curNPC.second.tile > 0)
 					{
-						curNPC.second.tile = startTile;
+						curNPC.second.tile--;
+						if (curNPC.second.tile < startTile)
+						{
+							curNPC.second.tile = startTile;
+						}
 					}
 				}
 				else if (val == 1)
 				{
-					curNPC.second.tile++;
-					if (curNPC.second.tile > endTile)
+					if (curNPC.second.tile < 0xFF)
 					{
-						curNPC.second.tile = endTile;
+						curNPC.second.tile++;
+						if (curNPC.second.tile > endTile)
+						{
+							curNPC.second.tile = endTile;
+						}
 					}
 				}
 			}
