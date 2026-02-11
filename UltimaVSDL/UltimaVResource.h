@@ -166,6 +166,21 @@ struct U5ImageData
 	std::vector<unsigned char> pixel_data;
 };
 
+struct U5SignData
+{
+	U5SignData(int curX, int curY, int curZ, std::string curText) :
+		x(curX),
+		y(curY),
+		z(curZ),
+		text(curText)
+	{
+	}
+	int x;
+	int y;
+	int z;
+	std::string text;
+};
+
 struct U5PaddedImageData : public U5ImageData
 {
 	U5PaddedImageData() :
@@ -202,6 +217,7 @@ public:
 	std::vector<U5PaddedImageData> m_ProportionalFontData;
 	std::vector<U5ImageData> m_Tiles;
 	std::vector<IntroScriptInstruction> m_IntroInstructions;
+	std::vector<std::vector< U5SignData>> m_SignData;
 	U5Data m_data;
 	RenderMode m_render_mode;
 	int m_CutsceneMap[NUM_CUTSCENES][CUTSCENE_WIDTH][CUTSCENE_HEIGHT];
@@ -242,6 +258,6 @@ private:
 	int ReadImage(std::vector<unsigned char> &data, size_t offset, int numPixelsPerByte, U5ImageData& outImage);
 	void LoadStoryText(const std::vector<unsigned char>& buffer, size_t pos, std::vector<unsigned char>& text);
 	bool ReadStrings(const std::vector<unsigned char>& buffer, std::vector<std::string>& str_vec, size_t start_pos, size_t end_pos);
-	std::string ReadNextString(std::vector<unsigned char>::iterator data);
+	std::string ReadNextString(std::vector<unsigned char>::iterator data, std::vector<unsigned char>::iterator end);
 };
 

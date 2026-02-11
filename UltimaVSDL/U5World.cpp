@@ -38,11 +38,11 @@ U5World::U5World(SDL3Helper* sdl_helper, UltimaVResource* u5_resources) :
 	//m_xpos = 176;
 	//m_ypos = 210;
 	
-	//m_xpos = 91;
-	//m_ypos = 68;
+	m_xpos = 91;
+	m_ypos = 68;
 
-	m_xpos = 148;
-	m_ypos = 83;
+	//m_xpos = 148;
+	//m_ypos = 83;
 
 	// Shame
 	//m_xpos = 58;

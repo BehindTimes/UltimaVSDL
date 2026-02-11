@@ -817,13 +817,18 @@ int UltimaVResource::LoadStory(std::vector<unsigned char> &data_buffer)
 	return 0;
 }
 
-std::string UltimaVResource::ReadNextString(std::vector<unsigned char>::iterator data)
+std::string UltimaVResource::ReadNextString(std::vector<unsigned char>::iterator data, std::vector<unsigned char>::iterator end)
 {
-	const int MAX_NAME_SIZE = 64;
+	// Just a safety check to avoid trying to overflow a buffer
+	const int MAX_NAME_SIZE = 256;
 	std::string retval;
 	// Limit 
 	for (int index = 0; index < MAX_NAME_SIZE; index++)
 	{
+		if (data + index == end)
+		{
+			break;
+		}
 		if (*(data + index) == 0)
 		{
 			return retval;
@@ -1008,7 +1013,7 @@ int UltimaVResource::LoadDataOvl()
 		size_t curPos = LOCATION_NAME_OFFSET + (2 * index);
 		name_offset = ReadInt16(buffer.begin(), curPos);
 		name_offset += 0x10;
-		m_data.location_names[index] = ReadNextString(buffer.begin() + name_offset);
+		m_data.location_names[index] = ReadNextString(buffer.begin() + name_offset, buffer.end());
 	}
 
 	return 0;
@@ -1480,6 +1485,66 @@ int UltimaVResource::LoadSigns()
 	if (0 != ret)
 	{
 		return ret;
+	}
+
+	const int NUM_SIGNS = 0x21;
+
+	std::vector<size_t> file_offsets;
+	size_t curPos = 0;
+	if (0 != ReadOffsets(buffer, 2, NUM_SIGNS, file_offsets, curPos))
+	{
+		return -3;
+	}
+
+	m_SignData.resize(NUM_SIGNS);
+
+	for (size_t index = 0; index < NUM_SIGNS; index++)
+	{
+		if (file_offsets[index] == 0)
+		{
+			continue;
+		}
+		curPos = file_offsets[index];
+		while (curPos < buffer.size())
+		{
+			uint8_t loc = buffer[curPos];
+			if (loc != index)
+			{
+				break;
+			}
+			curPos++;
+			if (curPos >= buffer.size())
+			{
+				return -1;
+			}
+			uint8_t z = buffer[curPos];
+			curPos++;
+			if (curPos >= buffer.size())
+			{
+				return -1;
+			}
+			uint8_t x = buffer[curPos];
+			curPos++;
+			if (curPos >= buffer.size())
+			{
+				return -1;
+			}
+			uint8_t y = buffer[curPos];
+			curPos++;
+			if (curPos >= buffer.size())
+			{
+				return -1;
+			}
+			std::vector<unsigned char>::iterator iter = buffer.begin() + curPos;
+			std::string strOut = ReadNextString(iter, buffer.end());
+			curPos += strOut.size();
+			if (curPos >= buffer.size())
+			{
+				return -1;
+			}
+			m_SignData[index].emplace_back(x, y, z, strOut);
+			curPos++;
+		}
 	}
 
 	return 0;
