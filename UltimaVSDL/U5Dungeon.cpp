@@ -799,7 +799,7 @@ void U5Dungeon::ProcessAnyKeyHit()
 	{
 		m_input->m_isValid = true;
 
-		SDL_Keycode curKey = m_input->GetKeyCode();
+		SDL_Keycode curKey = m_input->GetCurrentKeyCode();
 		switch (curKey)
 		{
 		case SDLK_UP:
@@ -838,7 +838,7 @@ int U5Dungeon::checkValidLocation(const std::pair<int, int>& pos_info)
 int U5Dungeon::ProcessUpDown()
 {
 	m_input->m_isValid = true;
-	SDL_Keycode curKey = m_input->GetKeyCode();
+	SDL_Keycode curKey = m_input->GetCurrentKeyCode();
 	switch (curKey)
 	{
 	case SDLK_UP:

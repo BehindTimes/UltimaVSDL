@@ -20,6 +20,7 @@
 #include <functional>
 #include <string>
 #include "GameOptions.h"
+#include <SDL3/SDL_keyboard.h>
 
 extern std::unique_ptr<U5Utils> m_utilities;
 extern std::unique_ptr<U5Input> m_input;
@@ -908,7 +909,7 @@ void U5World::HandleLeaveTown()
 int U5World::ProcessYesNo()
 {
 	m_input->m_isValid = true;
-	SDL_Keycode curKey = m_input->GetKeyCode();
+	SDL_Keycode curKey = m_input->GetCurrentKeyCode();
 	switch (curKey)
 	{
 	case SDLK_Y:
@@ -925,7 +926,7 @@ int U5World::ProcessYesNo()
 int U5World::ProcessDirection()
 {
 	m_input->m_isValid = true;
-	SDL_Keycode curKey = m_input->GetKeyCode();
+	SDL_Keycode curKey = m_input->GetCurrentKeyCode();
 	switch (curKey)
 	{
 	case SDLK_UP:
@@ -951,38 +952,15 @@ void U5World::ProcessAnyKeyHit()
 {
 	if (m_input->isAnyKeyHit())
 	{
+		bool valid = true;
 		m_input->m_isValid = true;
 		if (m_vec_pos.size() > 0)
 		{
 			return;
 		}
-		SDL_Keycode curKey = m_input->GetKeyCode();
+		SDL_Keycode curKey = m_input->GetCurrentKeyCode();
 		switch (curKey)
 		{
-		case SDLK_KP_1:
-			ProcessSouthWest();
-			break;
-		case SDLK_KP_3:
-			ProcessSouthEast();
-			break;
-		case SDLK_KP_7:
-			ProcessNorthWest();
-			break;
-		case SDLK_KP_9:
-			ProcessNorthEast();
-			break;
-		case SDLK_UP:
-			ProcessNorth();
-			break;
-		case SDLK_DOWN:
-			ProcessSouth();
-			break;
-		case SDLK_LEFT:
-			ProcessWest();
-			break;
-		case SDLK_RIGHT:
-			ProcessEast();
-			break;
 		case SDLK_E:
 			ProcessEnter();
 			break;
@@ -992,9 +970,47 @@ void U5World::ProcessAnyKeyHit()
 		case SDLK_L:
 			ProcessLook();
 			break;
+		case SDLK_Y:
+			ProcessYell();
+			break;
 		default:
 			m_input->m_isValid = false;
+			valid = false;
 			break;
+		}
+		if (!valid)
+		{
+			SDL_Keycode curKey = m_input->GetKeyCodePressed();
+
+			switch (curKey)
+			{
+			case SDLK_KP_1:
+				ProcessSouthWest();
+				break;
+			case SDLK_KP_3:
+				ProcessSouthEast();
+				break;
+			case SDLK_KP_7:
+				ProcessNorthWest();
+				break;
+			case SDLK_KP_9:
+				ProcessNorthEast();
+				break;
+			case SDLK_UP:
+				ProcessNorth();
+				break;
+			case SDLK_DOWN:
+				ProcessSouth();
+				break;
+			case SDLK_LEFT:
+				ProcessWest();
+				break;
+			case SDLK_RIGHT:
+				ProcessEast();
+				break;
+			default:
+				break;
+			}
 		}
 	}
 }
@@ -1281,4 +1297,60 @@ void U5World::PreMove()
 // This will lead to an end turn
 void U5World::PostMove()
 {
+}
+
+void U5World::ProcessYell()
+{
+	m_input->SetRequireAllKeysUp();
+	m_parent->m_console->PrintText(m_resources->m_data.game_strings_18[YELL_STRING]);
+	m_parent->m_console->PrintText(m_resources->m_data.game_strings_18[WHAT2_STRING]);
+	m_parent->m_console->PrintText(":");
+	m_process_key = std::bind(&U5World::HandleYell, this);
+}
+
+int U5World::ProcessLetterImmediate()
+{
+	int ret = -1;
+	m_input->m_isValid = true;
+	SDL_Keycode curKey = m_input->GetCurrentKeyCode();
+	if (curKey >= SDLK_0 && curKey <= SDLK_9)
+	{
+		ret = static_cast<int>(curKey);
+	}
+	else if (curKey >= SDLK_A && curKey <= SDLK_Z)
+	{
+		ret = static_cast<int>(curKey);
+	}
+	else if (curKey == SDLK_RETURN || curKey == SDLK_BACKSPACE)
+	{
+		ret = static_cast<int>(curKey);
+	}
+	else if (curKey > SDLK_SPACE && curKey <= SDLK_TILDE)
+	{
+		ret = static_cast<int>(curKey);
+	}
+	else
+	{
+		ret = -1;
+	}
+	return ret;
+}
+
+void U5World::HandleYell()
+{
+	int ret = ProcessLetterImmediate();
+	if (ret < 0)
+	{
+		return;
+	}
+	if (ret == SDLK_RETURN)
+	{
+		m_process_key = std::bind(&U5World::ProcessAnyKeyHit, this);
+		return;
+	}
+	else
+	{
+		const char* value = SDL_GetKeyName(ret);
+		m_parent->m_console->PrintText(value);
+	}
 }

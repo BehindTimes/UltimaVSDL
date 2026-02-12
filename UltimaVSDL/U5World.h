@@ -51,15 +51,18 @@ private:
 	void ProcessSouthWest();
 	void ProcessKlimb();
 	void ProcessLook();
+	void ProcessYell();
 
 	void ProcessAnyKeyHit();
 	int ProcessYesNo();
 	int ProcessDirection();
+	int ProcessLetterImmediate();
 
 	void ProcessLeaveTown();
 	void HandleLeaveTown();
 	void HandleKlimb();
 	void HandleLook();
+	void HandleYell();
 
 	void HandleNorth();
 	void HandleSouth();

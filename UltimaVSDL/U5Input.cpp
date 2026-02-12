@@ -21,7 +21,8 @@ U5Input::U5Input(SDL3Helper* sdl_helper) :
 	m_anyKeyHit(false),
 	m_allKeysMustBeUp(false),
 	m_allowDiagonals(false),
-	m_isValid(true)
+	m_isValid(true),
+	m_currentKeyCode(0)
 {
 	m_allowDiagonals = true;
 	m_curTick = m_sdl_helper->GetCurrentTick();
@@ -57,6 +58,7 @@ bool U5Input::IsEnabled() const
 
 void U5Input::StartInput()
 {
+	m_currentKeyCode = 0;
 	m_anyKeyHit = false;
 	m_prevTick = m_curTick;
 	m_curTick = m_sdl_helper->GetCurrentTick();
@@ -96,6 +98,7 @@ void U5Input::ProcessKeyDown(SDL_KeyboardEvent event)
 	{
 		m_curKeyCodes.push_back(event.key);
 	}
+	m_currentKeyCode = event.key;
 }
 
 void U5Input::ProcessKeyUp(SDL_KeyboardEvent event)
@@ -107,7 +110,12 @@ void U5Input::ProcessKeyUp(SDL_KeyboardEvent event)
 	}
 }
 
-SDL_Keycode U5Input::GetKeyCode() const
+SDL_Keycode U5Input::GetCurrentKeyCode() const
+{
+	return m_currentKeyCode;
+}
+
+SDL_Keycode U5Input::GetKeyCodePressed() const
 {
 	std::vector<SDL_Keycode>::const_iterator kc1;
 	std::vector<SDL_Keycode>::const_iterator kc2;

@@ -27,6 +27,7 @@ U5Console::U5Console(SDL3Helper* sdl_helper, UltimaVResource* u5_resources) :
 	m_curScrollDelay(0),
 	m_curLine(12),
 	m_cursorPosX(1),
+	m_cursorPosY(12),
 	m_scroll(false),
 	m_scrollOffset(0),
 	m_startLine(0),
@@ -135,11 +136,6 @@ std::vector<std::string> U5Console::FormatText(std::string text, int startElem, 
 	size_t max_len = static_cast<size_t>(CONSOLE_SIZE - startElem);
 	std::vector<std::string> ret;
 
-	if (pretty_print == false)
-	{
-		int j = 9;
-	}
-	
 	bool valid = true;
 	while (valid)
 	{
@@ -298,7 +294,7 @@ void U5Console::RenderCursor()
 	}
 	int temppos = m_startLine + 12;
 	temppos %= 14;
-	m_sdl_helper->DrawTileTexture8(m_sdl_helper->m_CharacterSetsTextures[0][0][static_cast<size_t>(5 + m_curCursor)], m_cursorPosX, 12);
+	m_sdl_helper->DrawTileTexture8(m_sdl_helper->m_CharacterSetsTextures[0][0][static_cast<size_t>(5 + m_curCursor)], m_cursorPosX, m_cursorPosY);
 }
 
 void U5Console::ShowPrompt()

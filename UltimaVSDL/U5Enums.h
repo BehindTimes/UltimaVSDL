@@ -126,6 +126,9 @@ const int LOOK_STRING = 0x12f;
 const int HYPHEN_STRING = 0x1b;
 const int THOU_DOST_SEE_STRING = 2;
 
+const int YELL_STRING = 0x143;
+const int WHAT2_STRING = 0x145;
+
 const int BED_HEAD = 171;
 const int BED_SLEEPING = 282;
 const int STAIRS_UP = 196;

@@ -920,7 +920,7 @@ void Intro::ProcessEvents()
 	case IntroMode::MENU:
 		if (m_input->isAnyKeyHit())
 		{
-			SDL_Keycode curKey = m_input->GetKeyCode();
+			SDL_Keycode curKey = m_input->GetKeyCodePressed();
 			switch (curKey)
 			{
 			case SDLK_UP:

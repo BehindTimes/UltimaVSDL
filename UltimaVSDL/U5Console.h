@@ -32,6 +32,7 @@ private:
 	Uint64 m_tickElapse;
 	bool m_showPrompt;
 	int m_cursorPosX;
+	int m_cursorPosY;
 	int m_curCursor;
 	Uint64 m_curCursorRenderDelay;
 	Uint64 m_curScrollDelay;

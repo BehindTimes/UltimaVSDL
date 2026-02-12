@@ -25,7 +25,8 @@ public:
 	void FinishInput();
 	void EnableInput(bool enabled);
 	void SetInputType(InputType inputType);
-	SDL_Keycode GetKeyCode() const;
+	SDL_Keycode GetKeyCodePressed() const;
+	SDL_Keycode GetCurrentKeyCode() const;
 	void SetKeyDelay(Uint64 delay);
 	void SetRequireAllKeysUp();
 	bool IsAnyKeyDown() const;
@@ -44,6 +45,7 @@ private:
 	Uint64 m_key_delay;
 	InputType m_InputType;
 	std::vector<SDL_Keycode> m_curKeyCodes;
+	SDL_Keycode m_currentKeyCode;
 	bool m_allow;
 	bool m_anyKeyHit;
 	bool m_allKeysMustBeUp;
