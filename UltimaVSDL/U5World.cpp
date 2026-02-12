@@ -734,7 +734,7 @@ void U5World::PrintSign(int x, int y, int z)
 	}
 	else
 	{
-		if (m_parent->m_sign_data.size() > tempindex + 1)
+		if (m_parent->m_sign_data.size() > static_cast<size_t>(tempindex + 1))
 		{
 			m_parent->m_console->PrintText(m_parent->m_sign_data[tempindex + 1].text, false, false, false);
 		}

@@ -30,8 +30,8 @@ public:
 	void SetPos(int x, int y) override;
 private:
 	void DrawRoom();
-	bool DrawFirstLayer(std::pair<uint8_t, uint8_t> left, std::pair<uint8_t, uint8_t> middle, std::pair<uint8_t, uint8_t> right);
-	bool DrawSecondLayer(std::pair<uint8_t, uint8_t> left, std::pair<uint8_t, uint8_t> middle, std::pair<uint8_t, uint8_t> right);
+	bool DrawFirstLayer(std::pair<uint8_t, uint8_t> left, std::pair<uint8_t, uint8_t> middle, std::pair<uint8_t, uint8_t> right, bool hasSign);
+	bool DrawSecondLayer(std::pair<uint8_t, uint8_t> left, std::pair<uint8_t, uint8_t> middle, std::pair<uint8_t, uint8_t> right, bool& hasSign);
 	bool DrawThirdLayer(std::pair<uint8_t, uint8_t> left, std::pair<uint8_t, uint8_t> middle, std::pair<uint8_t, uint8_t> right);
 	bool DrawFourthLayer(std::pair<uint8_t, uint8_t> left, std::pair<uint8_t, uint8_t> middle, std::pair<uint8_t, uint8_t> right);
 	void DrawBorder();

@@ -114,6 +114,7 @@ struct U5Data
 	std::vector<std::string> game_strings_16;
 	std::vector<std::string> game_strings_17;
 	std::vector<std::string> game_strings_18;
+	std::vector<std::string> dungeon_sign_strings;
 	std::vector<std::string> intro_strings;
 	std::array<unsigned char, 0x100> map_chunks;
 	std::vector<std::vector<unsigned char>> world_map;
@@ -219,6 +220,7 @@ public:
 	std::vector<U5ImageData> m_Tiles;
 	std::vector<IntroScriptInstruction> m_IntroInstructions;
 	std::vector<std::vector< U5SignData>> m_SignData;
+	std::vector<std::vector< U5SignData>> m_DungeonSignData;
 	U5Data m_data;
 	RenderMode m_render_mode;
 	int m_CutsceneMap[NUM_CUTSCENES][CUTSCENE_WIDTH][CUTSCENE_HEIGHT];
@@ -247,19 +249,20 @@ private:
 	int LoadMap(MapTypes map_type);
 	int LoadMapChunk(unsigned char cur_chunk_val, size_t curChunkX, size_t curChunkY, std::vector<std::vector<unsigned char>>& map, const std::vector<unsigned char>& buffer);
 	int LoadSigns();
+	int LoadDungeonSigns(const std::vector<unsigned char>& buffer);
 
 	int ParseCharacterFile(std::vector<U5ImageData>& bit_file_data, std::vector<unsigned char>& data, int width, int height);
 	int ParseBitFile(std::vector<U5ImageData> &bit_file_data, std::vector<unsigned char> &data);
 	int Parse16File(std::vector<U5ImageData>& bit_file_data, std::vector<unsigned char>& data, int numPixelsPerByte);
 	int ParseMaskFile(std::vector<U5ImageData>& bit_file_data, std::vector<unsigned char>& data, int numPixelsPerByte);
 	int MergeMask(U5ImageData& outImage, U5ImageData& mask);
-	uint32_t ReadInt16(std::vector<unsigned char>::iterator data, size_t &curPos);
-	uint32_t ReadInt32(std::vector<unsigned char>::iterator data, size_t &curPos);
+	uint32_t ReadInt16(std::vector<unsigned char>::const_iterator data, size_t &curPos);
+	uint32_t ReadInt32(std::vector<unsigned char>::const_iterator data, size_t &curPos);
 	int ReadOffsets(std::vector<unsigned char> &data, int offsetSize, int numOffsets, std::vector<size_t> &file_offsets, size_t &curPos);
 	int ReadImage(std::vector<unsigned char> &data, size_t offset, int numPixelsPerByte, U5ImageData& outImage);
 	void LoadStoryText(const std::vector<unsigned char>& buffer, size_t pos, std::vector<unsigned char>& text);
 	bool ReadStrings(const std::vector<unsigned char>& buffer, std::vector<std::string>& str_vec, size_t start_pos, size_t end_pos);
-	std::string ReadNextString(std::vector<unsigned char>::iterator data, std::vector<unsigned char>::iterator end);
+	std::string ReadNextString(std::vector<unsigned char>::const_iterator data, std::vector<unsigned char>::const_iterator end);
 	void SwapCharset(std::string& curString);
 };
 

@@ -127,14 +127,14 @@ int UltimaVResource::LoadResources()
 	return 0;
 }
 
-uint32_t UltimaVResource::ReadInt16(std::vector<unsigned char>::iterator data, size_t& curPos)
+uint32_t UltimaVResource::ReadInt16(std::vector<unsigned char>::const_iterator data, size_t& curPos)
 {
 	uint32_t retVal = (static_cast<uint32_t>(data[curPos + 1]) << 8) + static_cast<uint32_t>(data[curPos]);
 	curPos += 2;
 	return retVal;
 }
 
-uint32_t UltimaVResource::ReadInt32(std::vector<unsigned char>::iterator data, size_t& curPos)
+uint32_t UltimaVResource::ReadInt32(std::vector<unsigned char>::const_iterator data, size_t& curPos)
 {
 	uint32_t retVal = (static_cast<uint32_t>(data[curPos + 3]) << 24) + (static_cast<uint32_t>(data[curPos + 2]) << 16) +
 		(static_cast<uint32_t>(data[curPos + 1]) << 8) + static_cast<uint32_t>(data[curPos]);
@@ -817,7 +817,50 @@ int UltimaVResource::LoadStory(std::vector<unsigned char> &data_buffer)
 	return 0;
 }
 
-std::string UltimaVResource::ReadNextString(std::vector<unsigned char>::iterator data, std::vector<unsigned char>::iterator end)
+int UltimaVResource::LoadDungeonSigns(const std::vector<unsigned char>& buffer)
+{
+	const size_t NUM_DUNGEONS = 8;
+	const size_t NUM_SIGNS = 11;
+	m_DungeonSignData.resize(NUM_DUNGEONS);
+
+	std::vector<int> sign_x;
+	std::vector<int> sign_y;
+	std::vector<std::string> sign_text;
+
+	const size_t X_LOC = 0x2e08;
+	const size_t Y_LOC = 0x2e14;
+	const size_t TEXT_OFFSET_LOC = 0x2e20;
+	const size_t START_INDEX = 0x2df8;
+	const size_t NUM_SIGNS_INDEX = 0x2e00;
+
+	for (size_t index = 0; index < NUM_SIGNS; index++)
+	{
+		sign_x.emplace_back(buffer[X_LOC + index]);
+		sign_y.emplace_back(buffer[Y_LOC + index]);
+		size_t curPos = 0;
+		uint32_t tempoffset = ReadInt16(buffer.begin() + TEXT_OFFSET_LOC + (static_cast<size_t>(index * 2)), curPos);
+		tempoffset += 0x10;
+		std::string tempstr = ReadNextString(buffer.begin() + tempoffset, buffer.end());
+		sign_text.push_back(tempstr);
+	}
+
+	for (size_t index = 0; index < NUM_DUNGEONS; index++)
+	{
+		int start = buffer[START_INDEX + index];
+		int num = buffer[NUM_SIGNS_INDEX + index];
+		for (int sign_index = start; sign_index < start + num; sign_index++)
+		{
+			if (sign_index < sign_x.size())
+			{
+				m_DungeonSignData[index].emplace_back(sign_x[sign_index], sign_y[sign_index], 0, sign_text[sign_index]);
+			}
+		}
+	}
+
+	return 0;
+}
+
+std::string UltimaVResource::ReadNextString(std::vector<unsigned char>::const_iterator data, std::vector<unsigned char>::const_iterator end)
 {
 	// Just a safety check to avoid trying to overflow a buffer
 	const int MAX_NAME_SIZE = 256;
@@ -1019,6 +1062,11 @@ int UltimaVResource::LoadDataOvl()
 		name_offset = ReadInt16(buffer.begin(), curPos);
 		name_offset += 0x10;
 		m_data.location_names[index] = ReadNextString(buffer.begin() + name_offset, buffer.end());
+	}
+
+	if (0 != LoadDungeonSigns(buffer))
+	{
+		return -7;
 	}
 
 	return 0;
@@ -1581,7 +1629,7 @@ void UltimaVResource::SwapCharset(std::string& curString)
 				unsigned char d = static_cast<unsigned char>(curString[index - 1]);
 				if (d == 0xa6)
 				{
-					char cline = 0xec;
+					char cline = static_cast<char>(0xec);
 					curString[index - 1] = cline;
 					curString[index] = cline;
 				}

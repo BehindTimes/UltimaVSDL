@@ -262,6 +262,55 @@ void SDL3Helper::DrawTiledText(std::string text, int x_tile, int y_tile)
 	}
 }
 
+void SDL3Helper::DrawDungeonSign(std::string text, int x_tile, int y_tile)
+{
+	SDL_BlendMode blendmode_sub = SDL_ComposeCustomBlendMode(SDL_BLENDFACTOR_SRC_ALPHA, SDL_BLENDFACTOR_ONE, SDL_BLENDOPERATION_SUBTRACT,
+		SDL_BLENDFACTOR_ZERO, SDL_BLENDFACTOR_ONE, SDL_BLENDOPERATION_MAXIMUM);
+
+	SDL_FRect toRect{};
+	toRect.x = 0;
+	toRect.y = static_cast<float>(y_tile * HALF_TILE_HEIGHT);
+	toRect.w = HALF_TILE_WIDTH;
+	toRect.h = HALF_TILE_HEIGHT;
+	SDL_Texture* texture = nullptr;
+
+	float x = static_cast<float>(x_tile * HALF_TILE_WIDTH);
+
+	for (size_t index = 0; index < text.size(); index++)
+	{
+		unsigned char cur_letter = static_cast<unsigned char>(text[index]);
+		if (cur_letter == '\n')
+		{
+			x = static_cast<float>(x_tile * HALF_TILE_WIDTH);
+			toRect.x = x * HALF_TILE_WIDTH;
+			toRect.y += HALF_TILE_WIDTH;
+			continue;
+		}
+		if (cur_letter < 128)
+		{
+			texture = m_CharacterSetsTextures[1][0][cur_letter];
+			toRect.x = x;
+			SDL_RenderTexture(m_renderer, texture, NULL, &toRect);
+		}
+		else
+		{
+			unsigned char templetter = cur_letter - 128;
+			texture = m_CharacterSetsTextures[0][0][templetter];
+			toRect.x = x;
+			SDL_RenderTexture(m_renderer, texture, NULL, &toRect);
+		}
+
+		SDL_SetRenderDrawBlendMode(m_renderer, blendmode_sub);
+
+		SDL_SetRenderDrawColor(m_renderer, 255, 255, 255, 255);
+		SDL_RenderFillRect(m_renderer, &toRect);
+		SDL_SetRenderDrawColor(m_renderer, 0, 0, 0, 0);
+		SDL_SetRenderDrawBlendMode(m_renderer, SDL_BLENDMODE_NONE);
+
+		x += HALF_TILE_WIDTH;
+	}
+}
+
 void SDL3Helper::DrawTileRect(int x_tile, int y_tile, int width, int height, unsigned char r, unsigned char g, unsigned char b) const
 {
 	SDL_FRect toRect{};

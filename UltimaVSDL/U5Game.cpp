@@ -294,7 +294,19 @@ void U5Game::LoadMap(int map_num)
 	if (map_num < MAX_TOWN_MAPS)
 	{
 		m_map_level = m_resources->m_data.location_z_index[map_num];
-		m_sign_data = m_resources->m_SignData[map_num + 1];
+		m_sign_data = m_resources->m_SignData[static_cast<size_t>(map_num + 1)];
+	}
+	else
+	{
+		int curDungeon = map_num - MAX_TOWN_MAPS;
+		if (curDungeon < 8)
+		{
+			m_sign_data = m_resources->m_DungeonSignData[curDungeon];
+		}
+		else
+		{
+			m_sign_data.clear();
+		}
 	}
 	MapTypes curMapType = static_cast<MapTypes>(m_map_type);
 	switch (curMapType)
@@ -342,6 +354,7 @@ void U5Game::LoadMap(int map_num)
 		m_dungeon->LoadDungeonType(DungeonType::CAVE);
 		m_curLocation->SetDir('N');
 		m_curLocation->SetPos(1, 1);
+		//m_sign_data = m_resources->m_DungeonSignData[0];
 		break;
 	default:
 		break;

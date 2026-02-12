@@ -123,7 +123,7 @@ void U5Dungeon::CalcCurMatrix()
 	}
 }
 
-bool U5Dungeon::DrawFirstLayer(std::pair<uint8_t, uint8_t> left, std::pair<uint8_t, uint8_t> middle, std::pair<uint8_t, uint8_t> right)
+bool U5Dungeon::DrawFirstLayer(std::pair<uint8_t, uint8_t> left, std::pair<uint8_t, uint8_t> middle, std::pair<uint8_t, uint8_t> right, bool hasSign)
 {
 	auto& curTextures = m_sdl_helper->m_ImageDungeonTextures[static_cast<int>(m_dungeon_type)];
 	int window_width, window_height;
@@ -200,6 +200,21 @@ bool U5Dungeon::DrawFirstLayer(std::pair<uint8_t, uint8_t> left, std::pair<uint8
 			break;
 		}
 	}
+	// Draw the sign if it exists
+	// This should fit on the wall, but the game draws it above all other graphics, excluding items and monsters
+	if (hasSign)
+	{
+		uint8_t sign_num = m_curMatrix[1][1].second;
+		if (sign_num > 0)
+		{
+			sign_num--;
+			if (sign_num < m_parent->m_sign_data.size())
+			{
+				const int RENDER_OFFSET = 1;
+				m_sdl_helper->DrawDungeonSign(m_parent->m_sign_data[sign_num].text, m_parent->m_sign_data[sign_num].x + RENDER_OFFSET, m_parent->m_sign_data[sign_num].y + RENDER_OFFSET);
+			}
+		}
+	}
 
 	// Draw items last
 	switch (middle.first)
@@ -254,7 +269,7 @@ bool U5Dungeon::DrawFirstLayer(std::pair<uint8_t, uint8_t> left, std::pair<uint8
 	return true;
 }
 
-bool U5Dungeon::DrawSecondLayer(std::pair<uint8_t, uint8_t> left, std::pair<uint8_t, uint8_t> middle, std::pair<uint8_t, uint8_t> right)
+bool U5Dungeon::DrawSecondLayer(std::pair<uint8_t, uint8_t> left, std::pair<uint8_t, uint8_t> middle, std::pair<uint8_t, uint8_t> right, bool &hasSign)
 {
 	auto& curTextures = m_sdl_helper->m_ImageDungeonTextures[static_cast<int>(m_dungeon_type)];
 	int window_width, window_height;
@@ -262,6 +277,7 @@ bool U5Dungeon::DrawSecondLayer(std::pair<uint8_t, uint8_t> left, std::pair<uint
 	float vMult = window_height / static_cast<float>(ORIGINAL_GAME_HEIGHT);
 	float hMult = window_width / static_cast<float>(ORIGINAL_GAME_WIDTH);
 	bool drawsides = false;
+	hasSign = false;
 
 	switch (middle.first)
 	{
@@ -277,10 +293,18 @@ bool U5Dungeon::DrawSecondLayer(std::pair<uint8_t, uint8_t> left, std::pair<uint
 	case 11:
 		m_sdl_helper->RenderTextureAt(curTextures[9], hMult * 48, vMult * 22, hMult * 56, vMult * 164);
 		m_sdl_helper->RenderFlipTextureAt(curTextures[9], hMult * 103, vMult * 22, hMult * 56, vMult * 164, 2);
+		if (middle.second > 0)
+		{
+			hasSign = true;
+		}
 		break;
 	case 12:
 		m_sdl_helper->RenderTextureAt(curTextures[25], hMult * 48, vMult * 22, hMult * 56, vMult * 164);
 		m_sdl_helper->RenderFlipTextureAt(curTextures[25], hMult * 103, vMult * 22, hMult * 56, vMult * 164, 2);
+		if (middle.second > 0)
+		{
+			hasSign = true;
+		}
 		break;
 	case 15:
 		m_sdl_helper->RenderTextureAt(curTextures[13], hMult * 48, vMult * 22, hMult * 56, vMult * 164);
@@ -652,6 +676,7 @@ void U5Dungeon::DrawRoom()
 		}
 	}
 	bool ret;
+	bool hasSign = false;
 	if (max_depth > 2)
 	{
 		ret = DrawFourthLayer(m_curMatrix[0][3], m_curMatrix[1][3], m_curMatrix[2][3]);
@@ -662,10 +687,10 @@ void U5Dungeon::DrawRoom()
 	}
 	if (max_depth > 0)
 	{
-		ret = DrawSecondLayer(m_curMatrix[0][1], m_curMatrix[1][1], m_curMatrix[2][1]);
+		ret = DrawSecondLayer(m_curMatrix[0][1], m_curMatrix[1][1], m_curMatrix[2][1], hasSign);
 	}
 
-	ret = DrawFirstLayer(m_curMatrix[0][0], m_curMatrix[1][0], m_curMatrix[2][0]);
+	ret = DrawFirstLayer(m_curMatrix[0][0], m_curMatrix[1][0], m_curMatrix[2][0], hasSign);
 }
 
 void U5Dungeon::Render()
