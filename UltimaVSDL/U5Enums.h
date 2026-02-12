@@ -124,6 +124,7 @@ const int LEAVE_TOWN_STRING = 9;
 const int ENTER_STRING = 31;
 const int LOOK_STRING = 0x12f;
 const int HYPHEN_STRING = 0x1b;
+const int THOU_DOST_SEE_STRING = 2;
 
 const int BED_HEAD = 171;
 const int BED_SLEEPING = 282;

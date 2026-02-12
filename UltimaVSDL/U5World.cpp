@@ -789,12 +789,50 @@ void U5World::HandleLook()
 			tempy = 31;
 		}
 	}
-	unsigned char curpos = m_parent->m_currentMap[tempx][tempy];
+	int curpos = 0;
 
-	if (curpos == 164 || curpos == 248) // sign
+	// Check if NPC
+	if (m_parent->m_curNPCs != nullptr)
+	{
+		for (int index = 1; index < 32; index++)
+		{
+			if (m_parent->m_curNPCs->data[index].current_x == tempx &&
+				m_parent->m_curNPCs->data[index].current_y == tempy &&
+				m_parent->m_curNPCs->data[index].current_z == m_parent->m_cur_level)
+			{
+				curpos = m_parent->m_curNPCs->data[index].type + 0x100;
+				break;
+			}
+		}
+	}
+
+	if (curpos == 0)
+	{
+		curpos = m_parent->m_currentMap[tempx][tempy];
+	}
+
+	m_parent->m_console->PrintText(m_resources->m_data.game_strings_11[THOU_DOST_SEE_STRING]);
+
+	std::string curItem;
+
+	switch (curpos)
+	{
+	case 164:
+	case 248:
+		m_parent->m_console->PrintText("\n");
+		PrintSign(tempx, tempy, m_parent->m_cur_level);
+		break;
+	default:
+		curItem = m_resources->m_LookData[curpos];
+		m_parent->m_console->PrintText(curItem);
+		break;
+	}
+	
+	/*if (curpos == 164 || curpos == 248) // sign
 	{
 		PrintSign(tempx, tempy, m_parent->m_cur_level);
-	}
+	}*/
+	m_parent->m_console->PrintText("\n");
 	m_parent->m_console->NewPrompt();
 }
 

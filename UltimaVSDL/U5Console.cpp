@@ -134,13 +134,21 @@ std::vector<std::string> U5Console::FormatText(std::string text, int startElem, 
 	const int CONSOLE_SIZE = 16;
 	size_t max_len = static_cast<size_t>(CONSOLE_SIZE - startElem);
 	std::vector<std::string> ret;
+
+	if (pretty_print == false)
+	{
+		int j = 9;
+	}
 	
 	bool valid = true;
 	while (valid)
 	{
-		if (text.size() < max_len)
+		if (text.size() <= max_len)
 		{
-			ret.push_back(text);
+			if (!text.empty())
+			{
+				ret.push_back(text);
+			}
 			return ret;
 		}
 

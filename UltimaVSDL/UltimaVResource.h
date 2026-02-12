@@ -221,6 +221,7 @@ public:
 	std::vector<IntroScriptInstruction> m_IntroInstructions;
 	std::vector<std::vector< U5SignData>> m_SignData;
 	std::vector<std::vector< U5SignData>> m_DungeonSignData;
+	std::vector<std::string> m_LookData;
 	U5Data m_data;
 	RenderMode m_render_mode;
 	int m_CutsceneMap[NUM_CUTSCENES][CUTSCENE_WIDTH][CUTSCENE_HEIGHT];
@@ -250,6 +251,7 @@ private:
 	int LoadMapChunk(unsigned char cur_chunk_val, size_t curChunkX, size_t curChunkY, std::vector<std::vector<unsigned char>>& map, const std::vector<unsigned char>& buffer);
 	int LoadSigns();
 	int LoadDungeonSigns(const std::vector<unsigned char>& buffer);
+	int LoadLookData();
 
 	int ParseCharacterFile(std::vector<U5ImageData>& bit_file_data, std::vector<unsigned char>& data, int width, int height);
 	int ParseBitFile(std::vector<U5ImageData> &bit_file_data, std::vector<unsigned char> &data);

@@ -123,6 +123,10 @@ int UltimaVResource::LoadResources()
 	{
 		return -1;
 	}
+	if (0 != LoadLookData())
+	{
+		return -1;
+	}
 
 	return 0;
 }
@@ -1636,4 +1640,42 @@ void UltimaVResource::SwapCharset(std::string& curString)
 			}
 		}
 	}
+}
+
+int UltimaVResource::LoadLookData()
+{
+	std::vector<unsigned char> buffer;
+	int ret = LoadBuffer("LOOK2.DAT", buffer);
+
+	if (0 != ret)
+	{
+		return ret;
+	}
+
+	const int NUM_LOOK = 0x200;
+
+	std::vector<size_t> file_offsets;
+	size_t curPos = 0;
+	if (0 != ReadOffsets(buffer, 2, NUM_LOOK, file_offsets, curPos))
+	{
+		return -3;
+	}
+
+	m_LookData.resize(NUM_LOOK);
+
+	for (size_t index = 0; index < NUM_LOOK; index++)
+	{
+		if (file_offsets[index] == 0)
+		{
+			continue;
+		}
+		curPos = file_offsets[index];
+		if (curPos >= buffer.size())
+		{
+			return -4;
+		}
+		m_LookData[index] = ReadNextString(buffer.begin() + curPos, buffer.end());
+	}
+
+	return 0;
 }
