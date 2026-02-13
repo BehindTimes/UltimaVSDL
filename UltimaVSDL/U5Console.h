@@ -16,9 +16,13 @@ public:
 
 	void Render(Uint64 tickElapse);
 	void PrintText(std::string text, bool showElem = false, bool partial = false, bool pretty_print = true);
+	void PrintEditText(std::string text, bool allowNewLine);
 	void NewPrompt();
 	void ShowPrompt();
+	void UpdateCursor();
+	void BackspaceCursor();
 	void BlockPrompt(bool block);
+	void SetCursorStartPosX(int startPos);
 private:
 	void RenderCursor();
 	void ClearLine();

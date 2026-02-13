@@ -98,7 +98,9 @@ void U5Input::ProcessKeyDown(SDL_KeyboardEvent event)
 	{
 		m_curKeyCodes.push_back(event.key);
 	}
-	m_currentKeyCode = event.key;
+	auto display_key = SDL_GetKeyFromScancode(event.scancode, event.mod, false);
+
+	m_currentKeyCode = display_key;
 }
 
 void U5Input::ProcessKeyUp(SDL_KeyboardEvent event)

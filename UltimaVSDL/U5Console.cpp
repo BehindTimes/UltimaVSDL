@@ -193,6 +193,11 @@ std::vector<std::string> U5Console::FormatText(std::string text, int startElem, 
 	return ret;
 }
 
+void U5Console::SetCursorStartPosX(int startPos)
+{
+	m_cursorPosX = startPos;
+}
+
 int U5Console::GetCursorStartPos()
 {
 	if (m_buffer_strings.empty())
@@ -212,8 +217,93 @@ int U5Console::GetCursorStartPos()
 	return curpos + 1;
 }
 
+void U5Console::UpdateCursor()
+{
+	const int CONSOLE_SIZE = 16;
+	if (m_cursorPosX >= CONSOLE_SIZE)
+	{
+		if (m_cursorPosY >= 12)
+		{
+			m_buffer_strings.push_back({ 0, "\n" });
+		}
+	}
+	if (!m_scroll)
+	{
+		CheckText();
+	}
+}
+
+void U5Console::BackspaceCursor()
+{
+	const int CONSOLE_SIZE = 16;
+	m_cursorPosX--;
+	if (m_cursorPosX < 0)
+	{
+		m_cursorPosX = CONSOLE_SIZE - 1;
+		m_cursorPosY--;
+	}
+}
+
+void U5Console::PrintEditText(std::string text, bool allowNewLine)
+{
+	if (m_scroll)
+	{
+		return;
+	}
+	const int CONSOLE_SIZE = 16;
+	int cursorline = 12;
+
+	std::string str1 = text;
+	std::string str2;
+
+	int drawline = m_curLine + NUM_BUF_LINES;
+	if (!allowNewLine)
+	{
+		drawline--;
+		cursorline--;
+	}
+	drawline %= NUM_BUF_LINES;
+
+	if (text.length() >= CONSOLE_SIZE - 1)
+	{
+		str1 = text.substr(0, CONSOLE_SIZE - 1);
+		str2 = text.substr(CONSOLE_SIZE - 1);
+		cursorline++;
+		if (allowNewLine)
+		{
+			m_sdl_helper->SetRenderTarget(m_sdl_helper->m_TargetTextures[TTV_CONSOLE_BUFFER]);
+			m_sdl_helper->DrawTiledText(str1, 1, drawline);
+			m_sdl_helper->SetRenderTarget(nullptr);
+			return;
+		}
+	}
+	
+	m_sdl_helper->SetRenderTarget(m_sdl_helper->m_TargetTextures[TTV_CONSOLE_BUFFER]);
+	m_sdl_helper->DrawTileRect(1, drawline, CONSOLE_SIZE, 1);
+	if (m_curLine != drawline)
+	{
+		m_sdl_helper->DrawTileRect(0, m_curLine, CONSOLE_SIZE, 1);
+	}
+	m_sdl_helper->DrawTiledText(str1, 1, drawline);
+	if (!str2.empty())
+	{
+		m_sdl_helper->DrawTiledText(str2, 0, m_curLine);
+	}
+	m_cursorPosX = static_cast<int>(str1.size() + 1);
+	if (str1.size() >= CONSOLE_SIZE - 1)
+	{
+		m_cursorPosX = static_cast<int>(str2.size());
+	}
+	m_cursorPosY = cursorline;
+	m_sdl_helper->SetRenderTarget(nullptr);
+}
+
 void U5Console::PrintText(std::string text, bool showElem, bool partial, bool pretty_print)
 {
+	if (showElem)
+	{
+		m_cursorPosY = 12;
+	}
 	auto strVals = m_utilities->splitString(text, '\n', true);
 
 	if (strVals.size() > 0)
@@ -301,8 +391,6 @@ void U5Console::RenderCursor()
 		m_curCursor %= NUM_CURSOR;
 		m_curCursorRenderDelay %= CURSOR_RENDER_DELAY;
 	}
-	int temppos = m_startLine + 12;
-	temppos %= 14;
 	m_sdl_helper->DrawTileTexture8(m_sdl_helper->m_CharacterSetsTextures[0][0][static_cast<size_t>(5 + m_curCursor)], m_cursorPosX, m_cursorPosY);
 }
 

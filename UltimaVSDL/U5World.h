@@ -8,6 +8,7 @@
 #include <vector>
 #include "U5Enums.h"
 #include <functional>
+#include <string>
 
 struct PositionData
 {
@@ -64,6 +65,8 @@ private:
 	void HandleLook();
 	void HandleYell();
 
+	bool DoYell();
+
 	void HandleNorth();
 	void HandleSouth();
 	void HandleEast();
@@ -82,6 +85,7 @@ private:
 
 	U5Game* m_parent;
 	bool m_allowMove;
-
+	std::string m_displayWord;
+	bool m_allowNewLine;
 };
 

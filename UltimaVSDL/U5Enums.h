@@ -81,6 +81,9 @@ enum class MapTypes
 	Dungeon
 };
 
+const int MAX_YELL = 30;
+const int MAX_TALK = 16;
+
 const int NORTH_STRING = 0x249;
 const int SOUTH_STRING = 0x24a;
 const int EAST_STRING = 0x24b;
@@ -129,6 +132,9 @@ const int THOU_DOST_SEE_STRING = 0x358;
 
 const int YELL_STRING = 0x2f5;
 const int WHAT_COLON_STRING = 0x609;
+
+const int NO_EFFECT_STRING = 0x5fa;
+const int NOTHING_STRING = 0x329;
 
 const int BED_HEAD = 171;
 const int BED_SLEEPING = 282;

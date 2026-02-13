@@ -30,7 +30,8 @@ U5World::U5World(SDL3Helper* sdl_helper, UltimaVResource* u5_resources) :
 	GameBase(sdl_helper, u5_resources),
 	m_location_type(GameLocation::World),
 	m_parent(nullptr),
-	m_allowMove(true)
+	m_allowMove(true),
+	m_allowNewLine(true)
 {
 	//m_xpos = 50;
 	//m_ypos = 50;
@@ -1289,10 +1290,12 @@ void U5World::PostMove()
 
 void U5World::ProcessYell()
 {
+	m_displayWord.clear();
 	m_input->SetRequireAllKeysUp();
 	m_parent->m_console->PrintText(m_resources->m_data.game_strings[YELL_STRING]);
 	m_parent->m_console->PrintText(m_resources->m_data.game_strings[WHAT_COLON_STRING]);
 	m_process_key = std::bind(&U5World::HandleYell, this);
+	m_allowNewLine = true;
 }
 
 int U5World::ProcessLetterImmediate()
@@ -1312,7 +1315,7 @@ int U5World::ProcessLetterImmediate()
 	{
 		ret = static_cast<int>(curKey);
 	}
-	else if (curKey > SDLK_SPACE && curKey <= SDLK_TILDE)
+	else if (curKey >= SDLK_SPACE && curKey <= SDLK_TILDE)
 	{
 		ret = static_cast<int>(curKey);
 	}
@@ -1323,22 +1326,102 @@ int U5World::ProcessLetterImmediate()
 	return ret;
 }
 
+bool U5World::DoYell()
+{
+	return false;
+}
+
 void U5World::HandleYell()
 {
 	int ret = ProcessLetterImmediate();
+	m_input->m_isValid = false;
 	if (ret < 0)
 	{
 		return;
 	}
 	if (ret == SDLK_RETURN)
 	{
+		const int MAX_CONSOLE = 16;
+		bool drawNewLine = true;
+		if (!m_allowNewLine && m_displayWord.size() < MAX_CONSOLE)
+		{
+			drawNewLine = false;
+		}
+		if (m_displayWord.empty())
+		{
+			m_parent->m_console->PrintEditText(m_resources->m_data.game_strings[NOTHING_STRING], m_allowNewLine);
+			if (drawNewLine)
+			{
+				m_parent->m_console->PrintText("\n");
+			}
+			else
+			{
+				// Useless unless someone decides to edit the text without a newline
+				// Just include for that case
+				m_parent->m_console->SetCursorStartPosX(0);
+			}
+		}
+		else
+		{
+			if (drawNewLine)
+			{
+				m_parent->m_console->PrintText("\n");
+			}
+			else
+			{
+				// Useless unless someone decides to edit the text without a newline
+				// Just include for that case
+				m_parent->m_console->SetCursorStartPosX(0);
+			}
+			if (!DoYell())
+			{
+				m_parent->m_console->PrintText(m_resources->m_data.game_strings[NO_EFFECT_STRING]);
+			}
+		}
+		
 		m_process_key = std::bind(&U5World::ProcessAnyKeyHit, this);
 		m_parent->m_console->NewPrompt();
 		return;
 	}
+	else if (ret == SDLK_BACKSPACE)
+	{
+		if (!m_displayWord.empty())
+		{
+			m_displayWord.pop_back();
+			m_parent->m_console->PrintEditText(m_displayWord, m_allowNewLine);
+		}
+	}
 	else
 	{
 		const char* value = SDL_GetKeyName(ret);
-		m_parent->m_console->PrintText(value);
+		if (value != 0)
+		{
+			if (m_displayWord.size() < MAX_YELL)
+			{
+				std::string curLetter;
+
+				if (ret == SDLK_SPACE)
+				{
+					m_displayWord += ' ';
+					curLetter += ' ';
+				}
+				else
+				{
+					m_displayWord += value[0];
+					curLetter += value[0];
+				}
+
+				if (m_displayWord.size() >= 15 && m_allowNewLine)
+				{
+					m_parent->m_console->PrintEditText(m_displayWord, m_allowNewLine);
+					m_allowNewLine = false;
+					m_parent->m_console->PrintText("\n");
+				}
+				else
+				{
+					m_parent->m_console->PrintEditText(m_displayWord, m_allowNewLine);
+				}
+			}
+		}
 	}
 }
