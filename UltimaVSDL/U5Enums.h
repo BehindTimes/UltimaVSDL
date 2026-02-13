@@ -81,53 +81,54 @@ enum class MapTypes
 	Dungeon
 };
 
-const int NORTH_STRING = 5;
-const int SOUTH_STRING = 6;
-const int EAST_STRING = 7;
-const int WEST_STRING = 8;
+const int NORTH_STRING = 0x249;
+const int SOUTH_STRING = 0x24a;
+const int EAST_STRING = 0x24b;
+const int WEST_STRING = 0x24c;
 
-const int DIR_NORTH_STRING = 0;
-const int DIR_SOUTH_STRING = 2;
-const int DIR_EAST_STRING = 1;
-const int DIR_WEST_STRING = 3;
-const int DIR_STRING = 6;
+const int DIR_NORTH_STRING = 0x299;
+const int DIR_SOUTH_STRING = 0x29b;
+const int DIR_EAST_STRING = 0x29a;
+const int DIR_WEST_STRING = 0x29c;
+const int DIR_STRING = 0x29f;
 
-const int DUNGEON_TURN_RIGHT = 11;
-const int DUNGEON_TURN_LEFT = 14;
-const int DUNGEON_ADVANCE = 9;
-const int DUNGEON_BACKUP = 12;
-const int DUNGEON_TURN_AROUND = 15;
+const int DUNGEON_TURN_RIGHT = 0x2a4;
+const int DUNGEON_TURN_LEFT = 0x2a6;
+const int DUNGEON_ADVANCE = 0x2a2;
+const int DUNGEON_BACKUP = 0x2a5;
+const int DUNGEON_TURN_AROUND = 0x2a7;
 
-const int WHAT_STRING = 23;
+const int WHAT_STRING = 0x25b;
 
-const int KEEP_STRING = 0x23;
-const int VILLAGE_STRING = 0x24;
-const int TOWN_STRING = 0x25;
-const int HUT_STRING = 0x21;
-const int DUNGEON_STRING = 0x29;
-const int DWELLING_STRING = 0x2b;
-const int BLACKTHORN_PALANCE_STRING = 0x2c;
-const int BRITISH_CASTLE_STRING = 0x2d;
+const int KEEP_STRING = 0x288;
+const int VILLAGE_STRING = 0x289;
+const int TOWN_STRING = 0x28a;
+const int HUT_STRING = 0x286;
+const int DUNGEON_STRING = 0x28e;
+const int LIGHTHOUSE_STRING = 0x290;
+const int BLACKTHORN_PALANCE_STRING = 0x921;
+const int BRITISH_CASTLE_STRING = 0x292;
 
-const int YES_STRING = 10;
-const int UNDERWORLD_STRING = 11;
-const int BRITANNIA_STRING = 12;
-const int NO_STRING = 13;
-const int UP_STRING = 201;
-const int DOWN_STRING = 202;
-const int WITH_WHAT_STRING = 222;
-const int EXIT_TO_STRING = 27;
-const int KLIMB_PROMPT = 32;
-const int KLIMB_STRING = 34;
-const int KLIMB_WHAT = 36;
-const int LEAVE_TOWN_STRING = 9;
-const int ENTER_STRING = 31;
-const int LOOK_STRING = 0x12f;
-const int HYPHEN_STRING = 0x1b;
-const int THOU_DOST_SEE_STRING = 2;
+const int YES_EXIT_STRING = 0x24e;
+const int UNDERWORLD_STRING = 0x2cf;
+const int BRITANNIA_STRING = 0x250;
+const int NO_STRING = 0x251;
+const int UP_STRING = 0x244;
+const int DOWN_STRING = 0x245;
+const int WITH_WHAT_STRING = 0x4e1;
+const int EXIT_TO_STRING = 0x2ce;
+const int KLIMB_PROMPT = 0x2d2;
+const int KLIMB_STRING = 0x259;
+const int KLIMB_WHAT = 0x2d5;
+const int LEAVE_TOWN_STRING = 0x24d;
+const int ENTER_STRING = 0x284;
+const int ENTER_WHAT = 0x5d6;
+const int LOOK_STRING = 0x2ff;
+const int HYPHEN_STRING = 0x415;
+const int THOU_DOST_SEE_STRING = 0x358;
 
-const int YELL_STRING = 0x143;
-const int WHAT2_STRING = 0x145;
+const int YELL_STRING = 0x2f5;
+const int WHAT_COLON_STRING = 0x609;
 
 const int BED_HEAD = 171;
 const int BED_SLEEPING = 282;

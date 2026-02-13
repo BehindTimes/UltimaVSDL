@@ -188,8 +188,8 @@ void U5Game::ChangeLevel(int map_level)
 		{
 			m_curLocation = m_world.get();
 			LoadMap(-1);
-			m_console->PrintText(m_resources->m_data.game_strings_4[EXIT_TO_STRING]);
-			m_console->PrintText(m_resources->m_data.game_strings_1[BRITANNIA_STRING]);
+			m_console->PrintText(m_resources->m_data.game_strings[EXIT_TO_STRING]);
+			m_console->PrintText(m_resources->m_data.game_strings[BRITANNIA_STRING]);
 			m_console->NewPrompt();
 			return;
 		}
@@ -197,8 +197,8 @@ void U5Game::ChangeLevel(int map_level)
 		{
 			m_curLocation = m_world.get();
 			LoadMap(-2);
-			m_console->PrintText(m_resources->m_data.game_strings_4[EXIT_TO_STRING]);
-			m_console->PrintText(m_resources->m_data.game_strings_1[UNDERWORLD_STRING]);
+			m_console->PrintText(m_resources->m_data.game_strings[EXIT_TO_STRING]);
+			m_console->PrintText(m_resources->m_data.game_strings[UNDERWORLD_STRING]);
 			m_console->NewPrompt();
 			return;
 		}

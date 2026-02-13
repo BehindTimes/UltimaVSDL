@@ -768,7 +768,7 @@ void U5Dungeon::DrawBorder()
 
 	m_sdl_helper->DrawTileTexture8(m_sdl_helper->m_CharacterSetsTextures[0][0][static_cast<size_t>('0' + m_parent->m_cur_level)], 15, 0);
 
-	m_sdl_helper->DrawTiledText(m_resources->m_data.game_strings_3[DIR_STRING], 7, 23);
+	m_sdl_helper->DrawTiledText(m_resources->m_data.game_strings[DIR_STRING], 7, 23);
 	int dir_val;
 	switch (m_dir)
 	{
@@ -785,7 +785,7 @@ void U5Dungeon::DrawBorder()
 		dir_val = DIR_NORTH_STRING;
 		break;
 	}
-	m_sdl_helper->DrawTiledText(m_resources->m_data.game_strings_3[dir_val], 12, 23);
+	m_sdl_helper->DrawTiledText(m_resources->m_data.game_strings[dir_val], 12, 23);
 }
 
 void U5Dungeon::LoadDungeonType(DungeonType type)
@@ -799,7 +799,7 @@ void U5Dungeon::ProcessAnyKeyHit()
 	{
 		m_input->m_isValid = true;
 
-		SDL_Keycode curKey = m_input->GetCurrentKeyCode();
+		SDL_Keycode curKey = m_input->GetKeyCodePressed();
 		switch (curKey)
 		{
 		case SDLK_UP:
@@ -861,13 +861,13 @@ void U5Dungeon::HandleKlimb()
 	if (ret == 'U')
 	{
 		m_process_key = std::bind(&U5Dungeon::ProcessAnyKeyHit, this);
-		m_parent->m_console->PrintText(m_resources->m_data.game_strings_17[UP_STRING]);
+		m_parent->m_console->PrintText(m_resources->m_data.game_strings[UP_STRING]);
 		m_parent->ChangeLevel(-1);
 	}
 	else if (ret == 'D')
 	{
 		m_process_key = std::bind(&U5Dungeon::ProcessAnyKeyHit, this);
-		m_parent->m_console->PrintText(m_resources->m_data.game_strings_17[DOWN_STRING]);
+		m_parent->m_console->PrintText(m_resources->m_data.game_strings[DOWN_STRING]);
 		m_parent->ChangeLevel(1);
 	}
 }
@@ -879,21 +879,21 @@ void U5Dungeon::Klimb()
 	switch (curTile)
 	{
 	case 1: // Ladder up
-		m_parent->m_console->PrintText(m_resources->m_data.game_strings_4[KLIMB_STRING]);
-		m_parent->m_console->PrintText(m_resources->m_data.game_strings_17[UP_STRING]);
+		m_parent->m_console->PrintText(m_resources->m_data.game_strings[KLIMB_STRING]);
+		m_parent->m_console->PrintText(m_resources->m_data.game_strings[UP_STRING]);
 		m_parent->ChangeLevel(-1);
 		break;
 	case 2: // Ladder down
-		m_parent->m_console->PrintText(m_resources->m_data.game_strings_4[KLIMB_STRING]);
-		m_parent->m_console->PrintText(m_resources->m_data.game_strings_17[DOWN_STRING]);
+		m_parent->m_console->PrintText(m_resources->m_data.game_strings[KLIMB_STRING]);
+		m_parent->m_console->PrintText(m_resources->m_data.game_strings[DOWN_STRING]);
 		m_parent->ChangeLevel(1);
 		break;
 	case 3: // Prompt up/down
-		m_parent->m_console->PrintText(m_resources->m_data.game_strings_4[KLIMB_PROMPT]);
+		m_parent->m_console->PrintText(m_resources->m_data.game_strings[KLIMB_PROMPT]);
 		m_process_key = std::bind(&U5Dungeon::HandleKlimb, this);
 		break;
 	default:
-		m_parent->m_console->PrintText(m_resources->m_data.game_strings_4[KLIMB_WHAT]);
+		m_parent->m_console->PrintText(m_resources->m_data.game_strings[KLIMB_WHAT]);
 		m_parent->m_console->NewPrompt();
 		break;
 	}
@@ -930,7 +930,7 @@ void U5Dungeon::GoForward()
 		return;
 	}
 	SetPos(tempos.first, tempos.second);
-	m_parent->m_console->PrintText(m_resources->m_data.game_strings_3[DUNGEON_ADVANCE]);
+	m_parent->m_console->PrintText(m_resources->m_data.game_strings[DUNGEON_ADVANCE]);
 	m_parent->m_console->NewPrompt();
 }
 
@@ -965,7 +965,7 @@ void U5Dungeon::GoBackward()
 		return;
 	}
 	SetPos(tempos.first, tempos.second);
-	m_parent->m_console->PrintText(m_resources->m_data.game_strings_3[DUNGEON_BACKUP]);
+	m_parent->m_console->PrintText(m_resources->m_data.game_strings[DUNGEON_BACKUP]);
 	m_parent->m_console->NewPrompt();
 }
 
@@ -989,7 +989,7 @@ void U5Dungeon::TurnAround()
 		break;
 	}
 	CalcCurMatrix();
-	m_parent->m_console->PrintText(m_resources->m_data.game_strings_3[DUNGEON_TURN_AROUND]);
+	m_parent->m_console->PrintText(m_resources->m_data.game_strings[DUNGEON_TURN_AROUND]);
 	m_parent->m_console->NewPrompt();
 }
 
@@ -1013,7 +1013,7 @@ void U5Dungeon::TurnLeft()
 		break;
 	}
 	CalcCurMatrix();
-	m_parent->m_console->PrintText(m_resources->m_data.game_strings_3[DUNGEON_TURN_LEFT]);
+	m_parent->m_console->PrintText(m_resources->m_data.game_strings[DUNGEON_TURN_LEFT]);
 	m_parent->m_console->NewPrompt();
 }
 
@@ -1038,6 +1038,6 @@ void U5Dungeon::TurnRight()
 		break;
 	}
 	CalcCurMatrix();
-	m_parent->m_console->PrintText(m_resources->m_data.game_strings_3[DUNGEON_TURN_RIGHT]);
+	m_parent->m_console->PrintText(m_resources->m_data.game_strings[DUNGEON_TURN_RIGHT]);
 	m_parent->m_console->NewPrompt();
 }

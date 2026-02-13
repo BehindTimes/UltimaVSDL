@@ -136,6 +136,12 @@ std::vector<std::string> U5Console::FormatText(std::string text, int startElem, 
 	size_t max_len = static_cast<size_t>(CONSOLE_SIZE - startElem);
 	std::vector<std::string> ret;
 
+	if (startElem >= CONSOLE_SIZE)
+	{
+		ret.emplace_back(std::string("\n"));
+		max_len = CONSOLE_SIZE;
+	}
+
 	bool valid = true;
 	while (valid)
 	{
@@ -174,9 +180,12 @@ std::vector<std::string> U5Console::FormatText(std::string text, int startElem, 
 			{
 				ret.emplace_back(std::string("\n"));
 			}
-			ret.emplace_back(text.substr(0, CONSOLE_SIZE));
-			ret.emplace_back(std::string("\n"));
-			text.erase(0, CONSOLE_SIZE);
+			else
+			{
+				ret.emplace_back(text.substr(0, CONSOLE_SIZE));
+				ret.emplace_back(std::string("\n"));
+				text.erase(0, CONSOLE_SIZE);
+			}
 		}
 		max_len = CONSOLE_SIZE;
 	}

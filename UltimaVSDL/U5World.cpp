@@ -412,7 +412,7 @@ void U5World::ProcessNorth()
 	else
 	{
 		m_input->EnableInput(false);
-		m_parent->m_console->PrintText(m_resources->m_data.game_strings_1[NORTH_STRING]);
+		m_parent->m_console->PrintText(m_resources->m_data.game_strings[NORTH_STRING]);
 		if (check_location == 0)
 		{
 			m_parent->m_console->NewPrompt();
@@ -448,7 +448,7 @@ void U5World::ProcessSouth()
 	else
 	{
 		m_input->EnableInput(false);
-		m_parent->m_console->PrintText(m_resources->m_data.game_strings_1[SOUTH_STRING]);
+		m_parent->m_console->PrintText(m_resources->m_data.game_strings[SOUTH_STRING]);
 		if (check_location == 0)
 		{
 			m_parent->m_console->NewPrompt();
@@ -484,7 +484,7 @@ void U5World::ProcessEast()
 	else
 	{
 		m_input->EnableInput(false);
-		m_parent->m_console->PrintText(m_resources->m_data.game_strings_1[EAST_STRING]);
+		m_parent->m_console->PrintText(m_resources->m_data.game_strings[EAST_STRING]);
 		if (check_location == 0)
 		{
 			m_parent->m_console->NewPrompt();
@@ -521,7 +521,7 @@ void U5World::ProcessWest()
 	else
 	{
 		m_input->EnableInput(false);
-		m_parent->m_console->PrintText(m_resources->m_data.game_strings_1[WEST_STRING]);
+		m_parent->m_console->PrintText(m_resources->m_data.game_strings[WEST_STRING]);
 		if (check_location == 0)
 		{
 			m_parent->m_console->NewPrompt();
@@ -708,7 +708,7 @@ void U5World::ProcessSouthWest()
 
 void U5World::ProcessLeaveTown()
 {
-	m_parent->m_console->PrintText(m_resources->m_data.game_strings_1[LEAVE_TOWN_STRING]);
+	m_parent->m_console->PrintText(m_resources->m_data.game_strings[LEAVE_TOWN_STRING]);
 	m_process_key = std::bind(&U5World::HandleLeaveTown, this);
 }
 
@@ -753,19 +753,19 @@ void U5World::HandleLook()
 	switch (ret)
 	{
 	case 'U':
-		m_parent->m_console->PrintText(m_resources->m_data.game_strings_1[NORTH_STRING]);
+		m_parent->m_console->PrintText(m_resources->m_data.game_strings[NORTH_STRING]);
 		tempy--;
 		break;
 	case 'D':
-		m_parent->m_console->PrintText(m_resources->m_data.game_strings_1[SOUTH_STRING]);
+		m_parent->m_console->PrintText(m_resources->m_data.game_strings[SOUTH_STRING]);
 		tempy++;
 		break;
 	case 'L':
-		m_parent->m_console->PrintText(m_resources->m_data.game_strings_1[WEST_STRING]);
+		m_parent->m_console->PrintText(m_resources->m_data.game_strings[WEST_STRING]);
 		tempx--;
 		break;
 	case 'R':
-		m_parent->m_console->PrintText(m_resources->m_data.game_strings_1[EAST_STRING]);
+		m_parent->m_console->PrintText(m_resources->m_data.game_strings[EAST_STRING]);
 		tempx++;
 		break;
 	default:
@@ -812,7 +812,7 @@ void U5World::HandleLook()
 		curpos = m_parent->m_currentMap[tempx][tempy];
 	}
 
-	m_parent->m_console->PrintText(m_resources->m_data.game_strings_11[THOU_DOST_SEE_STRING]);
+	m_parent->m_console->PrintText(m_resources->m_data.game_strings[THOU_DOST_SEE_STRING]);
 
 	std::string curItem;
 
@@ -846,29 +846,29 @@ void U5World::HandleKlimb()
 	switch (ret)
 	{
 	case 'U':
-		m_parent->m_console->PrintText(m_resources->m_data.game_strings_1[NORTH_STRING]);
-		m_parent->m_console->PrintText(m_resources->m_data.game_strings_1[WHAT_STRING]);
+		m_parent->m_console->PrintText(m_resources->m_data.game_strings[NORTH_STRING]);
+		m_parent->m_console->PrintText(m_resources->m_data.game_strings[WHAT_STRING]);
 		m_parent->m_console->NewPrompt();
 		m_process_key = std::bind(&U5World::ProcessAnyKeyHit, this);
 		m_input->SetRequireAllKeysUp();
 		break;
 	case 'D':
-		m_parent->m_console->PrintText(m_resources->m_data.game_strings_1[SOUTH_STRING]);
-		m_parent->m_console->PrintText(m_resources->m_data.game_strings_1[WHAT_STRING]);
+		m_parent->m_console->PrintText(m_resources->m_data.game_strings[SOUTH_STRING]);
+		m_parent->m_console->PrintText(m_resources->m_data.game_strings[WHAT_STRING]);
 		m_parent->m_console->NewPrompt();
 		m_process_key = std::bind(&U5World::ProcessAnyKeyHit, this);
 		m_input->SetRequireAllKeysUp();
 		break;
 	case 'L':
-		m_parent->m_console->PrintText(m_resources->m_data.game_strings_1[WEST_STRING]);
-		m_parent->m_console->PrintText(m_resources->m_data.game_strings_1[WHAT_STRING]);
+		m_parent->m_console->PrintText(m_resources->m_data.game_strings[WEST_STRING]);
+		m_parent->m_console->PrintText(m_resources->m_data.game_strings[WHAT_STRING]);
 		m_parent->m_console->NewPrompt();
 		m_process_key = std::bind(&U5World::ProcessAnyKeyHit, this);
 		m_input->SetRequireAllKeysUp();
 		break;
 	case 'R':
-		m_parent->m_console->PrintText(m_resources->m_data.game_strings_1[EAST_STRING]);
-		m_parent->m_console->PrintText(m_resources->m_data.game_strings_1[WHAT_STRING]);
+		m_parent->m_console->PrintText(m_resources->m_data.game_strings[EAST_STRING]);
+		m_parent->m_console->PrintText(m_resources->m_data.game_strings[WHAT_STRING]);
 		m_parent->m_console->NewPrompt();
 		m_process_key = std::bind(&U5World::ProcessAnyKeyHit, this);
 		m_input->SetRequireAllKeysUp();
@@ -881,19 +881,20 @@ void U5World::HandleKlimb()
 void U5World::HandleLeaveTown()
 {
 	int ret = ProcessYesNo();
+	m_input->SetRequireAllKeysUp();
 	if (ret == 'Y')
 	{
 		m_process_key = std::bind(&U5World::ProcessAnyKeyHit, this);
-		m_parent->m_console->PrintText(m_resources->m_data.game_strings_1[YES_STRING]);
+		m_parent->m_console->PrintText(m_resources->m_data.game_strings[YES_EXIT_STRING]);
 		if (m_parent->m_old_location == GameLocation::World)
 		{
-			m_parent->m_console->PrintText(m_resources->m_data.game_strings_1[BRITANNIA_STRING]);
+			m_parent->m_console->PrintText(m_resources->m_data.game_strings[BRITANNIA_STRING]);
 			m_parent->m_console->NewPrompt();
 			m_parent->LoadMap(-1);
 		}
 		else if (m_parent->m_old_location == GameLocation::Underworld)
 		{
-			m_parent->m_console->PrintText(m_resources->m_data.game_strings_1[UNDERWORLD_STRING]);
+			m_parent->m_console->PrintText(m_resources->m_data.game_strings[UNDERWORLD_STRING]);
 			m_parent->m_console->NewPrompt();
 			m_parent->LoadMap(-2);
 		}
@@ -901,7 +902,7 @@ void U5World::HandleLeaveTown()
 	else if (ret == 'N')
 	{
 		m_process_key = std::bind(&U5World::ProcessAnyKeyHit, this);
-		m_parent->m_console->PrintText(m_resources->m_data.game_strings_1[NO_STRING]);
+		m_parent->m_console->PrintText(m_resources->m_data.game_strings[NO_STRING]);
 		m_parent->m_console->NewPrompt();
 	}
 }
@@ -952,15 +953,38 @@ void U5World::ProcessAnyKeyHit()
 {
 	if (m_input->isAnyKeyHit())
 	{
-		bool valid = true;
 		m_input->m_isValid = true;
 		if (m_vec_pos.size() > 0)
 		{
 			return;
 		}
-		SDL_Keycode curKey = m_input->GetCurrentKeyCode();
+		SDL_Keycode curKey = m_input->GetKeyCodePressed();
 		switch (curKey)
 		{
+		case SDLK_KP_1:
+			ProcessSouthWest();
+			break;
+		case SDLK_KP_3:
+			ProcessSouthEast();
+			break;
+		case SDLK_KP_7:
+			ProcessNorthWest();
+			break;
+		case SDLK_KP_9:
+			ProcessNorthEast();
+			break;
+		case SDLK_UP:
+			ProcessNorth();
+			break;
+		case SDLK_DOWN:
+			ProcessSouth();
+			break;
+		case SDLK_LEFT:
+			ProcessWest();
+			break;
+		case SDLK_RIGHT:
+			ProcessEast();
+			break;
 		case SDLK_E:
 			ProcessEnter();
 			break;
@@ -975,42 +999,7 @@ void U5World::ProcessAnyKeyHit()
 			break;
 		default:
 			m_input->m_isValid = false;
-			valid = false;
 			break;
-		}
-		if (!valid)
-		{
-			SDL_Keycode curKey = m_input->GetKeyCodePressed();
-
-			switch (curKey)
-			{
-			case SDLK_KP_1:
-				ProcessSouthWest();
-				break;
-			case SDLK_KP_3:
-				ProcessSouthEast();
-				break;
-			case SDLK_KP_7:
-				ProcessNorthWest();
-				break;
-			case SDLK_KP_9:
-				ProcessNorthEast();
-				break;
-			case SDLK_UP:
-				ProcessNorth();
-				break;
-			case SDLK_DOWN:
-				ProcessSouth();
-				break;
-			case SDLK_LEFT:
-				ProcessWest();
-				break;
-			case SDLK_RIGHT:
-				ProcessEast();
-				break;
-			default:
-				break;
-			}
 		}
 	}
 }
@@ -1157,10 +1146,10 @@ void U5World::ProcessScroll()
 void U5World::ProcessKlimb()
 {
 	m_input->SetRequireAllKeysUp();
-	m_parent->m_console->PrintText(m_resources->m_data.game_strings_4[KLIMB_STRING]);
+	m_parent->m_console->PrintText(m_resources->m_data.game_strings[KLIMB_STRING]);
 	if (m_parent->m_location == GameLocation::World || m_parent->m_location == GameLocation::Underworld)
 	{
-		m_parent->m_console->PrintText(m_resources->m_data.game_strings_17[WITH_WHAT_STRING]);
+		m_parent->m_console->PrintText(m_resources->m_data.game_strings[WITH_WHAT_STRING]);
 		m_parent->m_console->NewPrompt();
 		return;
 	}
@@ -1171,12 +1160,12 @@ void U5World::ProcessKlimb()
 		switch (curpos)
 		{
 		case LADDER_UP_TILE:
-			m_parent->m_console->PrintText(m_resources->m_data.game_strings_17[UP_STRING]);
+			m_parent->m_console->PrintText(m_resources->m_data.game_strings[UP_STRING]);
 			m_parent->m_console->NewPrompt();
 			m_parent->ChangeLevel(1);
 			return;
 		case LADDER_DOWN_TILE:
-			m_parent->m_console->PrintText(m_resources->m_data.game_strings_17[DOWN_STRING]);
+			m_parent->m_console->PrintText(m_resources->m_data.game_strings[DOWN_STRING]);
 			m_parent->m_console->NewPrompt();
 			m_parent->ChangeLevel(-1);
 			return;
@@ -1190,8 +1179,8 @@ void U5World::ProcessKlimb()
 void U5World::ProcessLook()
 {
 	m_input->SetRequireAllKeysUp();
-	m_parent->m_console->PrintText(m_resources->m_data.game_strings_18[LOOK_STRING]);
-	m_parent->m_console->PrintText(m_resources->m_data.game_strings_16[HYPHEN_STRING]);
+	m_parent->m_console->PrintText(m_resources->m_data.game_strings[LOOK_STRING]);
+	m_parent->m_console->PrintText(m_resources->m_data.game_strings[HYPHEN_STRING]);
 	m_process_key = std::bind(&U5World::HandleLook, this);
 }
 
@@ -1213,30 +1202,30 @@ void U5World::ProcessEnter()
 		{
 			m_parent->LoadMap(static_cast<int>(curMap));
 
-			m_parent->m_console->PrintText(m_resources->m_data.game_strings_2[ENTER_STRING], false, true);
+			m_parent->m_console->PrintText(m_resources->m_data.game_strings[ENTER_STRING], false, true);
 			if (m_resources->m_data.location_names[curMap].empty())
 			{
 				// Specially handle them
 				switch (curMap)
 				{
 				case 0x0D: // Sutek's Hut
-					dwelling_name = m_resources->m_data.game_strings_2[HUT_STRING];
+					dwelling_name = m_resources->m_data.game_strings[HUT_STRING];
 					m_parent->m_console->PrintText(dwelling_name + std::string("\n"), false);
 					break;
 				case 0x0E: // Sin'Varaal's Hut
-					dwelling_name = m_resources->m_data.game_strings_2[HUT_STRING];
+					dwelling_name = m_resources->m_data.game_strings[HUT_STRING];
 					m_parent->m_console->PrintText(dwelling_name + std::string("\n"), false);
 					break;
 				case 0x0F: // Hut
-					dwelling_name = m_resources->m_data.game_strings_2[HUT_STRING];
+					dwelling_name = m_resources->m_data.game_strings[HUT_STRING];
 					m_parent->m_console->PrintText(dwelling_name + std::string("\n"), false);
 					break;
 				case 0x10: // Lord British
-					dwelling_name = m_resources->m_data.game_strings_2[BRITISH_CASTLE_STRING];
+					dwelling_name = m_resources->m_data.game_strings[BRITISH_CASTLE_STRING];
 					m_parent->m_console->PrintText(dwelling_name + std::string("\n"), false);
 					break;
 				case 0x11: // Lord Blackthorn
-					dwelling_name = m_resources->m_data.game_strings_2[BLACKTHORN_PALANCE_STRING];
+					dwelling_name = m_resources->m_data.game_strings[BLACKTHORN_PALANCE_STRING];
 					m_parent->m_console->PrintText(dwelling_name + std::string("\n"), false);
 					break;
 				default:
@@ -1251,19 +1240,19 @@ void U5World::ProcessEnter()
 				switch (dwellingType)
 				{
 				case 0: // town
-					dwelling_name = m_resources->m_data.game_strings_2[TOWN_STRING];
+					dwelling_name = m_resources->m_data.game_strings[TOWN_STRING];
 					break;
 				case 1: // dwelling
-					dwelling_name = exType < 4 ? m_resources->m_data.game_strings_2[DWELLING_STRING] : m_resources->m_data.game_strings_2[HUT_STRING];
+					dwelling_name = exType < 4 ? m_resources->m_data.game_strings[LIGHTHOUSE_STRING] : m_resources->m_data.game_strings[HUT_STRING];
 					break;
 				case 2: // village
-					dwelling_name = m_resources->m_data.game_strings_2[VILLAGE_STRING];
+					dwelling_name = m_resources->m_data.game_strings[VILLAGE_STRING];
 					break;
 				case 3: // keep
-					dwelling_name = m_resources->m_data.game_strings_2[KEEP_STRING];
+					dwelling_name = m_resources->m_data.game_strings[KEEP_STRING];
 					break;
 				case 4: // dungeon
-					dwelling_name = m_resources->m_data.game_strings_2[DUNGEON_STRING];
+					dwelling_name = m_resources->m_data.game_strings[DUNGEON_STRING];
 					break;
 				default:
 					dwelling_name = "???";
@@ -1283,8 +1272,7 @@ void U5World::ProcessEnter()
 	}
 	else
 	{
-		m_parent->m_console->PrintText(m_resources->m_data.game_strings_2[31]);
-		m_parent->m_console->PrintText(m_resources->m_data.game_strings_2[46]);
+		m_parent->m_console->PrintText(m_resources->m_data.game_strings[ENTER_WHAT]);
 		m_parent->m_console->NewPrompt();
 	}
 }
@@ -1302,9 +1290,8 @@ void U5World::PostMove()
 void U5World::ProcessYell()
 {
 	m_input->SetRequireAllKeysUp();
-	m_parent->m_console->PrintText(m_resources->m_data.game_strings_18[YELL_STRING]);
-	m_parent->m_console->PrintText(m_resources->m_data.game_strings_18[WHAT2_STRING]);
-	m_parent->m_console->PrintText(":");
+	m_parent->m_console->PrintText(m_resources->m_data.game_strings[YELL_STRING]);
+	m_parent->m_console->PrintText(m_resources->m_data.game_strings[WHAT_COLON_STRING]);
 	m_process_key = std::bind(&U5World::HandleYell, this);
 }
 
@@ -1346,6 +1333,7 @@ void U5World::HandleYell()
 	if (ret == SDLK_RETURN)
 	{
 		m_process_key = std::bind(&U5World::ProcessAnyKeyHit, this);
+		m_parent->m_console->NewPrompt();
 		return;
 	}
 	else

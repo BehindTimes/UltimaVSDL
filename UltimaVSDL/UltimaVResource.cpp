@@ -900,7 +900,11 @@ bool UltimaVResource::ReadStrings(const std::vector<unsigned char>& buffer, std:
 		{
 			if (strValue.size() > 0)
 			{
-				str_vec.push_back(strValue);
+				std::vector<std::string>::iterator it = std::find(str_vec.begin(), str_vec.end(), strValue);
+				if (it == str_vec.end())
+				{
+					str_vec.push_back(strValue);
+				}
 				strValue.clear();
 			}
 		}
@@ -944,91 +948,95 @@ int UltimaVResource::LoadDataOvl()
 	{
 		return -5;
 	}
-	if (!ReadStrings(buffer, m_data.game_strings_0, 0x52, 0x129a))
+	if (!ReadStrings(buffer, m_data.game_strings, 0x52, 0x129a))
 	{
 		return -5;
 	}
-	if (!ReadStrings(buffer, m_data.game_strings_1, 0x266a, 0x28d5))
+	if (!ReadStrings(buffer, m_data.game_strings, 0x266a, 0x28d5))
 	{
 		return -5;
 	}
-	if (!ReadStrings(buffer, m_data.game_strings_2, 0x2956, 0x2bd0))
+	if (!ReadStrings(buffer, m_data.game_strings, 0x2956, 0x2bd0))
 	{
 		return -5;
 	}
-	if (!ReadStrings(buffer, m_data.game_strings_3, 0x2c8c, 0x2df8))
+	if (!ReadStrings(buffer, m_data.game_strings, 0x2c8c, 0x2df8))
 	{
 		return -5;
 	}
-	if (!ReadStrings(buffer, m_data.game_strings_4, 0x6aea, 0x6d56))
+	if (!ReadStrings(buffer, m_data.game_strings, 0x6aea, 0x6d56))
 	{
 		return -5;
 	}
-	if (!ReadStrings(buffer, m_data.game_strings_5, 0x6d84, 0x7010))
+	if (!ReadStrings(buffer, m_data.game_strings, 0x6d84, 0x7010))
 	{
 		return -5;
 	}
-	if (!ReadStrings(buffer, m_data.game_strings_6, 0x702a, 0x70e8))
-	{
-		return -5;
-	}
-
-	if (!ReadStrings(buffer, m_data.game_strings_7, 0x70f2, 0x71d1))
+	if (!ReadStrings(buffer, m_data.game_strings, 0x702a, 0x70e8))
 	{
 		return -5;
 	}
 
-	if (!ReadStrings(buffer, m_data.game_strings_8, 0x71dc, 0x7208))
+	if (!ReadStrings(buffer, m_data.game_strings, 0x70f2, 0x71d1))
 	{
 		return -5;
 	}
 
-	if (!ReadStrings(buffer, m_data.game_strings_9, 0x721c, 0x7384))
+	if (!ReadStrings(buffer, m_data.game_strings, 0x71dc, 0x7208))
 	{
 		return -5;
 	}
 
-	if (!ReadStrings(buffer, m_data.game_strings_10, 0x7398, 0x74f5))
+	if (!ReadStrings(buffer, m_data.game_strings, 0x721c, 0x7384))
 	{
 		return -5;
 	}
 
-	if (!ReadStrings(buffer, m_data.game_strings_11, 0x750a, 0x77f3))
+	if (!ReadStrings(buffer, m_data.game_strings, 0x7398, 0x74f5))
 	{
 		return -5;
 	}
 
-	if (!ReadStrings(buffer, m_data.game_strings_12, 0x7808, 0x7850))
+	if (!ReadStrings(buffer, m_data.game_strings, 0x750a, 0x77f3))
 	{
 		return -5;
 	}
 
-	if (!ReadStrings(buffer, m_data.game_strings_13, 0x785c, 0x7a19))
+	if (!ReadStrings(buffer, m_data.game_strings, 0x7808, 0x7850))
 	{
 		return -5;
 	}
 
-	if (!ReadStrings(buffer, m_data.game_strings_14, 0x7a26, 0x7f09))
+	if (!ReadStrings(buffer, m_data.game_strings, 0x785c, 0x7a19))
 	{
 		return -5;
 	}
 
-	if (!ReadStrings(buffer, m_data.game_strings_15, 0x7f26, 0x820e))
+	if (!ReadStrings(buffer, m_data.game_strings, 0x7a26, 0x7f09))
 	{
 		return -5;
 	}
 
-	if (!ReadStrings(buffer, m_data.game_strings_16, 0x8216, 0x848f))
+	if (!ReadStrings(buffer, m_data.game_strings, 0x7f26, 0x820e))
 	{
 		return -5;
 	}
 
-	if (!ReadStrings(buffer, m_data.game_strings_17, 0x84aa, 0x9215))
+	if (!ReadStrings(buffer, m_data.game_strings, 0x8216, 0x848f))
 	{
 		return -5;
 	}
 
-	if (!ReadStrings(buffer, m_data.game_strings_18, 0x9338, 0xa45a))
+	if (!ReadStrings(buffer, m_data.game_strings, 0x84aa, 0x9215))
+	{
+		return -5;
+	}
+
+	if (!ReadStrings(buffer, m_data.game_strings, 0x9338, 0xa45a))
+	{
+		return -5;
+	}
+	if (!ReadStrings(buffer, m_data.game_strings, 0x441b, 0x4aa9))
 	{
 		return -5;
 	}
