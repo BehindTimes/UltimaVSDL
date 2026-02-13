@@ -16,6 +16,7 @@ public:
 
 	std::filesystem::path m_game_directory;
 	bool m_smooth_scroll;
+	bool m_console_smooth_scroll;
 	RenderMode m_render_mode;
 
 private:

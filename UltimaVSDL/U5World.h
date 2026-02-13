@@ -52,6 +52,7 @@ private:
 	void ProcessSouthWest();
 	void ProcessKlimb();
 	void ProcessLook();
+	void ProcessTalk();
 	void ProcessYell();
 
 	void ProcessAnyKeyHit();
@@ -63,6 +64,7 @@ private:
 	void HandleLeaveTown();
 	void HandleKlimb();
 	void HandleLook();
+	void HandleTalk();
 	void HandleYell();
 
 	bool DoYell();

@@ -11,6 +11,7 @@
 GameOptions::GameOptions() :
     m_write_options(false),
     m_smooth_scroll(true),
+    m_console_smooth_scroll(true),
     m_render_mode(RenderMode::EGA),
     m_game_directory(std::filesystem::current_path())
 {
@@ -43,7 +44,8 @@ int GameOptions::Initialize()
 
 int GameOptions::ParseOptions(std::vector<std::string>& vec_options)
 {
-    std::map<std::string, bool> option_types = { {"directory", false} , {"smooth_scroll", false}, {"graphics_type", false} };
+    std::map<std::string, bool> option_types = { {"directory", false}, {"smooth_scroll", false}, {"console_smooth_scroll", false},
+        {"smooth_scroll", false}, {"graphics_type", false} };
     std::map<std::string, std::string> parsed_vals;
     // Loop through vector
     for (auto& curval : vec_options)
@@ -83,6 +85,30 @@ int GameOptions::ParseOptions(std::vector<std::string>& vec_options)
                 {
                 }
                 catch (std::out_of_range const& )
+                {
+                }
+            }
+            else if (strKey == "console_smooth_scroll")
+            {
+                try
+                {
+                    std::size_t pos{};
+                    const int i{ std::stoi(strVal, &pos) };
+                    if (i == 0)
+                    {
+                        m_console_smooth_scroll = false;
+                        option_types["console_smooth_scroll"] = true;
+                    }
+                    else if (i == 1)
+                    {
+                        m_console_smooth_scroll = true;
+                        option_types["console_smooth_scroll"] = true;
+                    }
+                }
+                catch (std::invalid_argument const&)
+                {
+                }
+                catch (std::out_of_range const&)
                 {
                 }
             }
@@ -128,6 +154,7 @@ int GameOptions::CreateOptions()
     }
     options_file << "directory=" << m_game_directory.string() << std::endl;
     options_file << "smooth_scroll=" << m_smooth_scroll << std::endl;
+    options_file << "console_smooth_scroll=" << m_console_smooth_scroll << std::endl;
     options_file << "graphics_type=" << (m_render_mode == RenderMode::EGA ? "EGA" : "CGA") << std::endl;
 
     options_file.close();

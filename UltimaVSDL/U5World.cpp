@@ -35,13 +35,13 @@ U5World::U5World(SDL3Helper* sdl_helper, UltimaVResource* u5_resources) :
 {
 	//m_xpos = 50;
 	//m_ypos = 50;
-	//m_xpos = 86;
-	//m_ypos = 110;
+	m_xpos = 83;
+	m_ypos = 106;
 	//m_xpos = 176;
 	//m_ypos = 210;
 	
-	m_xpos = 91;
-	m_ypos = 68;
+	//m_xpos = 91;
+	//m_ypos = 68;
 
 	//m_xpos = 148;
 	//m_ypos = 83;
@@ -769,6 +769,12 @@ void U5World::HandleLook()
 		m_parent->m_console->PrintText(m_resources->m_data.game_strings[EAST_STRING]);
 		tempx++;
 		break;
+	case ' ':
+		m_parent->m_console->PrintText(m_resources->m_data.game_strings[PASS_STRING]);
+		m_parent->m_console->NewPrompt();
+		m_process_key = std::bind(&U5World::ProcessAnyKeyHit, this);
+		m_input->SetRequireAllKeysUp();
+		break;
 	default:
 		return;
 	}
@@ -874,6 +880,12 @@ void U5World::HandleKlimb()
 		m_process_key = std::bind(&U5World::ProcessAnyKeyHit, this);
 		m_input->SetRequireAllKeysUp();
 		break;
+	case ' ':
+		m_parent->m_console->PrintText(m_resources->m_data.game_strings[PASS_STRING]);
+		m_parent->m_console->NewPrompt();
+		m_process_key = std::bind(&U5World::ProcessAnyKeyHit, this);
+		m_input->SetRequireAllKeysUp();
+		break;
 	default:
 		break;
 	}
@@ -943,6 +955,9 @@ int U5World::ProcessDirection()
 	case SDLK_RIGHT:
 		return 'R';
 		break;
+	case SDLK_SPACE:
+		return ' ';
+		break;
 	default:
 		m_input->m_isValid = false;
 		break;
@@ -994,6 +1009,9 @@ void U5World::ProcessAnyKeyHit()
 			break;
 		case SDLK_L:
 			ProcessLook();
+			break;
+		case SDLK_T:
+			ProcessTalk();
 			break;
 		case SDLK_Y:
 			ProcessYell();
@@ -1423,5 +1441,61 @@ void U5World::HandleYell()
 				}
 			}
 		}
+	}
+}
+
+void U5World::ProcessTalk()
+{
+	m_input->SetRequireAllKeysUp();
+	m_parent->m_console->PrintText(m_resources->m_data.game_strings[TALK_STRING]);
+	m_displayWord.clear();
+	m_input->SetRequireAllKeysUp();
+	m_process_key = std::bind(&U5World::HandleTalk, this);
+	m_allowNewLine = true;
+}
+
+void U5World::HandleTalk()
+{
+	int ret = ProcessDirection();
+
+	int tempx = m_xpos;
+	int tempy = m_ypos;
+
+	m_input->m_isValid = false;
+
+	switch (ret)
+	{
+	case 'U':
+		m_parent->m_console->PrintText(m_resources->m_data.game_strings[NORTH_STRING]);
+		tempy--;
+		break;
+	case 'D':
+		m_parent->m_console->PrintText(m_resources->m_data.game_strings[SOUTH_STRING]);
+		tempy++;
+		break;
+	case 'L':
+		m_parent->m_console->PrintText(m_resources->m_data.game_strings[WEST_STRING]);
+		tempx--;
+		break;
+	case 'R':
+		m_parent->m_console->PrintText(m_resources->m_data.game_strings[EAST_STRING]);
+		tempx++;
+		break;
+	case ' ':
+		m_parent->m_console->PrintText(m_resources->m_data.game_strings[PASS_STRING]);
+		m_parent->m_console->NewPrompt();
+		m_process_key = std::bind(&U5World::ProcessAnyKeyHit, this);
+		m_input->SetRequireAllKeysUp();
+		return;
+	default:
+		return;
+	}
+	if (m_location_type == GameLocation::World || m_location_type == GameLocation::Underworld)
+	{
+		m_parent->m_console->PrintText(m_resources->m_data.game_strings[FUNNY_NO_RESPONSE_STRING]);
+		m_parent->m_console->NewPrompt();
+		m_process_key = std::bind(&U5World::ProcessAnyKeyHit, this);
+		m_input->SetRequireAllKeysUp();
+		return;
 	}
 }

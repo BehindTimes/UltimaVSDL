@@ -13,9 +13,11 @@
 #include <vector>
 #include <deque>
 #include <utility>
+#include "GameOptions.h"
 
 extern std::unique_ptr<U5Utils> m_utilities;
 extern std::unique_ptr<U5Input> m_input;
+extern std::unique_ptr<GameOptions> m_options;
 
 U5Console::U5Console(SDL3Helper* sdl_helper, UltimaVResource* u5_resources) :
 	m_sdl_helper(sdl_helper),
@@ -33,7 +35,7 @@ U5Console::U5Console(SDL3Helper* sdl_helper, UltimaVResource* u5_resources) :
 	m_startLine(0),
 	m_blockPrompt(false),
 	m_hasPrompt(true),
-	m_smoothscroll(true)
+	m_smoothscroll(m_options->m_console_smooth_scroll)
 {
 	ShowPrompt();
 }
