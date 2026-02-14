@@ -129,6 +129,7 @@ const int ENTER_WHAT = 0x5d6;
 const int LOOK_STRING = 0x2ff;
 const int HYPHEN_STRING = 0x415;
 const int THOU_DOST_SEE_STRING = 0x358;
+const int YOU_SEE_STRING = 0x505;
 
 const int YELL_STRING = 0x2f5;
 const int WHAT_COLON_STRING = 0x609;

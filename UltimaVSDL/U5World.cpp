@@ -1579,6 +1579,25 @@ void U5World::HandleTalk()
 void U5World::DoTalk()
 {
 	// TO DO: This is filler just to prevent locking up for the time being
+	//m_resources->m_data.m_talkData
+	if (!m_parent->m_talk_data.contains(m_currentDialog))
+	{
+		m_parent->m_console->PrintText("\n");
+		m_parent->m_console->PrintText(m_resources->m_data.game_strings[NO_RESPONSE_STRING]);
+	}
+	else
+	{
+		auto& curDialog = m_parent->m_talk_data[m_currentDialog];
+		for (auto& curDesc : curDialog.description)
+		{
+			if (curDesc.first == 0)
+			{
+				m_parent->m_console->PrintText("\n");
+				m_parent->m_console->PrintText(m_resources->m_data.game_strings[YOU_SEE_STRING]);
+				m_parent->m_console->PrintText(curDesc.second);
+			}
+		}
+	}
 	m_parent->m_console->NewPrompt();
 	m_process_key = std::bind(&U5World::ProcessAnyKeyHit, this);
 	m_input->SetRequireAllKeysUp();

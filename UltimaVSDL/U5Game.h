@@ -11,6 +11,7 @@
 #include "U5Console.h"
 #include <utility>
 #include <cstdint>
+#include <map>
 
 class U5Game : public GameObject
 {
@@ -36,6 +37,7 @@ public:
 	int m_map_level;
 	int m_cur_level;
 	std::vector< U5SignData> m_sign_data;
+	std::map<int, U5Dialog> m_talk_data;
 
 private:
 	void LoadNPCData();

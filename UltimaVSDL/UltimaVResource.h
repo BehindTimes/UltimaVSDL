@@ -7,6 +7,7 @@
 #include <utility>
 #include "U5Enums.h"
 #include <SDL3/SDL_stdinc.h>
+#include <map>
 
 struct NPC_Schedule
 {
@@ -78,6 +79,15 @@ struct U5StoryScreen
 	U5StoryParagraphInfo paragraph[2];
 };
 
+struct U5Dialog
+{
+	std::vector<std::pair<int, std::string>> name;
+	std::vector<std::pair<int, std::string>> description;
+	std::vector<std::pair<int, std::string>> greeting;
+	std::vector<std::pair<int, std::string>> job;
+	std::vector<std::pair<int, std::string>> bye;
+};
+
 struct U5Data
 {
 	U5Data() :
@@ -111,6 +121,7 @@ struct U5Data
 	std::array<std::string, 0x28> location_names;
 	std::array<int, 0x20> location_z_index;
 	std::array< NPC_File, 4> npc_info;
+	std::array<std::map<int, U5Dialog>, 4> m_talkData;
 	std::vector<std::string> compressed_words;
 };
 
@@ -189,15 +200,6 @@ const size_t DEMO_HEIGHT = 4;
 enum TLK_ENUM
 {
 	TLK_STRING
-};
-
-struct U5Dialog
-{
-	std::vector<std::pair<int, std::string>> name;
-	std::vector<std::pair<int, std::string>> description;
-	std::vector<std::pair<int, std::string>> greeting;
-	std::vector<std::pair<int, std::string>> job;
-	std::vector<std::pair<int, std::string>> bye;
 };
 
 class UltimaVResource

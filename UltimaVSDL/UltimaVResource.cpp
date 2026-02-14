@@ -14,6 +14,7 @@
 #include <memory>
 #include <iostream>
 #include <map>
+#include <utility>
 
 extern std::unique_ptr<GameOptions> m_options;
 
@@ -128,7 +129,7 @@ int UltimaVResource::LoadResources()
 	{
 		return -1;
 	}
-	/*if (0 != LoadTalk(MapTypes::Castle))
+	if (0 != LoadTalk(MapTypes::Castle))
 	{
 		return -1;
 	}
@@ -139,7 +140,7 @@ int UltimaVResource::LoadResources()
 	if (0 != LoadTalk(MapTypes::Keep))
 	{
 		return -1;
-	}*/
+	}
 	if (0 != LoadTalk(MapTypes::Town))
 	{
 		return -1;
@@ -1752,6 +1753,8 @@ int UltimaVResource::LoadTalk(MapTypes map_type)
 		return -1;
 	}
 
+	std::map<int, U5Dialog>& curTalkData = m_data.m_talkData[static_cast<int>(map_type)];
+
 	std::vector<unsigned char> buffer;
 	int ret = LoadBuffer(strStoryFile, buffer);
 
@@ -1772,15 +1775,17 @@ int UltimaVResource::LoadTalk(MapTypes map_type)
 
 		talk_map[id_num] = offset;
 	}
-	U5Dialog dlg;
 
 	for (auto& talkdata : talk_map)
 	{
 		int curFix = 0;
 		curpos = talkdata.second;
+		curTalkData[static_cast<int>(talkdata.first)] = U5Dialog{};
 		unsigned char next_3[3]{};
 		unsigned char cur_char = 0;
 		std::string strCurString;
+		U5Dialog& dlg = curTalkData[static_cast<int>(talkdata.first)];
+		std::vector<std::pair<int, std::string>> curData;
 		while (1)
 		{
 			if (curpos + 3 > buffer.size())
@@ -1807,31 +1812,58 @@ int UltimaVResource::LoadTalk(MapTypes map_type)
 				switch (curFix)
 				{
 				case 0: // name
-					dlg.name.push_back({ 0, strCurString });
+					if (strCurString.size() > 0)
+					{
+						curData.emplace_back( 0, strCurString );
+					}
+					dlg.name = curData;
 					strCurString.clear();
+					curData.clear();
 					curFix++;
 					break;
 				case 1: // description
-					dlg.description.push_back({ 0, strCurString });
+					if (strCurString.size() > 0)
+					{
+						curData.emplace_back(0, strCurString);
+					}
+					dlg.description = curData;
 					strCurString.clear();
+					curData.clear();
 					curFix++;
 					break;
 				case 2: // greeting
-					dlg.greeting.push_back({ 0, strCurString });
+					if (strCurString.size() > 0)
+					{
+						curData.emplace_back(0, strCurString);
+					}
+					dlg.greeting = curData;
 					strCurString.clear();
+					curData.clear();
 					curFix++;
 					break;
 				case 3: // job
-					dlg.job.push_back({ 0, strCurString });
+					if (strCurString.size() > 0)
+					{
+						curData.emplace_back(0, strCurString);
+					}
+					dlg.job = curData;
 					strCurString.clear();
+					curData.clear();
 					curFix++;
 					break;
 				case 4: // bye
-					dlg.bye.push_back({ 0, strCurString });
+					if (strCurString.size() > 0)
+					{
+						curData.emplace_back(0, strCurString);
+					}
+					dlg.bye = curData;
 					strCurString.clear();
+					curData.clear();
 					curFix++;
 					break;
 				default:
+					strCurString.clear();
+					curData.clear();
 					break;
 				}
 			}
@@ -1843,7 +1875,12 @@ int UltimaVResource::LoadTalk(MapTypes map_type)
 			}
 			else // special case
 			{
-				int j = 9;
+				if (strCurString.size() > 0)
+				{
+					curData.emplace_back(0, strCurString);
+					strCurString.clear();
+				}
+				curData.emplace_back(cur_char, "");
 			}
 		}
 	}

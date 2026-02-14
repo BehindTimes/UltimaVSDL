@@ -265,6 +265,7 @@ void U5Game::LoadMap(int map_num)
 	// Underworld or Britannia 
 	if (map_num < 0)
 	{
+		m_talk_data.clear();
 		m_sign_data = m_resources->m_SignData[0];
 		if (map_num == -1) // Britannia
 		{
@@ -317,6 +318,7 @@ void U5Game::LoadMap(int map_num)
 		m_currentMap = m_resources->m_data.castle_maps[m_map_level];
 		m_curLocation->SetPos(15, 30);
 		m_curNPCs = &m_resources->m_data.npc_info[static_cast<int>(curMapType)].info[curMap];
+		m_talk_data = m_resources->m_data.m_talkData[static_cast<int>(curMapType)];
 		break;
 	case MapTypes::Dwelling:
 		m_location = GameLocation::Town;
@@ -324,6 +326,7 @@ void U5Game::LoadMap(int map_num)
 		m_currentMap = m_resources->m_data.dwelling_maps[m_map_level];
 		m_curLocation->SetPos(15, 30);
 		m_curNPCs = &m_resources->m_data.npc_info[static_cast<int>(curMapType)].info[curMap];
+		m_talk_data = m_resources->m_data.m_talkData[static_cast<int>(curMapType)];
 		break;
 	case MapTypes::Keep:
 		m_location = GameLocation::Town;
@@ -331,6 +334,7 @@ void U5Game::LoadMap(int map_num)
 		m_currentMap = m_resources->m_data.keep_maps[m_map_level];
 		m_curLocation->SetPos(15, 30);
 		m_curNPCs = &m_resources->m_data.npc_info[static_cast<int>(curMapType)].info[curMap];
+		m_talk_data = m_resources->m_data.m_talkData[static_cast<int>(curMapType)];
 		break;
 	case MapTypes::Town:
 		m_location = GameLocation::Town;
@@ -338,6 +342,7 @@ void U5Game::LoadMap(int map_num)
 		m_currentMap = m_resources->m_data.town_maps[m_map_level];
 		m_curLocation->SetPos(15, 30);
 		m_curNPCs = &m_resources->m_data.npc_info[static_cast<int>(curMapType)].info[curMap];
+		m_talk_data = m_resources->m_data.m_talkData[static_cast<int>(curMapType)];
 		break;
 	case MapTypes::Dungeon:
 		m_input->SetKeyDelay(250);
