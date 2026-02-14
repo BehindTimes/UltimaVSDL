@@ -336,12 +336,12 @@ void SDL3Helper::DrawTileTexture8(SDL_Texture* texture, int x_tile, int y_tile) 
 	SDL_RenderTexture(m_renderer, texture, NULL, &toRect);
 }
 
-void SDL3Helper::DrawTileTexture(SDL_Texture* texture, int x_tile, int y_tile) const
+void SDL3Helper::DrawTileTexture(SDL_Texture* texture, int x_tile, int y_tile, std::pair<float, float> offset) const
 {
 	SDL_FRect toRect{};
 	toRect.x = 0;
-	toRect.y = static_cast<float>(y_tile * RENDER_TILE_HEIGHT);
-	toRect.x = static_cast<float>(x_tile * RENDER_TILE_WIDTH);
+	toRect.y = static_cast<float>(y_tile * RENDER_TILE_HEIGHT) - (offset.second * RENDER_TILE_HEIGHT);
+	toRect.x = static_cast<float>(x_tile * RENDER_TILE_WIDTH) - (offset.first * RENDER_TILE_WIDTH);
 	toRect.w = RENDER_TILE_WIDTH;
 	toRect.h = RENDER_TILE_HEIGHT;
 

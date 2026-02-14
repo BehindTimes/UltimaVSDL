@@ -107,6 +107,21 @@ void U5World::DrawNPCs()
 	}
 }
 
+void U5World::DrawAvatar()
+{
+	m_sdl_helper->SetRenderTarget(m_sdl_helper->m_TargetTextures[TTV_MAIN_DISPLAY_BUFFER]);
+
+	int xpos = 6;
+	int ypos = 6;
+
+	SDL_Texture* curTexture;
+
+	curTexture = m_sdl_helper->m_TileTextures[0x11c].GetTexture();
+	m_sdl_helper->DrawTileTexture(curTexture, xpos, ypos, m_DisplayOffset);
+
+	m_sdl_helper->SetRenderTarget(nullptr);
+}
+
 void U5World::Render()
 {
 	DrawBorder();
@@ -163,6 +178,7 @@ void U5World::Render()
 	{
 		DrawNPCs();
 	}
+	DrawAvatar();
 }
 
 int U5World::checkValidLocation(const PositionData& pos_info)

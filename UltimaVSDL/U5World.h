@@ -39,6 +39,7 @@ public:
 	GameLocation m_location_type;
 private:
 	void DrawNPCs();
+	void DrawAvatar();
 	void ProcessScroll();
 	int checkValidLocation(const PositionData& pos_info);
 	void ProcessEnter();

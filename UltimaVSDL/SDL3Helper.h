@@ -50,7 +50,7 @@ public:
 	void DrawDungeonSign(std::string text, int x_tile, int y_tile);
 	void DrawInvertRect(int x_tile, int y_tile, int width, int height) const;
 	void DrawTileTexture8(SDL_Texture* texture, int x_tile, int y_tile) const;
-	void DrawTileTexture(SDL_Texture* texture, int x_tile, int y_tile) const;
+	void DrawTileTexture(SDL_Texture* texture, int x_tile, int y_tile, std::pair<float, float> offset = {}) const;
 	void DrawTileRect(int x_tile, int y_tile, int width = 1, int height = 1, unsigned char r = 0, unsigned char g = 0, unsigned char b = 0) const;
 	//void DrawTileRect(int x_tile, int y_tile, int num_x, int num_y, unsigned char color, RenderMode mode) const;
 	void DrawLineManual(std::vector<std::pair<int, int>> m_rect, int step, bool isHorz, int xPos, int yPos) const;
