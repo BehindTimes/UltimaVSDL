@@ -1524,6 +1524,7 @@ void U5World::HandleTalk()
 	}
 	
 	int dialog_pos = -1;
+	int npc_type = -1;
 	// Check if NPC
 	if (m_parent->m_curNPCs != nullptr)
 	{
@@ -1534,6 +1535,7 @@ void U5World::HandleTalk()
 				m_parent->m_curNPCs->data[index].current_z == m_parent->m_cur_level)
 			{
 				dialog_pos = m_parent->m_curNPCs->data[index].dialog_number;
+				npc_type = m_parent->m_curNPCs->data[index].type;
 				break;
 			}
 		}
@@ -1550,14 +1552,35 @@ void U5World::HandleTalk()
 
 	m_currentDialog = dialog_pos;
 
-	/*m_parent->m_console->NewPrompt();
-	m_process_key = std::bind(&U5World::ProcessAnyKeyHit, this);
-	m_input->SetRequireAllKeysUp();*/
+
+	if (m_currentDialog == 0)
+	{
+		// Guards offer a special no response
+		if (npc_type >= 0x70 && npc_type < 0x74)
+		{
+			m_parent->m_console->PrintText("\n");
+			m_parent->m_console->PrintText(m_resources->m_data.game_strings[GUARD_NO_RESPONSE_STRING]);
+		}
+		else
+		{
+			m_parent->m_console->PrintText("\n");
+			m_parent->m_console->PrintText(m_resources->m_data.game_strings[NO_RESPONSE_STRING]);
+		}
+		
+		m_parent->m_console->NewPrompt();
+		m_process_key = std::bind(&U5World::ProcessAnyKeyHit, this);
+		m_input->SetRequireAllKeysUp();
+		return;
+	}
 
 	m_process_key = std::bind(&U5World::DoTalk, this);
 }
 
 void U5World::DoTalk()
 {
-	
+	// TO DO: This is filler just to prevent locking up for the time being
+	m_parent->m_console->NewPrompt();
+	m_process_key = std::bind(&U5World::ProcessAnyKeyHit, this);
+	m_input->SetRequireAllKeysUp();
+	return;
 }

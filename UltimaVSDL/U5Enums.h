@@ -137,6 +137,8 @@ const int NO_EFFECT_STRING = 0x5fa;
 const int NOTHING_STRING = 0x329;
 const int TALK_STRING = 0x5e1;
 const int FUNNY_NO_RESPONSE_STRING = 0x5e2;
+const int GUARD_NO_RESPONSE_STRING = 0x4ee;
+const int NO_RESPONSE_STRING = 0x4ef;
 const int PASS_STRING = 0x2f7;
 const int NOBODY_HERE = 0x4f3;
 
