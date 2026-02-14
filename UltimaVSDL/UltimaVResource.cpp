@@ -13,6 +13,7 @@
 #include "GameOptions.h"
 #include <memory>
 #include <iostream>
+#include <map>
 
 extern std::unique_ptr<GameOptions> m_options;
 
@@ -127,6 +128,22 @@ int UltimaVResource::LoadResources()
 	{
 		return -1;
 	}
+	/*if (0 != LoadTalk(MapTypes::Castle))
+	{
+		return -1;
+	}
+	if (0 != LoadTalk(MapTypes::Dwelling))
+	{
+		return -1;
+	}
+	if (0 != LoadTalk(MapTypes::Keep))
+	{
+		return -1;
+	}*/
+	if (0 != LoadTalk(MapTypes::Town))
+	{
+		return -1;
+	}
 
 	return 0;
 }
@@ -146,7 +163,7 @@ uint32_t UltimaVResource::ReadInt32(std::vector<unsigned char>::const_iterator d
 	return retVal;
 }
 
-int UltimaVResource::ReadOffsets(std::vector<unsigned char> &data, int offsetSize, int numOffsets, std::vector<size_t> &file_offsets, size_t &curPos)
+int UltimaVResource::ReadOffsets(const std::vector<unsigned char> &data, int offsetSize, int numOffsets, std::vector<size_t> &file_offsets, size_t &curPos)
 {
 	if (data.size() < curPos + static_cast<size_t>(numOffsets * offsetSize))
 	{
@@ -916,10 +933,35 @@ bool UltimaVResource::ReadStrings(const std::vector<unsigned char>& buffer, std:
 	return true;
 }
 
+int UltimaVResource::ReadCompressedWords(const std::vector<unsigned char>& buffer)
+{
+	int NUM_COMPRESSED_WORDS = 0x81;
+	m_data.compressed_words.resize(NUM_COMPRESSED_WORDS);
+
+	std::vector<size_t> file_offsets;
+	size_t curPos = 0x24f8;
+	if (0 != ReadOffsets(buffer, 2, NUM_COMPRESSED_WORDS, file_offsets, curPos))
+	{
+		return -3;
+	}
+
+	for (int index = 0; index < NUM_COMPRESSED_WORDS; index++)
+	{
+		if (file_offsets[index] == 0)
+		{
+			continue;
+		}
+		size_t curOffset = file_offsets[index] + 0x10;
+		m_data.compressed_words[index] = ReadNextString(buffer.begin() + curOffset, buffer.end());
+	}
+
+	return 0;
+}
+
 int UltimaVResource::LoadDataOvl()
 {
-	std::vector<unsigned char> buffer;
-	int ret = LoadBuffer("DATA.OVL", buffer);
+	
+	int ret = LoadBuffer("DATA.OVL", m_data.buffer);
 
 	if (0 != ret)
 	{
@@ -928,127 +970,123 @@ int UltimaVResource::LoadDataOvl()
 
 	// The file should be 48464 (0xbd50) bytes long, but who knows if someone will ever hack the
 	// file, so just have a basic sanity check
-	if (buffer.size() < 0xA000)
+	if (m_data.buffer.size() < 0xA000)
 	{
 		return -2;
 	}
-	if (0 != LoadStory(buffer))
+	if (0 != LoadStory(m_data.buffer))
 	{
 		return -3;
 	}
-	if (0 != LoadEnding(buffer))
+	if (0 != LoadEnding(m_data.buffer))
 	{
 		return -4;
 	}
-	if (!ReadStrings(buffer, m_data.intro_strings, 0x311c, 0x3664))
+	if (!ReadStrings(m_data.buffer, m_data.intro_strings, 0x311c, 0x3664))
 	{
 		return -5;
 	}
-	if (!ReadStrings(buffer, m_data.intro_demo_string, 0xa020, 0xa053))
+	if (!ReadStrings(m_data.buffer, m_data.intro_demo_string, 0xa020, 0xa053))
 	{
 		return -5;
 	}
-	if (!ReadStrings(buffer, m_data.game_strings, 0x52, 0x129a))
+	if (!ReadStrings(m_data.buffer, m_data.game_strings, 0x52, 0x129a))
 	{
 		return -5;
 	}
-	if (!ReadStrings(buffer, m_data.game_strings, 0x266a, 0x28d5))
+	if (!ReadStrings(m_data.buffer, m_data.game_strings, 0x266a, 0x28d5))
 	{
 		return -5;
 	}
-	if (!ReadStrings(buffer, m_data.game_strings, 0x2956, 0x2bd0))
+	if (!ReadStrings(m_data.buffer, m_data.game_strings, 0x2956, 0x2bd0))
 	{
 		return -5;
 	}
-	if (!ReadStrings(buffer, m_data.game_strings, 0x2c8c, 0x2df8))
+	if (!ReadStrings(m_data.buffer, m_data.game_strings, 0x2c8c, 0x2df8))
 	{
 		return -5;
 	}
-	if (!ReadStrings(buffer, m_data.game_strings, 0x6aea, 0x6d56))
+	if (!ReadStrings(m_data.buffer, m_data.game_strings, 0x6aea, 0x6d56))
 	{
 		return -5;
 	}
-	if (!ReadStrings(buffer, m_data.game_strings, 0x6d84, 0x7010))
+	if (!ReadStrings(m_data.buffer, m_data.game_strings, 0x6d84, 0x7010))
 	{
 		return -5;
 	}
-	if (!ReadStrings(buffer, m_data.game_strings, 0x702a, 0x70e8))
-	{
-		return -5;
-	}
-
-	if (!ReadStrings(buffer, m_data.game_strings, 0x70f2, 0x71d1))
+	if (!ReadStrings(m_data.buffer, m_data.game_strings, 0x702a, 0x70e8))
 	{
 		return -5;
 	}
 
-	if (!ReadStrings(buffer, m_data.game_strings, 0x71dc, 0x7208))
+	if (!ReadStrings(m_data.buffer, m_data.game_strings, 0x70f2, 0x71d1))
 	{
 		return -5;
 	}
 
-	if (!ReadStrings(buffer, m_data.game_strings, 0x721c, 0x7384))
+	if (!ReadStrings(m_data.buffer, m_data.game_strings, 0x71dc, 0x7208))
 	{
 		return -5;
 	}
 
-	if (!ReadStrings(buffer, m_data.game_strings, 0x7398, 0x74f5))
+	if (!ReadStrings(m_data.buffer, m_data.game_strings, 0x721c, 0x7384))
 	{
 		return -5;
 	}
 
-	if (!ReadStrings(buffer, m_data.game_strings, 0x750a, 0x77f3))
+	if (!ReadStrings(m_data.buffer, m_data.game_strings, 0x7398, 0x74f5))
 	{
 		return -5;
 	}
 
-	if (!ReadStrings(buffer, m_data.game_strings, 0x7808, 0x7850))
+	if (!ReadStrings(m_data.buffer, m_data.game_strings, 0x750a, 0x77f3))
 	{
 		return -5;
 	}
 
-	if (!ReadStrings(buffer, m_data.game_strings, 0x785c, 0x7a19))
+	if (!ReadStrings(m_data.buffer, m_data.game_strings, 0x7808, 0x7850))
 	{
 		return -5;
 	}
 
-	if (!ReadStrings(buffer, m_data.game_strings, 0x7a26, 0x7f09))
+	if (!ReadStrings(m_data.buffer, m_data.game_strings, 0x785c, 0x7a19))
 	{
 		return -5;
 	}
 
-	if (!ReadStrings(buffer, m_data.game_strings, 0x7f26, 0x820e))
+	if (!ReadStrings(m_data.buffer, m_data.game_strings, 0x7a26, 0x7f09))
 	{
 		return -5;
 	}
 
-	if (!ReadStrings(buffer, m_data.game_strings, 0x8216, 0x848f))
+	if (!ReadStrings(m_data.buffer, m_data.game_strings, 0x7f26, 0x820e))
 	{
 		return -5;
 	}
 
-	if (!ReadStrings(buffer, m_data.game_strings, 0x84aa, 0x9215))
+	if (!ReadStrings(m_data.buffer, m_data.game_strings, 0x8216, 0x848f))
 	{
 		return -5;
 	}
 
-	if (!ReadStrings(buffer, m_data.game_strings, 0x9338, 0xa45a))
-	{
-		return -5;
-	}
-	if (!ReadStrings(buffer, m_data.game_strings, 0x441b, 0x4aa9))
+	if (!ReadStrings(m_data.buffer, m_data.game_strings, 0x84aa, 0x9215))
 	{
 		return -5;
 	}
 
-	/*if (!ReadStrings(buffer, m_data.intro_strings, 0x750a, 0xa459))
+	if (!ReadStrings(m_data.buffer, m_data.game_strings, 0x9338, 0xa45a))
 	{
 		return -5;
-	}*/
+	}
+	if (!ReadStrings(m_data.buffer, m_data.game_strings, 0x441b, 0x4aa9))
+	{
+		return -5;
+	}
+
 	const size_t MAP_CHUNK_LOC = 0x3886;
 	const size_t MAP_NUM_CHUNKS = 0x100;
 
-	std::copy_n(buffer.begin() + MAP_CHUNK_LOC, MAP_NUM_CHUNKS, m_data.map_chunks.begin());
+	std::copy_n(m_data.buffer.begin() + MAP_CHUNK_LOC, MAP_NUM_CHUNKS, m_data.map_chunks.begin());
 
 	const size_t LOCATION_X = 0x1e9a;
 	const size_t LOCATION_Y = 0x1ec2;
@@ -1057,12 +1095,12 @@ int UltimaVResource::LoadDataOvl()
 
 	for (size_t index = 0; index < m_data.location_info.size(); index++)
 	{
-		m_data.location_info[index].first = buffer[LOCATION_X + index];
-		m_data.location_info[index].second = buffer[LOCATION_Y + index];
+		m_data.location_info[index].first = m_data.buffer[LOCATION_X + index];
+		m_data.location_info[index].second = m_data.buffer[LOCATION_Y + index];
 
 		if (index < 32)
 		{
-			m_data.location_z_index[index] = buffer[LOCATION_Z + index];
+			m_data.location_z_index[index] = m_data.buffer[LOCATION_Z + index];
 			if (m_data.location_z_index[index] >= 16)
 			{
 				return -6;
@@ -1071,14 +1109,19 @@ int UltimaVResource::LoadDataOvl()
 
 		uint32_t name_offset;
 		size_t curPos = LOCATION_NAME_OFFSET + (2 * index);
-		name_offset = ReadInt16(buffer.begin(), curPos);
+		name_offset = ReadInt16(m_data.buffer.begin(), curPos);
 		name_offset += 0x10;
-		m_data.location_names[index] = ReadNextString(buffer.begin() + name_offset, buffer.end());
+		m_data.location_names[index] = ReadNextString(m_data.buffer.begin() + name_offset, m_data.buffer.end());
 	}
 
-	if (0 != LoadDungeonSigns(buffer))
+	if (0 != LoadDungeonSigns(m_data.buffer))
 	{
 		return -7;
+	}
+
+	if(0 != ReadCompressedWords(m_data.buffer))
+	{
+		return -8;
 	}
 
 	return 0;
@@ -1683,6 +1726,126 @@ int UltimaVResource::LoadLookData()
 			return -4;
 		}
 		m_LookData[index] = ReadNextString(buffer.begin() + curPos, buffer.end());
+	}
+
+	return 0;
+}
+
+int UltimaVResource::LoadTalk(MapTypes map_type)
+{
+	std::string strStoryFile;
+	switch (map_type)
+	{
+	case MapTypes::Castle:
+		strStoryFile = std::string("CASTLE.TLK");
+		break;
+	case MapTypes::Dwelling:
+		strStoryFile = std::string("DWELLING.TLK");
+		break;
+	case MapTypes::Keep:
+		strStoryFile = std::string("KEEP.TLK");
+		break;
+	case MapTypes::Town:
+		strStoryFile = std::string("TOWNE.TLK");
+		break;
+	default:
+		return -1;
+	}
+
+	std::vector<unsigned char> buffer;
+	int ret = LoadBuffer(strStoryFile, buffer);
+
+	if (0 != ret)
+	{
+		return ret;
+	}
+
+	size_t curpos = 0;
+
+	uint32_t numIds = ReadInt16(buffer.begin(), curpos);
+
+	std::map< uint32_t, uint32_t> talk_map;
+	for (uint32_t index = 0; index < numIds; index++)
+	{
+		uint32_t id_num = ReadInt16(buffer.begin(), curpos);
+		uint32_t offset = ReadInt16(buffer.begin(), curpos);
+
+		talk_map[id_num] = offset;
+	}
+	U5Dialog dlg;
+
+	for (auto& talkdata : talk_map)
+	{
+		int curFix = 0;
+		curpos = talkdata.second;
+		unsigned char next_3[3]{};
+		unsigned char cur_char = 0;
+		std::string strCurString;
+		while (1)
+		{
+			if (curpos + 3 > buffer.size())
+			{
+				return -1;
+			}
+			cur_char = next_3[0] = buffer[curpos];
+			next_3[1] = buffer[curpos + 1];
+			next_3[2] = buffer[curpos + 2];
+			curpos++;
+
+			if (next_3[0] == 0x90 && next_3[1] == 0x9f && next_3[2] == 0xc0)
+			{
+				break;
+			}
+
+			if (cur_char >= 160 && (cur_char < 255))
+			{
+				char c = static_cast<char>(cur_char - 128);
+				strCurString += c;
+			}
+			else if (cur_char == 0)
+			{
+				switch (curFix)
+				{
+				case 0: // name
+					dlg.name.push_back({ 0, strCurString });
+					strCurString.clear();
+					curFix++;
+					break;
+				case 1: // description
+					dlg.description.push_back({ 0, strCurString });
+					strCurString.clear();
+					curFix++;
+					break;
+				case 2: // greeting
+					dlg.greeting.push_back({ 0, strCurString });
+					strCurString.clear();
+					curFix++;
+					break;
+				case 3: // job
+					dlg.job.push_back({ 0, strCurString });
+					strCurString.clear();
+					curFix++;
+					break;
+				case 4: // bye
+					dlg.bye.push_back({ 0, strCurString });
+					strCurString.clear();
+					curFix++;
+					break;
+				default:
+					break;
+				}
+			}
+			else if (cur_char < 0x81)
+			{
+				strCurString += " ";
+				strCurString += m_data.compressed_words[cur_char];
+				strCurString += " ";
+			}
+			else // special case
+			{
+				int j = 9;
+			}
+		}
 	}
 
 	return 0;

@@ -68,6 +68,7 @@ private:
 	void HandleYell();
 
 	bool DoYell();
+	void DoTalk();
 
 	void HandleNorth();
 	void HandleSouth();
@@ -89,5 +90,6 @@ private:
 	bool m_allowMove;
 	std::string m_displayWord;
 	bool m_allowNewLine;
+	int m_currentDialog;
 };
 

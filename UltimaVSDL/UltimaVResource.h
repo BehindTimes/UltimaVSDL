@@ -88,6 +88,7 @@ struct U5Data
 		npc_info{}
 	{
 	}
+	std::vector<unsigned char> buffer;
 	const size_t NUM_STORIES = 21;
 	const size_t NUM_ENDING = 6;
 	std::vector<U5StoryScreen> story_text{ NUM_STORIES };
@@ -110,6 +111,7 @@ struct U5Data
 	std::array<std::string, 0x28> location_names;
 	std::array<int, 0x20> location_z_index;
 	std::array< NPC_File, 4> npc_info;
+	std::vector<std::string> compressed_words;
 };
 
 struct IntroScriptInstruction {
@@ -183,6 +185,21 @@ const size_t CUTSCENE_HEIGHT = 11;
 const size_t DEMO_WIDTH = 19;
 const size_t DEMO_HEIGHT = 4;
 
+
+enum TLK_ENUM
+{
+	TLK_STRING
+};
+
+struct U5Dialog
+{
+	std::vector<std::pair<int, std::string>> name;
+	std::vector<std::pair<int, std::string>> description;
+	std::vector<std::pair<int, std::string>> greeting;
+	std::vector<std::pair<int, std::string>> job;
+	std::vector<std::pair<int, std::string>> bye;
+};
+
 class UltimaVResource
 {
 public:
@@ -234,6 +251,7 @@ private:
 	int LoadSigns();
 	int LoadDungeonSigns(const std::vector<unsigned char>& buffer);
 	int LoadLookData();
+	int LoadTalk(MapTypes map_type);
 
 	int ParseCharacterFile(std::vector<U5ImageData>& bit_file_data, std::vector<unsigned char>& data, int width, int height);
 	int ParseBitFile(std::vector<U5ImageData> &bit_file_data, std::vector<unsigned char> &data);
@@ -242,10 +260,11 @@ private:
 	int MergeMask(U5ImageData& outImage, U5ImageData& mask);
 	uint32_t ReadInt16(std::vector<unsigned char>::const_iterator data, size_t &curPos);
 	uint32_t ReadInt32(std::vector<unsigned char>::const_iterator data, size_t &curPos);
-	int ReadOffsets(std::vector<unsigned char> &data, int offsetSize, int numOffsets, std::vector<size_t> &file_offsets, size_t &curPos);
+	int ReadOffsets(const std::vector<unsigned char> &data, int offsetSize, int numOffsets, std::vector<size_t> &file_offsets, size_t &curPos);
 	int ReadImage(std::vector<unsigned char> &data, size_t offset, int numPixelsPerByte, U5ImageData& outImage);
 	void LoadStoryText(const std::vector<unsigned char>& buffer, size_t pos, std::vector<unsigned char>& text);
 	bool ReadStrings(const std::vector<unsigned char>& buffer, std::vector<std::string>& str_vec, size_t start_pos, size_t end_pos);
+	int ReadCompressedWords(const std::vector<unsigned char>& buffer);
 	std::string ReadNextString(std::vector<unsigned char>::const_iterator data, std::vector<unsigned char>::const_iterator end);
 	void SwapCharset(std::string& curString);
 };

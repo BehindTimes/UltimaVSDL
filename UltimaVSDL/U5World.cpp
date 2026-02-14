@@ -31,7 +31,8 @@ U5World::U5World(SDL3Helper* sdl_helper, UltimaVResource* u5_resources) :
 	m_location_type(GameLocation::World),
 	m_parent(nullptr),
 	m_allowMove(true),
-	m_allowNewLine(true)
+	m_allowNewLine(true),
+	m_currentDialog(-1)
 {
 	//m_xpos = 50;
 	//m_ypos = 50;
@@ -1490,7 +1491,7 @@ void U5World::HandleTalk()
 	default:
 		return;
 	}
-	if (m_location_type == GameLocation::World || m_location_type == GameLocation::Underworld)
+	if (m_parent->m_location == GameLocation::World || m_parent->m_location == GameLocation::Underworld)
 	{
 		m_parent->m_console->PrintText(m_resources->m_data.game_strings[FUNNY_NO_RESPONSE_STRING]);
 		m_parent->m_console->NewPrompt();
@@ -1498,4 +1499,65 @@ void U5World::HandleTalk()
 		m_input->SetRequireAllKeysUp();
 		return;
 	}
+
+	if (tempx < 0 || tempy < 0 || tempx > 31 || tempy > 31)
+	{
+		m_parent->m_console->PrintText(m_resources->m_data.game_strings[NOBODY_HERE]);
+		m_parent->m_console->NewPrompt();
+		m_process_key = std::bind(&U5World::ProcessAnyKeyHit, this);
+		m_input->SetRequireAllKeysUp();
+		return;
+	}
+
+	int curpos = m_parent->m_currentMap[tempx][tempy];
+	if ((curpos >= 154 && curpos <= 156) ||
+		(curpos >= 148 && curpos <= 150))
+	{
+		if (ret == 'U')
+		{
+			tempy--;
+		}
+		else if (ret == 'D')
+		{
+			tempy++;
+		}
+	}
+	
+	int dialog_pos = -1;
+	// Check if NPC
+	if (m_parent->m_curNPCs != nullptr)
+	{
+		for (int index = 1; index < 32; index++)
+		{
+			if (m_parent->m_curNPCs->data[index].current_x == tempx &&
+				m_parent->m_curNPCs->data[index].current_y == tempy &&
+				m_parent->m_curNPCs->data[index].current_z == m_parent->m_cur_level)
+			{
+				dialog_pos = m_parent->m_curNPCs->data[index].dialog_number;
+				break;
+			}
+		}
+	}
+
+	if (dialog_pos < 0)
+	{
+		m_parent->m_console->PrintText(m_resources->m_data.game_strings[NOBODY_HERE]);
+		m_parent->m_console->NewPrompt();
+		m_process_key = std::bind(&U5World::ProcessAnyKeyHit, this);
+		m_input->SetRequireAllKeysUp();
+		return;
+	}
+
+	m_currentDialog = dialog_pos;
+
+	/*m_parent->m_console->NewPrompt();
+	m_process_key = std::bind(&U5World::ProcessAnyKeyHit, this);
+	m_input->SetRequireAllKeysUp();*/
+
+	m_process_key = std::bind(&U5World::DoTalk, this);
+}
+
+void U5World::DoTalk()
+{
+	
 }
