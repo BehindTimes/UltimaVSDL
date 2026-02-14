@@ -1652,7 +1652,7 @@ int UltimaVResource::LoadSigns()
 			{
 				return -1;
 			}
-			m_SignData[index].emplace_back(x, y, z, strOut);
+			m_SignData[index].emplace_back(x, y, static_cast<int8_t>(z), strOut);
 			curPos++;
 		}
 	}
@@ -1673,7 +1673,14 @@ void UltimaVResource::SwapCharset(std::string& curString)
 		{
 			if (c != 0xa)
 			{
-				c += 128;
+				if (c == 0x29)
+				{
+					c = 0xa;
+				}
+				else
+				{
+					c += 128;
+				}
 			}
 		}
 		curString[index] = static_cast<char>(c);
