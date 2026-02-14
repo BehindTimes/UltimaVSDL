@@ -144,6 +144,11 @@ std::vector<std::string> U5Console::FormatText(std::string text, int startElem, 
 		max_len = CONSOLE_SIZE;
 	}
 
+	if (pretty_print)
+	{
+		m_utilities->ReplaceStringInPlace(text, "  ", " ");
+	}
+
 	bool valid = true;
 	while (valid)
 	{

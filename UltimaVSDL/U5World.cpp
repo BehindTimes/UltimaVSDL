@@ -1588,13 +1588,19 @@ void U5World::DoTalk()
 	else
 	{
 		auto& curDialog = m_parent->m_talk_data[m_currentDialog];
+
+		m_parent->m_console->PrintText("\n");
+		m_parent->m_console->PrintText(m_resources->m_data.game_strings[YOU_SEE_STRING]);
+
 		for (auto& curDesc : curDialog.description)
 		{
 			if (curDesc.first == 0)
 			{
-				m_parent->m_console->PrintText("\n");
-				m_parent->m_console->PrintText(m_resources->m_data.game_strings[YOU_SEE_STRING]);
 				m_parent->m_console->PrintText(curDesc.second);
+			}
+			else if (curDesc.first == 0x8d)
+			{
+				m_parent->m_console->PrintText("\n");
 			}
 		}
 	}
