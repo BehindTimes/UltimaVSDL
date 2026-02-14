@@ -1786,6 +1786,11 @@ int UltimaVResource::LoadTalk(MapTypes map_type)
 		std::string strCurString;
 		U5Dialog& dlg = curTalkData[static_cast<int>(talkdata.first)];
 		std::vector<std::pair<int, std::string>> curData;
+		bool labelMode = false;
+		bool keywordMode = true;
+		int isDefault = -1;
+		int curId = -1;
+		std::vector<std::string> keyword_vec;
 		while (1)
 		{
 			if (curpos + 3 > buffer.size())
@@ -1862,6 +1867,187 @@ int UltimaVResource::LoadTalk(MapTypes map_type)
 					curFix++;
 					break;
 				default:
+					if (strCurString.size() > 0)
+					{
+						curData.emplace_back(0, strCurString);
+					}
+					if (labelMode)
+					{
+						/*if (dlg.name.front().second == "Stillwelt")
+						{
+							int j = 9;
+						}*/
+
+						if (keywordMode)
+						{
+							if (curData.empty())
+							{
+								break; // Corrupt talk file
+							}
+							keywordMode = false;
+
+							if (isDefault < 0)
+							{
+								// No actual answers allowed besides the default
+								if (curData[0].first == 0x90)
+								{
+									isDefault = 0;
+								}
+							}
+
+							if (isDefault == 1) // Default answer
+							{
+								dlg.labels[curId].default_answer = curData;
+								isDefault = -1;
+								keywordMode = true;
+							}
+							else if (isDefault == 0) // New label
+							{
+								// We've entered label territory
+								keyword_vec.clear();
+								if (curData[0].first >= 0x90 && curData[0].first <= 0x9b)
+								{
+									if (curData.size() < 3)
+									{
+										break; // Corrupt talk file
+									}
+									else if (curData[1].first < 0x91 || curData[1].first > 0x9b)
+									{
+										break; // Corrupt talk file
+									}
+
+									curId = curData[1].first;
+									curData.erase(curData.begin(), curData.begin() + 2);
+									dlg.labels[curId] = U5DialogLabel{};
+									dlg.labels[curId].text = curData;
+
+									if (curData.back().first == 0)
+									{
+										isDefault = 1;
+									}
+									else
+									{
+										isDefault = 0;
+									}
+									keywordMode = true;
+								}
+								else
+								{
+									break; // Corrupt talk file
+								}
+							}
+							else // Read the keyword in
+							{
+								// This should always be a string, but there are errors in the script.
+								// Unlike the other areas where the conversation will end prematurely, this continues on
+								if (curData[0].first == 0)
+								{
+									keyword_vec.push_back(curData[0].second);
+								}
+							}
+						}
+						else
+						{
+							if (curData.empty())
+							{
+								break; // Corrupt talk file
+							}
+
+							switch (curData[0].first)
+							{
+							case 0x87: // Previous keyword(s) or this keyword
+								keywordMode = true;
+								break;
+							default:
+								for (auto& curKeyword : keyword_vec)
+								{
+									dlg.labels[curId].keywords[curKeyword] = curData;
+								}
+								keywordMode = true;
+								keyword_vec.clear();
+								break;
+							}
+						}
+					}
+					else // keyword mode
+					{
+						if (keywordMode)
+						{
+							keywordMode = false;
+							if (curData.empty())
+							{
+								break; // Corrupt talk file
+							}
+							else if (curData.size() != 1)
+							{
+								// We've entered label territory
+								if (curData[0].first >= 0x90 && curData[0].first <= 0x9b)
+								{
+									labelMode = true;
+									keywordMode = true;
+									if (curData.size() < 3)
+									{
+										break; // Corrupt talk file
+									}
+									else if (curData[1].first < 0x91 || curData[1].first > 0x9b)
+									{
+										break; // Corrupt talk file
+									}
+
+									curId = curData[1].first;
+									curData.erase(curData.begin(), curData.begin() + 2);
+									dlg.labels[curId] = U5DialogLabel{};
+									dlg.labels[curId].text = curData;
+
+									if (curData.back().first == 0)
+									{
+										isDefault = 1;
+									}
+									else
+									{
+										isDefault = 0;
+									}
+								}
+								else
+								{
+									break; // Corrupt talk file
+								}
+							}
+							else
+							{
+								// This should always be a string, but there are errors in the script.
+								// Unlike the other areas where the conversation will end prematurely, this continues on
+								if (curData[0].first == 0)
+								{
+									keyword_vec.push_back(curData[0].second);
+								}
+							}
+						}
+						else
+						{
+							if (curData.empty())
+							{
+								break; // Corrupt talk file
+							}
+							else
+							{
+								switch (curData[0].first)
+								{
+								case 0x87: // Previous keyword(s) or this keyword
+									keywordMode = true;
+									break;
+								default:
+									for (auto& curKeyword : keyword_vec)
+									{
+										dlg.keywords[curKeyword] = curData;
+									}
+									keywordMode = true;
+									keyword_vec.clear();
+									break;
+								}
+							}
+						}
+					}
 					strCurString.clear();
 					curData.clear();
 					break;
@@ -1881,6 +2067,26 @@ int UltimaVResource::LoadTalk(MapTypes map_type)
 					strCurString.clear();
 				}
 				curData.emplace_back(cur_char, "");
+				// Subtract Gold, next 3 characters, store in string
+				if (cur_char == 0x85)
+				{
+					std::string gold_val;
+					if (buffer[curpos + 1] < 128 || buffer[curpos + 2] < 128 || buffer[curpos + 3] < 128)
+					{
+						break; // Corrupt talk file
+					}
+					gold_val += (buffer[curpos] - 128);
+					gold_val += (buffer[curpos + 1] - 128);
+					gold_val += (buffer[curpos + 2] - 128);
+					curpos += 3;
+					curData.back().second = gold_val;
+				}
+				// Change item, store this as a new keyword
+				else if (cur_char == 0x86)
+				{
+					curData.emplace_back(next_3[1], "");
+					curpos++;
+				}
 			}
 		}
 	}
