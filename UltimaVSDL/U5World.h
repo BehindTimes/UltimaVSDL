@@ -95,6 +95,5 @@ private:
 	std::string m_displayWord;
 	bool m_allowNewLine;
 	int m_currentDialog;
-	bool m_refreshConsole;
 };
 

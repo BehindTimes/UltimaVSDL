@@ -82,7 +82,7 @@ enum class MapTypes
 };
 
 const int MAX_YELL = 30;
-const int MAX_TALK = 16;
+const int MAX_TALK = 15;
 
 const int NORTH_STRING = 0x249;
 const int SOUTH_STRING = 0x24a;

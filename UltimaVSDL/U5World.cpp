@@ -32,8 +32,7 @@ U5World::U5World(SDL3Helper* sdl_helper, UltimaVResource* u5_resources) :
 	m_parent(nullptr),
 	m_allowMove(true),
 	m_allowNewLine(true),
-	m_currentDialog(-1),
-	m_refreshConsole(false)
+	m_currentDialog(-1)
 {
 	//m_xpos = 50;
 	//m_ypos = 50;
@@ -1342,7 +1341,6 @@ void U5World::ProcessYell()
 	m_parent->m_console->PrintText(m_resources->m_data.game_strings[WHAT_COLON_STRING]);
 	m_process_key = std::bind(&U5World::HandleYell, this);
 	m_allowNewLine = true;
-	m_refreshConsole = false;
 }
 
 int U5World::ProcessLetterImmediate()
@@ -1380,17 +1378,11 @@ bool U5World::DoYell()
 
 void U5World::HandleYell()
 {
-	bool isScrolling = m_parent->m_console->m_scroll;
-	if (isScrolling)
+	// Don't allow text input during a scroll
+	if (m_parent->m_console->m_scroll)
 	{
-		m_refreshConsole = true;
+		return;
 	}
-	if (m_refreshConsole && !isScrolling)
-	{
-		m_parent->m_console->PrintEditText(m_displayWord, m_allowNewLine);
-		m_refreshConsole = false;
-	}
-
 	int ret = ProcessLetterImmediate();
 	m_input->m_isValid = false;
 	if (ret < 0)
@@ -1657,22 +1649,15 @@ void U5World::ProcessTalkInput()
 	m_parent->m_console->PrintText(":");
 	m_process_key = std::bind(&U5World::HandleTalkInput, this);
 	m_allowNewLine = true;
-	m_refreshConsole = false;
 }
 
 void U5World::HandleTalkInput()
 {
-	bool isScrolling = m_parent->m_console->m_scroll;
-	if (isScrolling)
+	// Don't allow text input during a scroll
+	if (m_parent->m_console->m_scroll)
 	{
-		m_refreshConsole = true;
+		return;
 	}
-	if (m_refreshConsole && !isScrolling)
-	{
-		m_parent->m_console->PrintEditText(m_displayWord, m_allowNewLine);
-		m_refreshConsole = false;
-	}
-
 	int ret = ProcessLetterImmediate();
 	m_input->m_isValid = false;
 	if (ret < 0)
