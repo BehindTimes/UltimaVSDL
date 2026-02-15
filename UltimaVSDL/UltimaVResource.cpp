@@ -1814,7 +1814,7 @@ int UltimaVResource::LoadTalk(MapTypes map_type)
 				break;
 			}
 
-			if (cur_char >= 160 && (cur_char < 255))
+			if (cur_char >= 160 && (cur_char < 254))
 			{
 				char c = static_cast<char>(cur_char - 128);
 				strCurString += c;
@@ -1880,7 +1880,7 @@ int UltimaVResource::LoadTalk(MapTypes map_type)
 					}
 					if (labelMode)
 					{
-						/*if (dlg.name.front().second == "Stillwelt")
+						/*if (dlg.name.front().second == "Annon")
 						{
 							int j = 9;
 						}*/
@@ -2022,6 +2022,10 @@ int UltimaVResource::LoadTalk(MapTypes map_type)
 							}
 							else
 							{
+								/*if (dlg.name.front().second == "Annon")
+								{
+									int j = 9;
+								}*/
 								// This should always be a string, but there are errors in the script.
 								// Unlike the other areas where the conversation will end prematurely, this continues on
 								if (curData[0].first == 0)
@@ -2038,6 +2042,11 @@ int UltimaVResource::LoadTalk(MapTypes map_type)
 							}
 							else
 							{
+								/*if (dlg.name.front().second == "Annon")
+								{
+									int j = 9;
+								}*/
+
 								switch (curData[0].first)
 								{
 								case 0x87: // Previous keyword(s) or this keyword
@@ -2062,7 +2071,13 @@ int UltimaVResource::LoadTalk(MapTypes map_type)
 			}
 			else if (cur_char < 0x81)
 			{
-				strCurString += " ";
+				if (!strCurString.empty())
+				{
+					if (strCurString.back() != ' ')
+					{
+						strCurString += " ";
+					}
+				}
 				strCurString += m_data.compressed_words[cur_char];
 				strCurString += " ";
 			}
@@ -2090,6 +2105,12 @@ int UltimaVResource::LoadTalk(MapTypes map_type)
 				}
 				// Change item, store this as a new keyword
 				else if (cur_char == 0x86)
+				{
+					curData.emplace_back(next_3[1], "");
+					curpos++;
+				}
+				// test karma
+				else if (cur_char == 0xfe)
 				{
 					curData.emplace_back(next_3[1], "");
 					curpos++;
