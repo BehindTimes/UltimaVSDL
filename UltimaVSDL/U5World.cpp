@@ -77,10 +77,20 @@ void U5World::DrawNPCs()
 	// Index 0 is the Avatar
 	for (int index = 1; index < 32; index++)
 	{
-		if (m_parent->m_curNPCs->data[index].current_z != m_parent->m_cur_level)
+		int mapXMin = m_xpos - 6;
+		int mapYMin = m_ypos - 6;
+		int mapXMax = m_xpos + 6;
+		int mapYMax = m_ypos + 6;
+
+		if (m_parent->m_curNPCs->data[index].current_x < mapXMin ||
+			m_parent->m_curNPCs->data[index].current_x > mapXMax ||
+			m_parent->m_curNPCs->data[index].current_y < mapYMin ||
+			m_parent->m_curNPCs->data[index].current_y > mapYMax ||
+			m_parent->m_curNPCs->data[index].current_z != m_parent->m_cur_level)
 		{
 			continue;
 		}
+
 		int curpos = m_parent->m_curNPCs->data[index].type + 0x100;
 
 		if (curpos >= m_sdl_helper->m_TileTextures.size() || curpos == 0x100)
