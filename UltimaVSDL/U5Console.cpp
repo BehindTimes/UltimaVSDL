@@ -35,7 +35,9 @@ U5Console::U5Console(SDL3Helper* sdl_helper, UltimaVResource* u5_resources) :
 	m_startLine(0),
 	m_blockPrompt(false),
 	m_hasPrompt(true),
-	m_smoothscroll(m_options->m_console_smooth_scroll)
+	m_smoothscroll(m_options->m_console_smooth_scroll),
+	m_cached_startLine(0),
+	m_is_editing(false)
 {
 	ShowPrompt();
 }
@@ -251,7 +253,81 @@ void U5Console::BackspaceCursor()
 	}
 }
 
-void U5Console::PrintEditText(std::string text, bool allowNewLine)
+void U5Console::StartLineEdit()
+{
+	m_cachedText.clear();
+	m_cached_startLine = m_curLine;
+	m_is_editing = true;
+}
+
+void U5Console::EndLineEdit()
+{
+	m_cached_startLine = m_curLine;
+	m_is_editing = false;
+}
+
+bool U5Console::LineWasIncremented() const
+{
+	return m_cached_startLine == m_curLine;
+}
+
+// TO DO: Before text entry, we can grab the current m_curLine.
+// This way, we can enter multiline text into the console, rather
+// than just the hack
+void U5Console::PrintEditText(std::string text)
+{
+	/*if (m_scroll)
+	{
+		return;
+	}*/
+	m_cachedText = text;
+
+	int scroll_offset = m_scroll ? 1 : 0;
+	int temp_curline = m_curLine + scroll_offset;
+	const int CONSOLE_SIZE = 16;
+
+	std::string str1 = text;
+	std::string str2;
+	int second_line = (m_cached_startLine + 1) % NUM_BUF_LINES;
+
+	int cursorline = 12;
+
+	if (text.length() >= CONSOLE_SIZE - 1)
+	{
+		if (m_cached_startLine == temp_curline)
+		{
+			PrintText("\n");
+		}
+		str1 = text.substr(0, CONSOLE_SIZE - 1);
+		str2 = text.substr(CONSOLE_SIZE - 1);
+		m_cursorPosY = second_line;
+	}
+	else
+	{
+		if (m_cached_startLine != temp_curline)
+		{
+			cursorline = 11;
+		}
+	}
+	
+	m_sdl_helper->SetRenderTarget(m_sdl_helper->m_TargetTextures[TTV_CONSOLE_BUFFER]);
+	m_sdl_helper->DrawTileRect(1, m_cached_startLine, CONSOLE_SIZE, 1);
+	m_sdl_helper->DrawTiledText(str1, 1, m_cached_startLine);
+	if (m_cached_startLine != temp_curline)
+	{
+		m_sdl_helper->DrawTileRect(0, second_line, CONSOLE_SIZE, 1);
+		m_sdl_helper->DrawTiledText(str2, 0, second_line);
+	}
+	m_cursorPosX = static_cast<int>(str1.size() + 1);
+	if (str1.size() >= CONSOLE_SIZE - 1)
+	{
+		m_cursorPosX = static_cast<int>(str2.size());
+	}
+	m_cursorPosY = cursorline;
+	m_sdl_helper->SetRenderTarget(nullptr);
+}
+
+/*void U5Console::PrintEditText(std::string text, bool allowNewLine)
 {
 	if (m_scroll)
 	{
@@ -284,7 +360,7 @@ void U5Console::PrintEditText(std::string text, bool allowNewLine)
 			return;
 		}
 	}
-	
+
 	m_sdl_helper->SetRenderTarget(m_sdl_helper->m_TargetTextures[TTV_CONSOLE_BUFFER]);
 	m_sdl_helper->DrawTileRect(1, drawline, CONSOLE_SIZE, 1);
 	if (m_curLine != drawline)
@@ -303,7 +379,7 @@ void U5Console::PrintEditText(std::string text, bool allowNewLine)
 	}
 	m_cursorPosY = cursorline;
 	m_sdl_helper->SetRenderTarget(nullptr);
-}
+}*/
 
 void U5Console::PrintText(std::string text, bool showElem, bool partial, bool pretty_print)
 {
@@ -341,6 +417,19 @@ void U5Console::PrintText(std::string text, bool showElem, bool partial, bool pr
 	}
 }
 
+bool U5Console::IsReady()
+{
+	if (m_scroll)
+	{
+		return false;
+	}
+	if (!m_buffer_strings.empty())
+	{
+		return false;
+	}
+	return true;
+}
+
 void U5Console::ProcessScroll()
 {
 	m_curScrollDelay += m_tickElapse;
@@ -364,6 +453,11 @@ void U5Console::ProcessScroll()
 			m_cursorPosX = 0;
 		}
 		CheckText();
+
+		if (m_is_editing)
+		{
+			PrintEditText(m_cachedText);
+		}
 	}
 	else
 	{

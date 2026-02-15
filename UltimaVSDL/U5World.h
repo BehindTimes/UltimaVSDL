@@ -68,6 +68,9 @@ private:
 	void HandleTalk();
 	void HandleYell();
 
+	void StartTalk();
+	void StartYell();
+
 	bool DoYell();
 	void DoTalk();
 
@@ -93,7 +96,6 @@ private:
 	U5Game* m_parent;
 	bool m_allowMove;
 	std::string m_displayWord;
-	bool m_allowNewLine;
 	int m_currentDialog;
 };
 

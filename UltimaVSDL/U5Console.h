@@ -16,7 +16,7 @@ public:
 
 	void Render(Uint64 tickElapse);
 	void PrintText(std::string text, bool showElem = false, bool partial = false, bool pretty_print = true);
-	void PrintEditText(std::string text, bool allowNewLine);
+	void PrintEditText(std::string text);
 	void NewPrompt();
 	void ShowPrompt();
 	void UpdateCursor();
@@ -24,7 +24,11 @@ public:
 	void BlockPrompt(bool block);
 	void SetCursorStartPosX(int startPos);
 
-	bool m_scroll;
+	void StartLineEdit();
+	void EndLineEdit();
+	bool LineWasIncremented() const;
+
+	bool IsReady();
 
 private:
 	void RenderCursor();
@@ -51,10 +55,14 @@ private:
 
 	float m_scrollOffset;
 	int m_startLine;
+	int m_cached_startLine;
+	bool m_is_editing;
 
 	const Uint64 CURSOR_RENDER_DELAY = 100;
 	const Uint64 SCROLL_DELAY = 60;
 	const int NUM_BUF_LINES = 14;
 	std::deque<std::pair<int, std::string>> m_buffer_strings;
+	bool m_scroll;
+	std::string m_cachedText;
 };
 
