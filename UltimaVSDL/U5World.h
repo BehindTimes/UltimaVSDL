@@ -85,6 +85,9 @@ private:
 
 	void PrintSign(int x, int y, int z);
 
+	void ProcessTalkInput();
+	void HandleTalkInput();
+
 	std::function<void()> m_process_key;
 
 	U5Game* m_parent;
@@ -92,5 +95,6 @@ private:
 	std::string m_displayWord;
 	bool m_allowNewLine;
 	int m_currentDialog;
+	bool m_refreshConsole;
 };
 

@@ -32,7 +32,8 @@ U5World::U5World(SDL3Helper* sdl_helper, UltimaVResource* u5_resources) :
 	m_parent(nullptr),
 	m_allowMove(true),
 	m_allowNewLine(true),
-	m_currentDialog(-1)
+	m_currentDialog(-1),
+	m_refreshConsole(false)
 {
 	//m_xpos = 50;
 	//m_ypos = 50;
@@ -1341,6 +1342,7 @@ void U5World::ProcessYell()
 	m_parent->m_console->PrintText(m_resources->m_data.game_strings[WHAT_COLON_STRING]);
 	m_process_key = std::bind(&U5World::HandleYell, this);
 	m_allowNewLine = true;
+	m_refreshConsole = false;
 }
 
 int U5World::ProcessLetterImmediate()
@@ -1378,6 +1380,17 @@ bool U5World::DoYell()
 
 void U5World::HandleYell()
 {
+	bool isScrolling = m_parent->m_console->m_scroll;
+	if (isScrolling)
+	{
+		m_refreshConsole = true;
+	}
+	if (m_refreshConsole && !isScrolling)
+	{
+		m_parent->m_console->PrintEditText(m_displayWord, m_allowNewLine);
+		m_refreshConsole = false;
+	}
+
 	int ret = ProcessLetterImmediate();
 	m_input->m_isValid = false;
 	if (ret < 0)
@@ -1630,8 +1643,125 @@ void U5World::DoTalk()
 			}
 		}
 	}
-	m_parent->m_console->NewPrompt();
+	ProcessTalkInput();
+	/*m_parent->m_console->NewPrompt();
 	m_process_key = std::bind(&U5World::ProcessAnyKeyHit, this);
-	m_input->SetRequireAllKeysUp();
+	m_input->SetRequireAllKeysUp();*/
 	return;
+}
+
+void U5World::ProcessTalkInput()
+{
+	m_displayWord.clear();
+	m_input->SetRequireAllKeysUp();
+	m_parent->m_console->PrintText(":");
+	m_process_key = std::bind(&U5World::HandleTalkInput, this);
+	m_allowNewLine = true;
+	m_refreshConsole = false;
+}
+
+void U5World::HandleTalkInput()
+{
+	bool isScrolling = m_parent->m_console->m_scroll;
+	if (isScrolling)
+	{
+		m_refreshConsole = true;
+	}
+	if (m_refreshConsole && !isScrolling)
+	{
+		m_parent->m_console->PrintEditText(m_displayWord, m_allowNewLine);
+		m_refreshConsole = false;
+	}
+
+	int ret = ProcessLetterImmediate();
+	m_input->m_isValid = false;
+	if (ret < 0)
+	{
+		return;
+	}
+	if (ret == SDLK_RETURN)
+	{
+		const int MAX_CONSOLE = 16;
+		bool drawNewLine = true;
+		if (!m_allowNewLine && m_displayWord.size() < MAX_CONSOLE)
+		{
+			drawNewLine = false;
+		}
+		if (m_displayWord.empty())
+		{
+			m_parent->m_console->PrintEditText(m_resources->m_data.game_strings[NOTHING_STRING], m_allowNewLine);
+			if (drawNewLine)
+			{
+				m_parent->m_console->PrintText("\n");
+			}
+			else
+			{
+				// Useless unless someone decides to edit the text without a newline
+				// Just include for that case
+				m_parent->m_console->SetCursorStartPosX(0);
+			}
+		}
+		else
+		{
+			if (drawNewLine)
+			{
+				m_parent->m_console->PrintText("\n");
+			}
+			else
+			{
+				// Useless unless someone decides to edit the text without a newline
+				// Just include for that case
+				m_parent->m_console->SetCursorStartPosX(0);
+			}
+			if (!DoYell())
+			{
+				m_parent->m_console->PrintText(m_resources->m_data.game_strings[NO_EFFECT_STRING]);
+			}
+		}
+
+		m_process_key = std::bind(&U5World::ProcessAnyKeyHit, this);
+		m_parent->m_console->NewPrompt();
+		return;
+	}
+	else if (ret == SDLK_BACKSPACE)
+	{
+		if (!m_displayWord.empty())
+		{
+			m_displayWord.pop_back();
+			m_parent->m_console->PrintEditText(m_displayWord, m_allowNewLine);
+		}
+	}
+	else
+	{
+		const char* value = SDL_GetKeyName(ret);
+		if (value != 0)
+		{
+			if (m_displayWord.size() < MAX_TALK)
+			{
+				std::string curLetter;
+
+				if (ret == SDLK_SPACE)
+				{
+					m_displayWord += ' ';
+					curLetter += ' ';
+				}
+				else
+				{
+					m_displayWord += value[0];
+					curLetter += value[0];
+				}
+
+				if (m_displayWord.size() >= 15 && m_allowNewLine)
+				{
+					m_parent->m_console->PrintEditText(m_displayWord, m_allowNewLine);
+					m_allowNewLine = false;
+					m_parent->m_console->PrintText("\n");
+				}
+				else
+				{
+					m_parent->m_console->PrintEditText(m_displayWord, m_allowNewLine);
+				}
+			}
+		}
+	}
 }

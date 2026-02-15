@@ -23,6 +23,9 @@ public:
 	void BackspaceCursor();
 	void BlockPrompt(bool block);
 	void SetCursorStartPosX(int startPos);
+
+	bool m_scroll;
+
 private:
 	void RenderCursor();
 	void ClearLine();
@@ -41,7 +44,7 @@ private:
 	Uint64 m_curCursorRenderDelay;
 	Uint64 m_curScrollDelay;
 	int m_curLine;
-	bool m_scroll;
+	
 	bool m_blockPrompt;
 	bool m_hasPrompt;
 	bool m_smoothscroll;
