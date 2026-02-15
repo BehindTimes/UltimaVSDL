@@ -142,6 +142,8 @@ const int GUARD_NO_RESPONSE_STRING = 0x4ee;
 const int NO_RESPONSE_STRING = 0x4ef;
 const int PASS_STRING = 0x2f7;
 const int NOBODY_HERE = 0x4f3;
+const int I_AM_CALLED = 0x506;
+const int YOUR_INTEREST = 0x4fc;
 
 const int BED_HEAD = 171;
 const int BED_SLEEPING = 282;

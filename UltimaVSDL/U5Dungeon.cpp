@@ -830,7 +830,7 @@ void U5Dungeon::ProcessAnyKeyHit()
 	}
 }
 
-int U5Dungeon::checkValidLocation(const std::pair<int, int>& pos_info)
+int U5Dungeon::checkValidLocation(const std::pair<int, int>& /*pos_info*/)
 {
 	return 0;
 }

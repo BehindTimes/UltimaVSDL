@@ -24,6 +24,32 @@ struct PositionData
 
 class U5Game;
 
+enum class TalkMode
+{
+	Description,
+	Greeting,
+	Label,
+	Goodbye
+};
+
+struct DialogInfo
+{
+	DialogInfo(int dnum) :
+		dialog_num(dnum),
+		mode(TalkMode::Description),
+		label_num(-1),
+		instruction_num(0)
+	{
+	}
+
+	int dialog_num;
+	TalkMode mode;
+	int label_num;
+	U5Dialog dialog;
+	std::vector<std::pair<int, std::string>> current_instruction;
+	size_t instruction_num;
+};
+
 class U5World : public GameBase
 {
 public:
@@ -96,6 +122,6 @@ private:
 	U5Game* m_parent;
 	bool m_allowMove;
 	std::string m_displayWord;
-	int m_currentDialog;
+	DialogInfo m_currentDialog;
 };
 

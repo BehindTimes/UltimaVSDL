@@ -1587,10 +1587,10 @@ void U5World::HandleTalk()
 		return;
 	}
 
-	m_currentDialog = dialog_pos;
+	int currentDialog = dialog_pos;
 
 
-	if (m_currentDialog == 0)
+	if (currentDialog == 0)
 	{
 		// Guards offer a special no response
 		if (npc_type >= 0x70 && npc_type < 0x74)
@@ -1609,16 +1609,11 @@ void U5World::HandleTalk()
 		m_input->SetRequireAllKeysUp();
 		return;
 	}
+	m_currentDialog = DialogInfo(currentDialog);
 
-	m_process_key = std::bind(&U5World::DoTalk, this);
-}
-
-void U5World::DoTalk()
-{
-	// TO DO: This is filler just to prevent locking up for the time being
-	//m_resources->m_data.m_talkData
-	if (!m_parent->m_talk_data.contains(m_currentDialog))
+	if (!m_parent->m_talk_data.contains(m_currentDialog.dialog_num))
 	{
+		// TO DO: This is filler just to prevent locking up for the time being
 		m_parent->m_console->PrintText("\n");
 		m_parent->m_console->PrintText(m_resources->m_data.game_strings[NO_RESPONSE_STRING]);
 		m_parent->m_console->NewPrompt();
@@ -1627,39 +1622,94 @@ void U5World::DoTalk()
 	}
 	else
 	{
-		auto& curDialog = m_parent->m_talk_data[m_currentDialog];
-
-		m_parent->m_console->PrintText("\n");
-		m_parent->m_console->PrintText(m_resources->m_data.game_strings[YOU_SEE_STRING]);
-
-		for (auto& curDesc : curDialog.description)
-		{
-			if (curDesc.first == 0)
-			{
-				m_parent->m_console->PrintText(curDesc.second);
-			}
-			else if (curDesc.first == 0x8d)
-			{
-				m_parent->m_console->PrintText("\n");
-			}
-		}
-
-		if (!curDialog.greeting.empty())
-		{
-			m_parent->m_console->PrintText("\n");
-			m_parent->m_console->PrintText("\n");
-		}
-
-		ProcessTalkInput();
+		m_currentDialog.dialog = m_parent->m_talk_data[m_currentDialog.dialog_num];
+		m_currentDialog.current_instruction = m_currentDialog.dialog.description;
+		m_process_key = std::bind(&U5World::DoTalk, this);
 	}
-	return;
+}
+
+void U5World::DoTalk()
+{
+	bool knowAvatar = false;
+	bool knowName = true;
+
+	for (m_currentDialog.instruction_num; m_currentDialog.instruction_num < m_currentDialog.current_instruction.size(); m_currentDialog.instruction_num++)
+	{
+		if (m_currentDialog.instruction_num == 0)
+		{
+			switch (m_currentDialog.mode)
+			{
+			case TalkMode::Description:
+				m_parent->m_console->PrintText("\n");
+				m_parent->m_console->PrintText(m_resources->m_data.game_strings[YOU_SEE_STRING]);
+				break;
+			case TalkMode::Greeting:
+				m_parent->m_console->PrintText("\n\n");
+				if (!knowAvatar)
+				{
+					if (knowName)
+					{
+						m_parent->m_console->PrintText(m_resources->m_data.game_strings[I_AM_CALLED]);
+						m_parent->m_console->PrintText(m_currentDialog.dialog.name[0].second);
+						if(m_currentDialog.dialog.name[0].second.size() > 0 &&
+							m_currentDialog.dialog.name[0].second.back() != '\"')
+						{
+							m_parent->m_console->PrintText("\"");
+						}
+						m_parent->m_console->PrintText("\n\n");
+					}
+					m_currentDialog.label_num = -1;
+					ProcessTalkInput();
+					return;
+				}
+				break;
+			default:
+				break;
+			};
+		}
+
+		switch (m_currentDialog.current_instruction[m_currentDialog.instruction_num].first)
+		{
+		case 0:
+			m_parent->m_console->PrintText(m_currentDialog.current_instruction[m_currentDialog.instruction_num].second);
+			break;
+		case 0x8d:
+			m_parent->m_console->PrintText("\n");
+			break;
+		case 0xff:
+			switch (m_currentDialog.mode)
+			{
+			case TalkMode::Description:
+				m_currentDialog.label_num = -1;
+				ProcessTalkInput();
+				return;
+				break;
+			default:
+				break;
+			};
+			break;
+		default:
+			break;
+		};
+	}
+
+	switch (m_currentDialog.mode)
+	{
+	case TalkMode::Description:
+		m_currentDialog.mode = TalkMode::Greeting;
+		m_currentDialog.instruction_num = 0;
+		m_currentDialog.current_instruction = m_currentDialog.dialog.greeting;
+		break;
+	default:
+		break;
+	};
 }
 
 void U5World::ProcessTalkInput()
 {
 	m_displayWord.clear();
 	m_input->SetRequireAllKeysUp();
-	m_parent->m_console->PrintText(":");
+	m_parent->m_console->PrintText(m_resources->m_data.game_strings[YOUR_INTEREST]);
 	m_process_key = std::bind(&U5World::StartTalk, this);
 }
 
