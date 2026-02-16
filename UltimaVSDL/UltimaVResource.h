@@ -83,7 +83,8 @@ struct U5DialogLabel
 {
 	std::vector<std::pair<int, std::string>> text;
 	std::vector<std::pair<int, std::string>> default_answer;
-	std::map<std::string, std::vector<std::pair<int, std::string>>> keywords;
+	//std::map<std::string, std::vector<std::pair<int, std::string>>> keywords;
+	std::vector<std::pair<std::string, std::vector<std::pair<int, std::string>>>> keywords;
 };
 
 struct U5Dialog
@@ -93,7 +94,8 @@ struct U5Dialog
 	std::vector<std::pair<int, std::string>> greeting;
 	std::vector<std::pair<int, std::string>> job;
 	std::vector<std::pair<int, std::string>> bye;
-	std::map<std::string, std::vector<std::pair<int, std::string>>> keywords;
+	//std::map<std::string, std::vector<std::pair<int, std::string>>> keywords;
+	std::vector<std::pair<std::string, std::vector<std::pair<int, std::string>>>> keywords;
 	std::map<int, U5DialogLabel> labels;
 };
 
@@ -132,6 +134,7 @@ struct U5Data
 	std::array< NPC_File, 4> npc_info;
 	std::array<std::map<int, U5Dialog>, 4> m_talkData;
 	std::vector<std::string> compressed_words;
+	std::vector<std::string> input_words;
 };
 
 struct IntroScriptInstruction {

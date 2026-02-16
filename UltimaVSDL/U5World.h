@@ -26,6 +26,7 @@ class U5Game;
 
 enum class TalkMode
 {
+	Name,
 	Description,
 	Greeting,
 	Label,

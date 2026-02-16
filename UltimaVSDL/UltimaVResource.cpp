@@ -1085,6 +1085,10 @@ int UltimaVResource::LoadDataOvl()
 	{
 		return -5;
 	}
+	if (!ReadStrings(m_data.buffer, m_data.input_words, 0x9244, 0x9338))
+	{
+		return -5;
+	}
 
 	const size_t MAP_CHUNK_LOC = 0x3886;
 	const size_t MAP_NUM_CHUNKS = 0x100;
@@ -1978,7 +1982,9 @@ int UltimaVResource::LoadTalk(MapTypes map_type)
 							default:
 								for (auto& curKeyword : keyword_vec)
 								{
-									dlg.labels[curId].keywords[curKeyword] = curData;
+									//dlg.labels[curId].keywords[curKeyword] = curData;
+									dlg.labels[curId].keywords.push_back(std::make_pair(curKeyword, curData));
+
 								}
 								keywordMode = true;
 								keyword_vec.clear();
@@ -2065,7 +2071,8 @@ int UltimaVResource::LoadTalk(MapTypes map_type)
 								default:
 									for (auto& curKeyword : keyword_vec)
 									{
-										dlg.keywords[curKeyword] = curData;
+										//dlg.keywords[curKeyword] = curData;
+										dlg.keywords.push_back(std::make_pair(curKeyword, curData));
 									}
 									keywordMode = true;
 									keyword_vec.clear();

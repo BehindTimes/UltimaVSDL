@@ -1650,6 +1650,9 @@ void U5World::DoTalk()
 		{
 			switch (m_currentDialog.mode)
 			{
+			case TalkMode::Name:
+				m_parent->m_console->PrintText(m_resources->m_data.game_strings[MY_NAME_IS_STING]);
+				break;
 			case TalkMode::Description:
 				m_parent->m_console->PrintText("\n");
 				m_parent->m_console->PrintText(m_resources->m_data.game_strings[YOU_SEE_STRING]);
@@ -1687,7 +1690,7 @@ void U5World::DoTalk()
 				m_parent->m_console->PrintText("\"");
 			}
 			m_parent->m_console->PrintText(m_currentDialog.current_instruction[m_currentDialog.instruction_num].second);
-			if (m_currentDialog.mode == TalkMode::Goodbye)
+			if (m_currentDialog.mode == TalkMode::Goodbye || m_currentDialog.mode == TalkMode::Name)
 			{
 				if (m_currentDialog.instruction_num == m_currentDialog.current_instruction.size() - 1)
 				{
@@ -1717,6 +1720,11 @@ void U5World::DoTalk()
 
 	switch (m_currentDialog.mode)
 	{
+	case TalkMode::Name:
+		m_parent->m_console->PrintText("\n");
+		m_currentDialog.label_num = -1;
+		ProcessTalkInput();
+		break;
 	case TalkMode::Description:
 		m_currentDialog.mode = TalkMode::Greeting;
 		m_currentDialog.instruction_num = 0;
@@ -1755,13 +1763,17 @@ void U5World::HandleTalkWord(std::string strReponse)
 		drawNewLine = false;
 	}
 
-	if (strReponse.empty() || strReponse.starts_with("BYE"))
+	if (strReponse.empty() || strReponse.starts_with(m_resources->m_data.input_words[INPUT_BYE]) || strReponse.starts_with(m_resources->m_data.input_words[INPUT_THANK]))
 	{
 		m_process_key = std::bind(&U5World::DoTalk, this);
 		m_currentDialog.mode = TalkMode::Goodbye;
 		m_currentDialog.instruction_num = 0;
 		m_currentDialog.current_instruction = m_currentDialog.dialog.bye;
-		m_parent->m_console->PrintEditText(m_resources->m_data.game_strings[BYE_STRING]);
+		if (strReponse.empty())
+		{
+			m_parent->m_console->PrintEditText(m_resources->m_data.game_strings[BYE_STRING]);
+		}
+		//m_parent->m_console->PrintEditText(m_resources->m_data.game_strings[BYE_STRING]);
 		if (drawNewLine)
 		{
 			m_parent->m_console->PrintText("\n");
@@ -1770,6 +1782,34 @@ void U5World::HandleTalkWord(std::string strReponse)
 		m_parent->m_console->EndLineEdit();
 		return;
 	}
+	else if (strReponse.starts_with(m_resources->m_data.input_words[INPUT_NAME]))
+	{
+		m_process_key = std::bind(&U5World::DoTalk, this);
+		if (drawNewLine)
+		{
+			m_parent->m_console->PrintText("\n");
+		}
+		m_parent->m_console->PrintText("\n");
+		m_parent->m_console->EndLineEdit();
+		m_currentDialog.mode = TalkMode::Name;
+		m_currentDialog.instruction_num = 0;
+		m_currentDialog.current_instruction = m_currentDialog.dialog.name;
+		return;
+	}
+	else if (strReponse.starts_with(m_resources->m_data.input_words[INPUT_JOB]) || strReponse.starts_with(m_resources->m_data.input_words[INPUT_WORK]))
+	{
+	}
+	else
+	{
+		// Check for naughty words now
+		for (size_t index = INPUT_NAUGHTY; index < m_resources->m_data.input_words.size(); index++)
+		{
+			if(strReponse.starts_with(m_resources->m_data.input_words[index]))
+			{
+			}
+		}
+	}
+	//for(
 	m_parent->m_console->EndLineEdit();
 	m_process_key = std::bind(&U5World::ProcessAnyKeyHit, this);
 	m_parent->m_console->NewPrompt();

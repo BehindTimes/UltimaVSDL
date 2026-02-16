@@ -264,6 +264,7 @@ void U5Console::EndLineEdit()
 {
 	m_cached_startLine = m_curLine;
 	m_is_editing = false;
+	m_cursorPosY = 12;
 }
 
 bool U5Console::LineWasIncremented() const

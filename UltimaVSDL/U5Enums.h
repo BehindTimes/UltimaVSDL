@@ -146,6 +146,15 @@ const int I_AM_CALLED = 0x506;
 const int YOUR_INTEREST = 0x4fc;
 const int BYE_STRING = 0x4fd;
 const int END_QUOTED_STRING = 0x517;
+const int MY_NAME_IS_STING = 0x4fa;
+const int WITH_LANGUAGE_LIKE_THAT_STRING = 0x4b;
+
+const int INPUT_NAME = 0;
+const int INPUT_JOB = 1;
+const int INPUT_WORK = 2;
+const int INPUT_BYE = 3;
+const int INPUT_THANK = 4;
+const size_t INPUT_NAUGHTY = 5;
 
 const int BED_HEAD = 171;
 const int BED_SLEEPING = 282;
