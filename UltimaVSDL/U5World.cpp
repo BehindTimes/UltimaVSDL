@@ -1935,21 +1935,32 @@ void U5World::HandleTalkWord(std::string strReponse)
 		{
 			m_process_key = std::bind(&U5World::DoTalk, this);
 			
-			m_parent->m_console->EndLineEdit();
 			// Correcting for a bug, which does not show a quotation when it should
 			std::string what_did_you_say = m_resources->m_data.game_strings[WHAT_DID_YOU_SAY_STRING];
-			if (drawNewLine)
-			{
-				if (what_did_you_say.starts_with("\n"))
-				{
-				}
-			}
+			
 			if (what_did_you_say.ends_with('\"'))
 			{
 				what_did_you_say += '\"';
 			}
-			what_did_you_say += "\n";
+			// I'm putting in this hack, or else I'd need to rewrite the console.
+			// With empty phrases, the game expects no return value, and will
+			// require it in the string.  I believe this is the only area this
+			// can occur, as yelling and normal conversation all place in a fake word
+			// Not that you'd want to have a response on the line, even with
+			// translations, but in the original you could, and this won't perfectly
+			// replicate it.
+			if (what_did_you_say.starts_with("\n"))
+			{
+				what_did_you_say.erase(0, 1);
+			}
+			if (drawNewLine)
+			{
+				m_parent->m_console->PrintText("\n");
+			}
+			what_did_you_say += '\n';
+
 			m_parent->m_console->PrintText(what_did_you_say);
+			m_parent->m_console->EndLineEdit();
 			return;
 		}
 	}
