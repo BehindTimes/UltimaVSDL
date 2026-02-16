@@ -16,6 +16,7 @@
 #include <map>
 #include <utility>
 #include "U5Utils.h"
+#include <cctype>
 
 extern std::unique_ptr<GameOptions> m_options;
 extern std::unique_ptr<U5Utils> m_utilities;
@@ -1963,7 +1964,11 @@ int UltimaVResource::LoadTalk(MapTypes map_type)
 								// Unlike the other areas where the conversation will end prematurely, this continues on
 								if (curData[0].first == 0)
 								{
-									keyword_vec.push_back(curData[0].second);
+									std::string keyword = curData[0].second;
+									std::transform(keyword.begin(), keyword.end(), keyword.begin(),
+										[](unsigned char c) { return static_cast<char>(std::toupper(c)); });
+
+									keyword_vec.push_back(keyword);
 								}
 							}
 						}
@@ -2046,7 +2051,11 @@ int UltimaVResource::LoadTalk(MapTypes map_type)
 								// Unlike the other areas where the conversation will end prematurely, this continues on
 								if (curData[0].first == 0)
 								{
-									keyword_vec.push_back(curData[0].second);
+									std::string keyword = curData[0].second;
+									std::transform(keyword.begin(), keyword.end(), keyword.begin(),
+										[](unsigned char c) { return static_cast<char>(std::toupper(c)); });
+
+									keyword_vec.push_back(keyword);
 								}
 							}
 						}

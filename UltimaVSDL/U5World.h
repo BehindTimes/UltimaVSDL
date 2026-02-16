@@ -116,6 +116,7 @@ private:
 	void PrintSign(int x, int y, int z);
 
 	void ProcessTalkInput();
+	void ProcessLabelInput();
 	void HandleTalkInput();
 	void HandleTalkWord(std::string strReponse);
 

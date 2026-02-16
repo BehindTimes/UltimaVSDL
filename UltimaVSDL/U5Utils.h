@@ -12,6 +12,7 @@ public:
 	int GetRandom(int min, int max);
 	std::vector<std::string> splitString(const std::string& str, char delimiter, bool keepDelim);
 	void ReplaceStringInPlace(std::string& subject, const std::string& search, const std::string& replace);
+	std::string trim(const std::string& str);
 private:
 	std::random_device m_rd;
 	std::mt19937 m_rGen;

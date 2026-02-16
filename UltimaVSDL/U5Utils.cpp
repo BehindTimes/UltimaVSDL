@@ -67,3 +67,15 @@ void U5Utils::ReplaceStringInPlace(std::string& subject, const std::string& sear
 		pos += replace.length();
 	}
 }
+
+std::string U5Utils::trim(const std::string& str)
+{
+	const std::string WHITESPACE = " \n\r\t\f\v"; // Common whitespace characters
+	size_t first = str.find_first_not_of(WHITESPACE);
+	if (std::string::npos == first)
+	{
+		return "";
+	}
+	size_t last = str.find_last_not_of(WHITESPACE);
+	return str.substr(first, (last - first + 1));
+}
