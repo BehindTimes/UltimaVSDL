@@ -851,6 +851,7 @@ void U5World::HandleLook()
 
 	switch (curpos)
 	{
+	case 160:
 	case 164:
 	case 248:
 		m_parent->m_console->PrintText("\n");
@@ -1671,7 +1672,18 @@ void U5World::DoTalk()
 		switch (m_currentDialog.current_instruction[m_currentDialog.instruction_num].first)
 		{
 		case 0:
+			if (m_currentDialog.mode == TalkMode::Goodbye)
+			{
+				m_parent->m_console->PrintText("\"");
+			}
 			m_parent->m_console->PrintText(m_currentDialog.current_instruction[m_currentDialog.instruction_num].second);
+			if (m_currentDialog.mode == TalkMode::Goodbye)
+			{
+				if (m_currentDialog.instruction_num == m_currentDialog.current_instruction.size() - 1)
+				{
+					m_parent->m_console->PrintText(m_resources->m_data.game_strings[END_QUOTED_STRING]);
+				}
+			}
 			break;
 		case 0x8d:
 			m_parent->m_console->PrintText("\n");
@@ -1700,6 +1712,15 @@ void U5World::DoTalk()
 		m_currentDialog.instruction_num = 0;
 		m_currentDialog.current_instruction = m_currentDialog.dialog.greeting;
 		break;
+	case TalkMode::Greeting:
+		m_parent->m_console->PrintText("\n\n");
+		m_currentDialog.label_num = -1;
+		ProcessTalkInput();
+		break;
+	case TalkMode::Goodbye:
+		m_process_key = std::bind(&U5World::ProcessAnyKeyHit, this);
+		m_parent->m_console->NewPrompt();
+		break;
 	default:
 		break;
 	};
@@ -1713,6 +1734,37 @@ void U5World::ProcessTalkInput()
 	m_process_key = std::bind(&U5World::StartTalk, this);
 }
 
+void U5World::HandleTalkWord(std::string strReponse)
+{
+	const int MAX_CONSOLE = 16;
+
+	bool allowNewLine = m_parent->m_console->LineWasIncremented();
+	bool drawNewLine = true;
+	if (!allowNewLine && strReponse.size() < MAX_CONSOLE)
+	{
+		drawNewLine = false;
+	}
+
+	if (strReponse.empty() || strReponse.starts_with("BYE"))
+	{
+		m_process_key = std::bind(&U5World::DoTalk, this);
+		m_currentDialog.mode = TalkMode::Goodbye;
+		m_currentDialog.instruction_num = 0;
+		m_currentDialog.current_instruction = m_currentDialog.dialog.bye;
+		m_parent->m_console->PrintEditText(m_resources->m_data.game_strings[BYE_STRING]);
+		if (drawNewLine)
+		{
+			m_parent->m_console->PrintText("\n");
+		}
+		m_parent->m_console->PrintText("\n");
+		m_parent->m_console->EndLineEdit();
+		return;
+	}
+	m_parent->m_console->EndLineEdit();
+	m_process_key = std::bind(&U5World::ProcessAnyKeyHit, this);
+	m_parent->m_console->NewPrompt();
+}
+
 void U5World::HandleTalkInput()
 {
 	int ret = ProcessLetterImmediate();
@@ -1723,14 +1775,15 @@ void U5World::HandleTalkInput()
 	}
 	if (ret == SDLK_RETURN)
 	{
-		bool allowNewLine = m_parent->m_console->LineWasIncremented();
-		const int MAX_CONSOLE = 16;
-		bool drawNewLine = true;
+		//bool allowNewLine = m_parent->m_console->LineWasIncremented();
+		//const int MAX_CONSOLE = 16;
+		/*bool drawNewLine = true;
 		if (!allowNewLine && m_displayWord.size() < MAX_CONSOLE)
 		{
 			drawNewLine = false;
-		}
-		if (m_displayWord.empty())
+		}*/
+		HandleTalkWord(m_displayWord);
+		/*if (m_displayWord.empty())
 		{
 			m_parent->m_console->PrintEditText(m_resources->m_data.game_strings[NOTHING_STRING]);
 			if (drawNewLine)
@@ -1760,11 +1813,11 @@ void U5World::HandleTalkInput()
 			{
 				m_parent->m_console->PrintText(m_resources->m_data.game_strings[NO_EFFECT_STRING]);
 			}
-		}
+		}*/
 
-		m_parent->m_console->EndLineEdit();
+		/*m_parent->m_console->EndLineEdit();
 		m_process_key = std::bind(&U5World::ProcessAnyKeyHit, this);
-		m_parent->m_console->NewPrompt();
+		m_parent->m_console->NewPrompt();*/
 		return;
 	}
 	else if (ret == SDLK_BACKSPACE)

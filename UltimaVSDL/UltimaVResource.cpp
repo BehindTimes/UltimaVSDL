@@ -15,8 +15,10 @@
 #include <iostream>
 #include <map>
 #include <utility>
+#include "U5Utils.h"
 
 extern std::unique_ptr<GameOptions> m_options;
+extern std::unique_ptr<U5Utils> m_utilities;
 
 UltimaVResource::UltimaVResource() :
 	m_render_mode(m_options->m_render_mode)
@@ -1607,6 +1609,9 @@ int UltimaVResource::LoadSigns()
 
 	m_SignData.resize(NUM_SIGNS);
 
+	std::vector<std::string> compressed_sign_strings;
+	ReadStrings(m_data.buffer, compressed_sign_strings, 0x7398, 0x7439);
+
 	for (size_t index = 0; index < NUM_SIGNS; index++)
 	{
 		if (file_offsets[index] == 0)
@@ -1646,8 +1651,19 @@ int UltimaVResource::LoadSigns()
 			}
 			std::vector<unsigned char>::iterator iter = buffer.begin() + curPos;
 			std::string strOut = ReadNextString(iter, buffer.end());
+
+			size_t strOutSize = strOut.size();
+			
+			// Some signs use compressed text
+			for (size_t char_index = 0; char_index < compressed_sign_strings.size(); char_index++)
+			{
+				unsigned char tempchar = static_cast<unsigned char>(0x29 + char_index);
+				std::string searchchar;
+				searchchar += tempchar;
+				m_utilities->ReplaceStringInPlace(strOut, searchchar, compressed_sign_strings[char_index]);
+			}
 			SwapCharset(strOut);
-			curPos += strOut.size();
+			curPos += strOutSize;
 			if (curPos >= buffer.size())
 			{
 				return -1;
@@ -1673,16 +1689,10 @@ void UltimaVResource::SwapCharset(std::string& curString)
 		{
 			if (c != 0xa)
 			{
-				if (c == 0x29)
-				{
-					c = 0xa;
-				}
-				else
-				{
-					c += 128;
-				}
+				c += 128;
 			}
 		}
+
 		curString[index] = static_cast<char>(c);
 
 		if (index > 0)

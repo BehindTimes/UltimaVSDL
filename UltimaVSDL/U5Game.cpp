@@ -265,6 +265,8 @@ void U5Game::LoadMap(int map_num)
 	// Underworld or Britannia 
 	if (map_num < 0)
 	{
+		m_map_level = 0;
+		m_cur_level = 0;
 		m_talk_data.clear();
 		m_sign_data = m_resources->m_SignData[0];
 		if (map_num == -1) // Britannia

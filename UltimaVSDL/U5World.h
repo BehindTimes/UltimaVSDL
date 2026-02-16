@@ -116,6 +116,7 @@ private:
 
 	void ProcessTalkInput();
 	void HandleTalkInput();
+	void HandleTalkWord(std::string strReponse);
 
 	std::function<void()> m_process_key;
 
