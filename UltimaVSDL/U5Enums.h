@@ -109,7 +109,7 @@ const int TOWN_STRING = 0x28a;
 const int HUT_STRING = 0x286;
 const int DUNGEON_STRING = 0x28e;
 const int LIGHTHOUSE_STRING = 0x290;
-const int BLACKTHORN_PALANCE_STRING = 0x921;
+const int BLACKTHORN_PALANCE_STRING = 0x291;
 const int BRITISH_CASTLE_STRING = 0x292;
 
 const int YES_EXIT_STRING = 0x24e;

@@ -33,6 +33,15 @@ U5World::U5World(SDL3Helper* sdl_helper, UltimaVResource* u5_resources) :
 	m_allowMove(true),
 	m_currentDialog(-1)
 {
+	// blackthorn
+	//m_xpos = 196;
+	//m_ypos = 245;
+
+	// serpent's hold
+	//m_xpos = 146;
+	//m_ypos = 242;
+
+	// 
 	//m_xpos = 50;
 	//m_ypos = 50;
 	m_xpos = 83;
@@ -754,6 +763,7 @@ void U5World::PrintSign(int x, int y, int z)
 	}
 	if (!found)
 	{
+		// TO DO: Should print Live by the eight laws.
 		return;
 	}
 	if (m_parent->m_sign_data[tempindex].text != std::string("\n"))
