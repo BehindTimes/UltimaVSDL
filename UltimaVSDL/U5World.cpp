@@ -21,10 +21,12 @@
 #include <string>
 #include "GameOptions.h"
 #include <SDL3/SDL_keyboard.h>
+#include "CharacterData.h"
 
 extern std::unique_ptr<U5Utils> m_utilities;
 extern std::unique_ptr<U5Input> m_input;
 extern std::unique_ptr<GameOptions> m_options;
+extern std::unique_ptr<CharacterData> m_charData;
 
 U5World::U5World(SDL3Helper* sdl_helper, UltimaVResource* u5_resources) :
 	GameBase(sdl_helper, u5_resources),
@@ -38,14 +40,14 @@ U5World::U5World(SDL3Helper* sdl_helper, UltimaVResource* u5_resources) :
 	//m_ypos = 245;
 
 	// serpent's hold
-	//m_xpos = 146;
-	//m_ypos = 242;
+	//m_xpos = 146;	// 92
+	//m_ypos = 242; // F2
 
 	// 
 	//m_xpos = 50;
 	//m_ypos = 50;
-	m_xpos = 83;
-	m_ypos = 106;
+	m_xpos = 83;  // 53
+	m_ypos = 106; // 6A
 	//m_xpos = 176;
 	//m_ypos = 210;
 	
@@ -1405,6 +1407,16 @@ void U5World::StartTalk()
 	m_process_key = std::bind(&U5World::HandleTalkInput, this);
 }
 
+void U5World::StartNameTalk()
+{
+	if (!m_parent->m_console->IsReady())
+	{
+		return;
+	}
+	m_parent->m_console->StartLineEdit();
+	m_process_key = std::bind(&U5World::HandleNameTalkInput, this);
+}
+
 
 void U5World::HandleYell()
 {
@@ -1641,8 +1653,10 @@ void U5World::HandleTalk()
 
 void U5World::DoTalk()
 {
-	bool knowAvatar = false;
-	bool knowName = true;
+	bool knowAvatar = true;
+	bool knowName = false;
+	int karma = 74;
+	bool firstinstruction = true;
 
 	for (m_currentDialog.instruction_num; m_currentDialog.instruction_num < m_currentDialog.current_instruction.size(); m_currentDialog.instruction_num++)
 	{
@@ -1683,17 +1697,30 @@ void U5World::DoTalk()
 		}
 
 		std::string printWord;
+		int value;
 
 		switch (m_currentDialog.current_instruction[m_currentDialog.instruction_num].first)
 		{
 		case 0:
+			printWord.clear();
 			if (m_currentDialog.mode == TalkMode::Goodbye)
 			{
 				printWord += "\"";
 			}
 			else if (m_currentDialog.mode == TalkMode::Label)
 			{
-				if (m_currentDialog.instruction_num == 0)
+				if (firstinstruction)
+				{
+					if (m_currentDialog.current_instruction[m_currentDialog.instruction_num].second.size() > 0 &&
+						m_currentDialog.current_instruction[m_currentDialog.instruction_num].second[0] != '\"')
+					{
+						printWord += "\"";
+					}
+				}
+			}
+			else if (m_currentDialog.mode == TalkMode::Greeting)
+			{
+				if (firstinstruction)
 				{
 					if (m_currentDialog.current_instruction[m_currentDialog.instruction_num].second.size() > 0 &&
 						m_currentDialog.current_instruction[m_currentDialog.instruction_num].second[0] != '\"')
@@ -1720,12 +1747,43 @@ void U5World::DoTalk()
 					printWord += '\n';
 				}
 			}
+			else if (m_currentDialog.mode == TalkMode::Greeting)
+			{
+				if (m_currentDialog.instruction_num == m_currentDialog.current_instruction.size() - 1)
+				{
+					printWord += "\"";
+				}
+			}
 			m_parent->m_console->PrintText(printWord);
+			firstinstruction = false;
 			break;
-		case 0x8d:
+		case 0x81: // print Avatar name
+			m_parent->m_console->PrintText(m_charData->m_name);
+			break;
+		case 0x88: // ask name
+			printWord.clear();
+			if (firstinstruction)
+			{
+				printWord += "\"";
+				firstinstruction = false;
+			}
+			printWord += m_resources->m_data.game_strings[PROMPT_NAME_STRING];
+			printWord += "\n";
+			m_parent->m_console->PrintText(printWord);
+			ProcessNameInput();
+			return;
+			break;
+		case 0x8c: // if/else
+			if (!knowAvatar)
+			{
+				m_currentDialog.instruction_num++;
+			}
+			break;
+		case 0x8d: // New line
 			m_parent->m_console->PrintText("\n");
+			firstinstruction = true;
 			break;
-		case 0x91:
+		case 0x91: // goto label
 		case 0x92:
 		case 0x93:
 		case 0x94:
@@ -1735,12 +1793,24 @@ void U5World::DoTalk()
 		case 0x98:
 		case 0x99:
 		case 0x9a:
+			m_currentDialog.mode = TalkMode::Label;
 			m_currentDialog.label_num = m_currentDialog.current_instruction[m_currentDialog.instruction_num].first;
 			if (m_currentDialog.dialog.labels.contains(m_currentDialog.label_num))
 			{
 				m_currentDialog.instruction_num = 0;
 				m_currentDialog.current_instruction = m_currentDialog.dialog.labels[m_currentDialog.label_num].text;
 				return;
+			}
+			break;
+		case 0xfe:// karma check
+			if (m_currentDialog.instruction_num + 3 < m_currentDialog.current_instruction.size())
+			{
+				m_currentDialog.instruction_num++;
+				value = m_currentDialog.current_instruction[m_currentDialog.instruction_num].first;
+				if (karma < value)
+				{
+					m_currentDialog.instruction_num++;
+				}
 			}
 			break;
 		case 0xff:
@@ -1759,6 +1829,9 @@ void U5World::DoTalk()
 			};
 			break;
 		default:
+		{
+			int j = 9;
+		}
 			break;
 		};
 	}
@@ -1816,6 +1889,59 @@ void U5World::ProcessLabelInput()
 	m_input->SetRequireAllKeysUp();
 	m_parent->m_console->PrintText(m_resources->m_data.game_strings[YOU_RESPOND_STRING]);
 	m_process_key = std::bind(&U5World::StartTalk, this);
+}
+
+void U5World::ProcessNameInput()
+{
+	m_displayWord.clear();
+	m_input->SetRequireAllKeysUp();
+	m_parent->m_console->PrintText(m_resources->m_data.game_strings[YOU_RESPOND_STRING]);
+	m_process_key = std::bind(&U5World::StartNameTalk, this);
+}
+
+void U5World::HandleNameTalkWord(std::string strReponse)
+{
+	strReponse = m_utilities->trim(strReponse);
+	const int MAX_CONSOLE = 16;
+
+	bool allowNewLine = m_parent->m_console->LineWasIncremented();
+	bool drawNewLine = true;
+	if (!allowNewLine && strReponse.size() < MAX_CONSOLE)
+	{
+		drawNewLine = false;
+	}
+
+	m_process_key = std::bind(&U5World::DoTalk, this);
+	
+	m_parent->m_console->EndLineEdit();
+
+	m_currentDialog.instruction_num++;
+
+	std::string responsestring;
+
+	if (strReponse == m_charData->m_name_upper_case)
+	{
+		responsestring = m_resources->m_data.game_strings[A_PLEASURE_STRING];
+	}
+	else
+	{
+		responsestring = m_resources->m_data.game_strings[IF_YOU_SAY_SO_STRING];
+	}
+
+	// Another hack to fix the console.  Technically, without this, it matches the original
+	// game, but this will make it look cleaner.  Once again though, things could mess
+	// up if someone edits the talk script without matching the original quirks
+	if (responsestring.starts_with("\n"))
+	{
+		responsestring.erase(0, 1);
+	}
+
+	if (drawNewLine)
+	{
+		m_parent->m_console->PrintText("\n");
+	}
+
+	m_parent->m_console->PrintText(responsestring);
 }
 
 void U5World::HandleTalkWord(std::string strReponse)
@@ -2031,49 +2157,7 @@ void U5World::HandleTalkInput()
 	}
 	if (ret == SDLK_RETURN)
 	{
-		//bool allowNewLine = m_parent->m_console->LineWasIncremented();
-		//const int MAX_CONSOLE = 16;
-		/*bool drawNewLine = true;
-		if (!allowNewLine && m_displayWord.size() < MAX_CONSOLE)
-		{
-			drawNewLine = false;
-		}*/
 		HandleTalkWord(m_displayWord);
-		/*if (m_displayWord.empty())
-		{
-			m_parent->m_console->PrintEditText(m_resources->m_data.game_strings[NOTHING_STRING]);
-			if (drawNewLine)
-			{
-				m_parent->m_console->PrintText("\n");
-			}
-			else
-			{
-				// Useless unless someone decides to edit the text without a newline
-				// Just include for that case
-				m_parent->m_console->SetCursorStartPosX(0);
-			}
-		}
-		else
-		{
-			if (drawNewLine)
-			{
-				m_parent->m_console->PrintText("\n");
-			}
-			else
-			{
-				// Useless unless someone decides to edit the text without a newline
-				// Just include for that case
-				m_parent->m_console->SetCursorStartPosX(0);
-			}
-			if (!DoYell())
-			{
-				m_parent->m_console->PrintText(m_resources->m_data.game_strings[NO_EFFECT_STRING]);
-			}
-		}*/
-
-		/*m_parent->m_console->EndLineEdit();
-		m_process_key = std::bind(&U5World::ProcessAnyKeyHit, this);
-		m_parent->m_console->NewPrompt();*/
 		return;
 	}
 	else if (ret == SDLK_BACKSPACE)
@@ -2109,3 +2193,51 @@ void U5World::HandleTalkInput()
 		}
 	}
 }
+
+void U5World::HandleNameTalkInput()
+{
+	int ret = ProcessLetterImmediate();
+	m_input->m_isValid = false;
+	if (ret < 0)
+	{
+		return;
+	}
+	if (ret == SDLK_RETURN)
+	{
+		HandleNameTalkWord(m_displayWord);
+		return;
+	}
+	else if (ret == SDLK_BACKSPACE)
+	{
+		if (!m_displayWord.empty())
+		{
+			m_displayWord.pop_back();
+			m_parent->m_console->PrintEditText(m_displayWord);
+		}
+	}
+	else
+	{
+		const char* value = SDL_GetKeyName(ret);
+		if (value != 0)
+		{
+			if (m_displayWord.size() < MAX_TALK)
+			{
+				std::string curLetter;
+
+				if (ret == SDLK_SPACE)
+				{
+					m_displayWord += ' ';
+					curLetter += ' ';
+				}
+				else
+				{
+					m_displayWord += value[0];
+					curLetter += value[0];
+				}
+
+				m_parent->m_console->PrintEditText(m_displayWord);
+			}
+		}
+	}
+}
+

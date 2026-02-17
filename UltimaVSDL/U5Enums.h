@@ -151,6 +151,9 @@ const int WITH_LANGUAGE_LIKE_THAT_STRING = 0x4fb;
 const int CANNOT_HELP = 0x4fe;
 const int YOU_RESPOND_STRING = 0x4ff;
 const int WHAT_DID_YOU_SAY_STRING = 0x500;
+const int PROMPT_NAME_STRING = 0x501;
+const int IF_YOU_SAY_SO_STRING = 0x503;
+const int A_PLEASURE_STRING = 0x504;
 
 const int INPUT_NAME = 0;
 const int INPUT_JOB = 1;

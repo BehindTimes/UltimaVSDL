@@ -134,6 +134,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="AnimationTexture.cpp" />
+    <ClCompile Include="CharacterData.cpp" />
     <ClCompile Include="CutScene.cpp" />
     <ClCompile Include="FadeObject.cpp" />
     <ClCompile Include="GameBase.cpp" />
@@ -155,6 +156,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AnimationTexture.h" />
+    <ClInclude Include="CharacterData.h" />
     <ClInclude Include="ColorData.h" />
     <ClInclude Include="CutScene.h" />
     <ClInclude Include="FadeObject.h" />

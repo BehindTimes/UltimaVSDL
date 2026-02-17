@@ -15,6 +15,7 @@
 #include "U5Input.h"
 #include "U5Game.h"
 #include "GameOptions.h"
+#include "CharacterData.h"
 
 static std::unique_ptr<SDL3Helper> sdl_helper;
 static std::unique_ptr<UltimaVResource> u5_resources;
@@ -26,6 +27,7 @@ std::unique_ptr<U5Utils> m_utilities;
 std::unique_ptr<U5Input> m_input;
 std::unique_ptr<U5Game> m_game;
 std::unique_ptr<GameOptions> m_options;
+std::unique_ptr<CharacterData> m_charData;
 
 static void MainLoop()
 {
@@ -55,6 +57,8 @@ static void MainLoop()
 
 	m_game = std::make_unique<U5Game>(sdl_helper.get(), u5_resources.get());
 	m_game->LoadData();
+
+	m_charData = std::make_unique<CharacterData>();
 
 	curObject = m_game.get();
 	//curObject = splash_screen.get();

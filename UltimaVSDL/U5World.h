@@ -95,6 +95,7 @@ private:
 	void HandleTalk();
 	void HandleYell();
 
+	void StartNameTalk();
 	void StartTalk();
 	void StartYell();
 
@@ -117,8 +118,11 @@ private:
 
 	void ProcessTalkInput();
 	void ProcessLabelInput();
+	void ProcessNameInput();
+	void HandleNameTalkInput();
 	void HandleTalkInput();
 	void HandleTalkWord(std::string strReponse);
+	void HandleNameTalkWord(std::string strReponse);
 
 	std::function<void()> m_process_key;
 
