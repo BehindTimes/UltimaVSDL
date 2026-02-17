@@ -280,6 +280,5 @@ private:
 	bool ReadStrings(const std::vector<unsigned char>& buffer, std::vector<std::string>& str_vec, size_t start_pos, size_t end_pos);
 	int ReadCompressedWords(const std::vector<unsigned char>& buffer);
 	std::string ReadNextString(std::vector<unsigned char>::const_iterator data, std::vector<unsigned char>::const_iterator end);
-	void SwapCharset(std::string& curString);
 };
 

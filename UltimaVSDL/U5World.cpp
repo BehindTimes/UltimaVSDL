@@ -33,7 +33,8 @@ U5World::U5World(SDL3Helper* sdl_helper, UltimaVResource* u5_resources) :
 	m_location_type(GameLocation::World),
 	m_parent(nullptr),
 	m_allowMove(true),
-	m_currentDialog(-1)
+	m_currentDialog(-1),
+	m_current_talk_pause_delay(0)
 {
 	// blackthorn
 	//m_xpos = 196;
@@ -211,7 +212,6 @@ int U5World::checkValidLocation(const PositionData& pos_info)
 			pos_info.new_position.second >= m_parent->m_currentMap[0].size())
 		{
 			m_process_key = std::bind(&U5World::ProcessLeaveTown, this);
-			m_parent->m_console->BlockPrompt(true);
 			return -1;
 		}
 	}
@@ -1651,12 +1651,32 @@ void U5World::HandleTalk()
 	}
 }
 
+void U5World::ProcessTalkPause()
+{
+	m_current_talk_pause_delay += m_tickElapse;
+	if (m_current_talk_pause_delay > TALK_PAUSE_TIME)
+	{
+		m_parent->m_console->SetCursorVisible(true);
+		m_process_key = std::bind(&U5World::DoTalk, this);
+	}
+}
+
+void U5World::ProcessTalkKeyWait()
+{
+	int ret = ProcessLetterImmediate();
+	if (ret > 0)
+	{
+		m_process_key = std::bind(&U5World::DoTalk, this);
+	}
+}
+
 void U5World::DoTalk()
 {
 	bool knowAvatar = m_charData->m_knowAvatar;
 	bool knowName = false;
-	int karma = 74;
+	int karma = 76;
 	bool firstinstruction = true;
+	bool runemode = false;
 
 	for (m_currentDialog.instruction_num; m_currentDialog.instruction_num < m_currentDialog.current_instruction.size(); m_currentDialog.instruction_num++)
 	{
@@ -1701,6 +1721,8 @@ void U5World::DoTalk()
 
 		switch (m_currentDialog.current_instruction[m_currentDialog.instruction_num].first)
 		{
+		case -1: // Default prompt case
+			break;
 		case 0:
 			printWord.clear();
 			if (m_currentDialog.mode == TalkMode::Goodbye || m_currentDialog.mode == TalkMode::Label || m_currentDialog.mode == TalkMode::Greeting)
@@ -1715,7 +1737,19 @@ void U5World::DoTalk()
 				}
 			}
 
-			printWord += m_currentDialog.current_instruction[m_currentDialog.instruction_num].second;
+			// Technically, you can have the full thing stay in rune mode, but this never actually occurs in game.
+			// Once again, this is different than how the actual game handles things, but works the same way,
+			// provided the talk script stays in the proper form
+			if (runemode)
+			{
+				std::string strOut = m_currentDialog.current_instruction[m_currentDialog.instruction_num].second;
+				m_utilities->SwapCharset(strOut);
+				printWord += strOut;
+			}
+			else
+			{
+				printWord += m_currentDialog.current_instruction[m_currentDialog.instruction_num].second;
+			}
 			
 			if (m_currentDialog.mode == TalkMode::Goodbye || m_currentDialog.mode == TalkMode::Name)
 			{
@@ -1755,6 +1789,18 @@ void U5World::DoTalk()
 			m_parent->m_console->NewPrompt();
 			return;
 			break;
+		case 0x83: // pause
+			m_process_key = std::bind(&U5World::ProcessTalkPause, this);
+			m_current_talk_pause_delay = 0;
+			m_currentDialog.instruction_num++;
+			m_parent->m_console->SetCursorVisible(false);
+			return;
+			break;
+		case 0x84: // join party
+			m_process_key = std::bind(&U5World::ProcessAnyKeyHit, this);
+			m_parent->m_console->NewPrompt();
+			return;
+			break;
 		case 0x88: // ask name
 			printWord.clear();
 			if (firstinstruction)
@@ -1777,6 +1823,14 @@ void U5World::DoTalk()
 		case 0x8d: // New line
 			m_parent->m_console->PrintText("\n");
 			firstinstruction = true;
+			break;
+		case 0x8e: // rune mode
+			runemode = !runemode;
+			break;
+		case 0x8f: // key wait
+			m_process_key = std::bind(&U5World::ProcessTalkKeyWait, this);
+			m_currentDialog.instruction_num++;
+			return;
 			break;
 		case 0x91: // goto label
 		case 0x92:
@@ -1974,6 +2028,7 @@ void U5World::HandleTalkWord(std::string strReponse)
 			m_currentDialog.mode = TalkMode::Label;
 			std::vector<std::pair<int, std::string>> naughty_instructions;
 			naughty_instructions.push_back(std::make_pair(0, m_resources->m_data.game_strings[WITH_LANGUAGE_LIKE_THAT_STRING] + "\"\n\n"));
+			naughty_instructions.push_back(std::make_pair(0x83, "")); // Add pause
 			naughty_instructions.push_back(std::make_pair(m_currentDialog.label_num, ""));
 			m_currentDialog.current_instruction = naughty_instructions;
 			m_currentDialog.instruction_num = 0;

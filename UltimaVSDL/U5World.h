@@ -117,6 +117,8 @@ private:
 	void PrintSign(int x, int y, int z);
 
 	void ProcessTalkInput();
+	void ProcessTalkPause();
+	void ProcessTalkKeyWait();
 	void ProcessLabelInput();
 	void ProcessNameInput();
 	void HandleNameTalkInput();
@@ -130,5 +132,8 @@ private:
 	bool m_allowMove;
 	std::string m_displayWord;
 	DialogInfo m_currentDialog;
+	Uint64 m_current_talk_pause_delay;
+
+	const Uint64 TALK_PAUSE_TIME = 2500;
 };
 

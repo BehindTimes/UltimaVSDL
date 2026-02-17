@@ -21,8 +21,8 @@ public:
 	void ShowPrompt();
 	void UpdateCursor();
 	void BackspaceCursor();
-	void BlockPrompt(bool block);
 	void SetCursorStartPosX(int startPos);
+	void SetCursorVisible(bool isVisible);
 
 	void StartLineEdit();
 	void EndLineEdit();

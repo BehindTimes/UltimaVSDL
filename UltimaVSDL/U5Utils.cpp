@@ -79,3 +79,38 @@ std::string U5Utils::trim(const std::string& str)
 	size_t last = str.find_last_not_of(WHITESPACE);
 	return str.substr(first, (last - first + 1));
 }
+
+void U5Utils::SwapCharset(std::string& curString)
+{
+	for (size_t index = 0; index < curString.size(); index++)
+	{
+		unsigned char c = static_cast<unsigned char>(curString[index]);
+		if (c >= 128)
+		{
+			c -= 128;
+		}
+		else
+		{
+			if (c != 0xa)
+			{
+				c += 128;
+			}
+		}
+
+		curString[index] = static_cast<char>(c);
+
+		if (index > 0)
+		{
+			if (c == 0xa7)
+			{
+				unsigned char d = static_cast<unsigned char>(curString[index - 1]);
+				if (d == 0xa6)
+				{
+					char cline = static_cast<char>(0xec);
+					curString[index - 1] = cline;
+					curString[index] = cline;
+				}
+			}
+		}
+	}
+}

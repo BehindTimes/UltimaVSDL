@@ -33,7 +33,6 @@ U5Console::U5Console(SDL3Helper* sdl_helper, UltimaVResource* u5_resources) :
 	m_scroll(false),
 	m_scrollOffset(0),
 	m_startLine(0),
-	m_blockPrompt(false),
 	m_hasPrompt(true),
 	m_smoothscroll(m_options->m_console_smooth_scroll),
 	m_cached_startLine(0),
@@ -44,11 +43,6 @@ U5Console::U5Console(SDL3Helper* sdl_helper, UltimaVResource* u5_resources) :
 
 U5Console::~U5Console()
 {
-}
-
-void U5Console::BlockPrompt(bool block)
-{
-	m_blockPrompt = block;
 }
 
 void U5Console::NewPrompt()
@@ -501,4 +495,9 @@ void U5Console::ShowPrompt()
 	m_sdl_helper->SetRenderTarget(m_sdl_helper->m_TargetTextures[TTV_CONSOLE_BUFFER]);
 	m_sdl_helper->DrawTileTexture8(m_sdl_helper->m_ArrowTextures[1], 0, m_curLine);
 	m_sdl_helper->SetRenderTarget(nullptr);
+}
+
+void U5Console::SetCursorVisible(bool isVisible)
+{
+	m_showPrompt = isVisible;
 }
