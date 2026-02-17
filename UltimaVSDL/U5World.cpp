@@ -1717,6 +1717,7 @@ void U5World::DoTalk()
 				if (m_currentDialog.instruction_num == m_currentDialog.current_instruction.size() - 1)
 				{
 					printWord += m_resources->m_data.game_strings[END_QUOTED_STRING];
+					printWord += '\n';
 				}
 			}
 			m_parent->m_console->PrintText(printWord);
@@ -1750,6 +1751,9 @@ void U5World::DoTalk()
 				ProcessTalkInput();
 				return;
 				break;
+			case TalkMode::Label:
+				m_currentDialog.label_num = -1;
+				break;
 			default:
 				break;
 			};
@@ -1779,7 +1783,7 @@ void U5World::DoTalk()
 		ProcessTalkInput();
 		break;
 	case TalkMode::Label:
-		m_parent->m_console->PrintText("\n");
+		//m_parent->m_console->PrintText("\n");
 		if (m_currentDialog.label_num >= 0x91 && m_currentDialog.label_num <= 0x9a)
 		{
 			ProcessLabelInput();
@@ -1840,15 +1844,8 @@ void U5World::HandleTalkWord(std::string strReponse)
 			m_parent->m_console->EndLineEdit();
 			m_currentDialog.mode = TalkMode::Label;
 			std::vector<std::pair<int, std::string>> naughty_instructions;
-			if (m_currentDialog.label_num >= 0x91 && m_currentDialog.label_num <= 0x9a)
-			{
-				naughty_instructions.push_back(std::make_pair(0, m_resources->m_data.game_strings[WITH_LANGUAGE_LIKE_THAT_STRING] + "\"\n\n"));
-				naughty_instructions.push_back(std::make_pair(m_currentDialog.label_num, ""));
-			}
-			else
-			{
-				naughty_instructions.push_back(std::make_pair(0, m_resources->m_data.game_strings[WITH_LANGUAGE_LIKE_THAT_STRING] + "\"\n"));
-			}
+			naughty_instructions.push_back(std::make_pair(0, m_resources->m_data.game_strings[WITH_LANGUAGE_LIKE_THAT_STRING] + "\"\n\n"));
+			naughty_instructions.push_back(std::make_pair(m_currentDialog.label_num, ""));
 			m_currentDialog.current_instruction = naughty_instructions;
 			m_currentDialog.instruction_num = 0;
 			return;
@@ -1927,6 +1924,20 @@ void U5World::HandleTalkWord(std::string strReponse)
 					return;
 				}
 			}
+			m_process_key = std::bind(&U5World::DoTalk, this);
+			if (drawNewLine)
+			{
+				m_parent->m_console->PrintText("\n");
+			}
+			m_parent->m_console->PrintText("\n");
+			m_parent->m_console->EndLineEdit();
+			m_currentDialog.instruction_num = 0;
+			m_currentDialog.mode = TalkMode::Label;
+			m_currentDialog.label_num = -1;
+			std::vector<std::pair<int, std::string>> default_instructions;
+			default_instructions.push_back(std::make_pair(0, m_resources->m_data.game_strings[CANNOT_HELP]));
+			m_currentDialog.current_instruction = default_instructions;
+			return;
 		}
 	}
 	else
@@ -1963,9 +1974,48 @@ void U5World::HandleTalkWord(std::string strReponse)
 			m_parent->m_console->EndLineEdit();
 			return;
 		}
+		else
+		{
+			if (m_currentDialog.dialog.labels.contains(m_currentDialog.label_num))
+			{
+				// Originally, I used a map, but the game searches in order.  This actually leads
+				// to a bug where a keyword could prevent another keyword, but we're going to keep
+				// that here to be consistent.
+				for (size_t index = 0; index < m_currentDialog.dialog.labels[m_currentDialog.label_num].keywords.size(); index++)
+				{
+					if (strReponse.starts_with(m_currentDialog.dialog.labels[m_currentDialog.label_num].keywords[index].first))
+					{
+						m_process_key = std::bind(&U5World::DoTalk, this);
+						if (drawNewLine)
+						{
+							m_parent->m_console->PrintText("\n");
+						}
+						m_parent->m_console->PrintText("\n");
+						m_parent->m_console->EndLineEdit();
+						m_currentDialog.instruction_num = 0;
+						m_currentDialog.mode = TalkMode::Label;
+						m_currentDialog.current_instruction = m_currentDialog.dialog.labels[m_currentDialog.label_num].keywords[index].second;
+						m_currentDialog.label_num = -1;
+						return;
+					}
+				}
+				m_process_key = std::bind(&U5World::DoTalk, this);
+				if (drawNewLine)
+				{
+					m_parent->m_console->PrintText("\n");
+				}
+				m_parent->m_console->PrintText("\n");
+				m_parent->m_console->EndLineEdit();
+				m_currentDialog.instruction_num = 0;
+				m_currentDialog.mode = TalkMode::Label;
+				m_currentDialog.current_instruction = m_currentDialog.dialog.labels[m_currentDialog.label_num].default_answer;
+				m_currentDialog.label_num = -1;
+				return;
+			}
+		}
 	}
 	
-	//for(
+	// A default case for corrupt scripts
 	m_parent->m_console->EndLineEdit();
 	m_process_key = std::bind(&U5World::ProcessAnyKeyHit, this);
 	m_parent->m_console->NewPrompt();

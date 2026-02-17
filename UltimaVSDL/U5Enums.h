@@ -148,6 +148,7 @@ const int BYE_STRING = 0x4fd;
 const int END_QUOTED_STRING = 0x517;
 const int MY_NAME_IS_STING = 0x4fa;
 const int WITH_LANGUAGE_LIKE_THAT_STRING = 0x4fb;
+const int CANNOT_HELP = 0x4fe;
 const int YOU_RESPOND_STRING = 0x4ff;
 const int WHAT_DID_YOU_SAY_STRING = 0x500;
 
