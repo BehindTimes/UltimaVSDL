@@ -1653,7 +1653,7 @@ void U5World::HandleTalk()
 
 void U5World::DoTalk()
 {
-	bool knowAvatar = true;
+	bool knowAvatar = m_charData->m_knowAvatar;
 	bool knowName = false;
 	int karma = 74;
 	bool firstinstruction = true;
@@ -1703,22 +1703,7 @@ void U5World::DoTalk()
 		{
 		case 0:
 			printWord.clear();
-			if (m_currentDialog.mode == TalkMode::Goodbye)
-			{
-				printWord += "\"";
-			}
-			else if (m_currentDialog.mode == TalkMode::Label)
-			{
-				if (firstinstruction)
-				{
-					if (m_currentDialog.current_instruction[m_currentDialog.instruction_num].second.size() > 0 &&
-						m_currentDialog.current_instruction[m_currentDialog.instruction_num].second[0] != '\"')
-					{
-						printWord += "\"";
-					}
-				}
-			}
-			else if (m_currentDialog.mode == TalkMode::Greeting)
+			if (m_currentDialog.mode == TalkMode::Goodbye || m_currentDialog.mode == TalkMode::Label || m_currentDialog.mode == TalkMode::Greeting)
 			{
 				if (firstinstruction)
 				{
@@ -1758,7 +1743,17 @@ void U5World::DoTalk()
 			firstinstruction = false;
 			break;
 		case 0x81: // print Avatar name
+			if (firstinstruction)
+			{
+				m_parent->m_console->PrintText("\"");
+				firstinstruction = false;
+			}
 			m_parent->m_console->PrintText(m_charData->m_name);
+			break;
+		case 0x82: // end conversation
+			m_process_key = std::bind(&U5World::ProcessAnyKeyHit, this);
+			m_parent->m_console->NewPrompt();
+			return;
 			break;
 		case 0x88: // ask name
 			printWord.clear();
@@ -1814,11 +1809,17 @@ void U5World::DoTalk()
 			}
 			break;
 		case 0xff:
+			m_currentDialog.instruction_num = m_currentDialog.current_instruction.size();
 			switch (m_currentDialog.mode)
 			{
-			case TalkMode::Description:
+			case TalkMode::Name:
+				m_currentDialog.mode = TalkMode::Label;
 				m_currentDialog.label_num = -1;
-				ProcessTalkInput();
+				break;
+			case TalkMode::Description:
+				m_currentDialog.mode = TalkMode::Label;
+				m_currentDialog.label_num = -1;
+				//ProcessTalkInput();
 				return;
 				break;
 			case TalkMode::Label:
@@ -1921,6 +1922,8 @@ void U5World::HandleNameTalkWord(std::string strReponse)
 
 	if (strReponse == m_charData->m_name_upper_case)
 	{
+		// TO DO: associate this with the character.  Temporarily, making this global
+		m_charData->m_knowAvatar = true;
 		responsestring = m_resources->m_data.game_strings[A_PLEASURE_STRING];
 	}
 	else
@@ -2090,11 +2093,13 @@ void U5World::HandleTalkWord(std::string strReponse)
 			{
 				what_did_you_say.erase(0, 1);
 			}
+			what_did_you_say += '\"';
+
 			if (drawNewLine)
 			{
 				m_parent->m_console->PrintText("\n");
 			}
-			what_did_you_say += '\n';
+			what_did_you_say += "\n\n";
 
 			m_parent->m_console->PrintText(what_did_you_say);
 			m_parent->m_console->EndLineEdit();
