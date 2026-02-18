@@ -34,7 +34,8 @@ U5World::U5World(SDL3Helper* sdl_helper, UltimaVResource* u5_resources) :
 	m_parent(nullptr),
 	m_allowMove(true),
 	m_currentDialog(-1),
-	m_current_talk_pause_delay(0)
+	m_current_talk_pause_delay(0),
+	m_curShop(0)
 {
 	// blackthorn
 	//m_xpos = 196;
@@ -1571,7 +1572,8 @@ void U5World::HandleTalk()
 
 	int curpos = m_parent->m_currentMap[tempx][tempy];
 	if ((curpos >= 154 && curpos <= 156) ||
-		(curpos >= 148 && curpos <= 150))
+		(curpos >= 148 && curpos <= 150) ||
+		curpos == 190)
 	{
 		if (ret == 'U')
 		{
@@ -1596,7 +1598,13 @@ void U5World::HandleTalk()
 			{
 				dialog_pos = m_parent->m_curNPCs->data[index].dialog_number;
 				npc_type = m_parent->m_curNPCs->data[index].type;
-				std::cout << dialog_pos << " " << npc_type << std::endl;
+				// dialog_pos
+				// 129 arms dealer
+				// 130 tavern keeper
+				// 131 horse
+				// 134 guild
+				// 136 inn keeper
+				//std::cout << dialog_pos << " " << npc_type << std::endl;
 				break;
 			}
 		}
@@ -1637,12 +1645,60 @@ void U5World::HandleTalk()
 
 	if (!m_parent->m_talk_data.contains(m_currentDialog.dialog_num))
 	{
-		// TO DO: This is filler just to prevent locking up for the time being
-		m_parent->m_console->PrintText("\n");
-		m_parent->m_console->PrintText(m_resources->m_data.game_strings[NO_RESPONSE_STRING]);
-		m_parent->m_console->NewPrompt();
-		m_process_key = std::bind(&U5World::ProcessAnyKeyHit, this);
-		m_input->SetRequireAllKeysUp();
+		const int SHOP_START = 129;
+		const int SHOP_END = 136;
+
+		if (m_currentDialog.dialog_num >= SHOP_START && m_currentDialog.dialog_num <= SHOP_END)
+		{
+			std::vector<std::pair<bool, bool>> has_data = {
+				m_shop_data.has_arms_info,
+				m_shop_data.has_tavern_info,
+				m_shop_data.has_horse_info,
+				m_shop_data.has_ship_info,
+				m_shop_data.has_reagents_info,
+				m_shop_data.has_provisions_info,
+				m_shop_data.has_healer_info,
+				m_shop_data.has_inn_info
+			};
+			std::vector<std::pair<std::string, std::string>> vendor_data = {
+				m_shop_data.arms_info,
+				m_shop_data.tavern_info,
+				m_shop_data.horse_info,
+				m_shop_data.ship_info,
+				m_shop_data.reagents_info,
+				m_shop_data.provisions_info,
+				m_shop_data.healer_info,
+				m_shop_data.inn_info
+			};
+			m_curShop = m_currentDialog.dialog_num - SHOP_START;
+			m_parent->m_console->PrintText("\n");
+
+			m_parent->m_console->PrintText("SHOP: ");
+			if (has_data[m_curShop].first)
+			{
+				
+				m_parent->m_console->PrintText(vendor_data[m_curShop].first);
+			}
+			m_parent->m_console->PrintText("\n");
+			m_parent->m_console->PrintText("NAME: ");
+			if (has_data[m_curShop].second)
+			{
+				m_parent->m_console->PrintText(vendor_data[m_curShop].second);
+			}
+			m_parent->m_console->PrintText("\n");
+			m_parent->m_console->NewPrompt();
+			m_process_key = std::bind(&U5World::ProcessAnyKeyHit, this);
+			m_input->SetRequireAllKeysUp();
+		}
+		else
+		{
+			// TO DO: This is filler just to prevent locking up for the time being
+			m_parent->m_console->PrintText("\n");
+			m_parent->m_console->PrintText(m_resources->m_data.game_strings[NO_RESPONSE_STRING]);
+			m_parent->m_console->NewPrompt();
+			m_process_key = std::bind(&U5World::ProcessAnyKeyHit, this);
+			m_input->SetRequireAllKeysUp();
+		}
 	}
 	else
 	{

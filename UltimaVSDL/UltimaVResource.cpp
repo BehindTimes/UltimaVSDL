@@ -846,6 +846,107 @@ int UltimaVResource::LoadStory(std::vector<unsigned char> &data_buffer)
 	return 0;
 }
 
+void UltimaVResource::LoadVendorData(const std::vector<unsigned char>& buffer)
+{
+	const size_t ARMS_INDEX = 0x23da;
+	const size_t ARMS_NAME_INDEX = 0x21da;
+	const size_t ARMS_VENDOR_INDEX = 0x22da;
+	const size_t TAVERN_INDEX = 0x23ea;
+	const size_t TAVERN_NAME_INDEX = 0x21fa;
+	const size_t TAVERN_VENDOR_INDEX = 0x22fa;
+	const size_t HORSE_INDEX = 0x23fa;
+	const size_t HORSE_NAME_INDEX = 0x221a;
+	const size_t HORSE_VENDOR_INDEX = 0x231a;
+	const size_t SHIP_INDEX = 0x240a;
+	const size_t SHIP_NAME_INDEX = 0x223a;
+	const size_t SHIP_VENDOR_INDEX = 0x233a;
+	const size_t REAGENT_INDEX = 0x241a;
+	const size_t REAGENTNAME_INDEX = 0x225a;
+	const size_t REAGENT_VENDOR_INDEX = 0x235a;
+	const size_t GUILD_INDEX = 0x242a;
+	const size_t GUILD_NAME_INDEX = 0x227a;
+	const size_t GUILD_VENDOR_INDEX = 0x237a;
+	const size_t HEALER_INDEX = 0x243a;
+	const size_t HEALER_NAME_INDEX = 0x229a;
+	const size_t HEALER_VENDOR_INDEX = 0x239a;
+	const size_t INN_INDEX = 0x244a;
+	const size_t INN_NAME_INDEX = 0x22ba;
+	const size_t INN_VENDOR_INDEX = 0x23ba;
+
+	std::vector<std::vector<size_t>> shoppe_offsets = {
+		{ ARMS_INDEX, ARMS_NAME_INDEX, ARMS_VENDOR_INDEX },
+		{ TAVERN_INDEX, TAVERN_NAME_INDEX, TAVERN_VENDOR_INDEX },
+		{ HORSE_INDEX, HORSE_NAME_INDEX, HORSE_VENDOR_INDEX },
+		{ SHIP_INDEX, SHIP_NAME_INDEX, SHIP_VENDOR_INDEX },
+		{ REAGENT_INDEX, REAGENTNAME_INDEX, REAGENT_VENDOR_INDEX },
+		{ GUILD_INDEX, GUILD_NAME_INDEX, GUILD_VENDOR_INDEX },
+		{ HEALER_INDEX, HEALER_NAME_INDEX, HEALER_VENDOR_INDEX },
+		{ INN_INDEX, INN_NAME_INDEX, INN_VENDOR_INDEX }
+	};
+
+	for (int shop_index = 0; shop_index < shoppe_offsets.size(); shop_index++)
+	{
+		for (int index = 0; index < 16; index++)
+		{
+			unsigned char curTown = buffer[shoppe_offsets[shop_index][0] + index];
+			if (curTown == 0)
+			{
+				continue;
+			}
+			m_data.shop_info.insert(std::pair <int, ShopInfo>(curTown, ShopInfo{}));
+
+			std::vector<std::pair<std::string, std::string>*> data = {
+				&m_data.shop_info[curTown].arms_info,
+				&m_data.shop_info[curTown].tavern_info,
+				&m_data.shop_info[curTown].horse_info,
+				&m_data.shop_info[curTown].ship_info,
+				&m_data.shop_info[curTown].reagents_info,
+				&m_data.shop_info[curTown].provisions_info,
+				&m_data.shop_info[curTown].healer_info,
+				&m_data.shop_info[curTown].inn_info 
+			};
+			std::vector<std::pair<bool, bool>*> has_data = {
+				&m_data.shop_info[curTown].has_arms_info,
+				&m_data.shop_info[curTown].has_tavern_info,
+				&m_data.shop_info[curTown].has_horse_info,
+				&m_data.shop_info[curTown].has_ship_info,
+				&m_data.shop_info[curTown].has_reagents_info,
+				&m_data.shop_info[curTown].has_provisions_info,
+				&m_data.shop_info[curTown].has_healer_info,
+				&m_data.shop_info[curTown].has_inn_info
+			};
+
+			size_t curPos = shoppe_offsets[shop_index][1] + static_cast<size_t>(index * 2);	
+			uint32_t vendor_offset = ReadInt16(buffer.begin(), curPos);
+			if (vendor_offset != 0)
+			{
+				vendor_offset += 0x10;
+				std::string name = ReadNextString(buffer.begin() + vendor_offset, buffer.end());
+				data[shop_index]->first = name;
+				has_data[shop_index]->first = true;
+			}
+			else
+			{
+				has_data[shop_index]->first = false;
+			}
+
+			curPos = shoppe_offsets[shop_index][2] + static_cast<size_t>(index * 2);
+			vendor_offset = ReadInt16(buffer.begin(), curPos);
+			if (vendor_offset != 0)
+			{
+				vendor_offset += 0x10;
+				std::string name = ReadNextString(buffer.begin() + vendor_offset, buffer.end());
+				data[shop_index]->second = name;
+				has_data[shop_index]->second = true;
+			}
+			else
+			{
+				has_data[shop_index]->second = false;
+			}
+		}
+	}
+}
+
 int UltimaVResource::LoadDungeonSigns(const std::vector<unsigned char>& buffer)
 {
 	const size_t NUM_DUNGEONS = 8;
@@ -1135,6 +1236,8 @@ int UltimaVResource::LoadDataOvl()
 	{
 		return -8;
 	}
+
+	LoadVendorData(m_data.buffer);
 
 	return 0;
 }

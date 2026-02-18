@@ -369,6 +369,15 @@ void U5Game::LoadMap(int map_num)
 
 	if (m_curNPCs != nullptr)
 	{
+		if (m_resources->m_data.shop_info.contains(map_num + 1))
+		{
+			m_world->m_shop_data = m_resources->m_data.shop_info[map_num + 1];
+		}
+		else
+		{
+			m_world->m_shop_data = ShopInfo{};
+		}
+		
 		LoadNPCData();
 	}
 }

@@ -99,6 +99,27 @@ struct U5Dialog
 	std::map<int, U5DialogLabel> labels;
 };
 
+struct ShopInfo
+{
+	std::pair<std::string, std::string> arms_info;
+	std::pair<std::string, std::string> tavern_info;
+	std::pair<std::string, std::string> horse_info;
+	std::pair<std::string, std::string> ship_info;
+	std::pair<std::string, std::string> reagents_info;
+	std::pair<std::string, std::string> provisions_info;
+	std::pair<std::string, std::string> healer_info;
+	std::pair<std::string, std::string> inn_info;
+
+	std::pair<bool, bool> has_arms_info;
+	std::pair<bool, bool> has_tavern_info;
+	std::pair<bool, bool> has_horse_info;
+	std::pair<bool, bool> has_ship_info;
+	std::pair<bool, bool> has_reagents_info;
+	std::pair<bool, bool> has_provisions_info;
+	std::pair<bool, bool> has_healer_info;
+	std::pair<bool, bool> has_inn_info;
+};
+
 struct U5Data
 {
 	U5Data() :
@@ -136,6 +157,7 @@ struct U5Data
 	std::vector<std::string> compressed_words;
 	std::vector<std::string> input_words;
 	std::vector<std::string> shoppe_words;
+	std::map<int, ShopInfo> shop_info;
 };
 
 struct IntroScriptInstruction {
@@ -209,7 +231,6 @@ const size_t CUTSCENE_HEIGHT = 11;
 const size_t DEMO_WIDTH = 19;
 const size_t DEMO_HEIGHT = 4;
 
-
 enum TLK_ENUM
 {
 	TLK_STRING
@@ -282,5 +303,6 @@ private:
 	bool ReadStrings(const std::vector<unsigned char>& buffer, std::vector<std::string>& str_vec, size_t start_pos, size_t end_pos);
 	int ReadCompressedWords(const std::vector<unsigned char>& buffer);
 	std::string ReadNextString(std::vector<unsigned char>::const_iterator data, std::vector<unsigned char>::const_iterator end);
+	void LoadVendorData(const std::vector<unsigned char>& buffer);
 };
 

@@ -64,6 +64,7 @@ public:
 	std::vector<PositionData> m_vec_pos;
 
 	GameLocation m_location_type;
+	ShopInfo m_shop_data;
 private:
 	void DrawNPCs();
 	void DrawAvatar();
@@ -133,6 +134,7 @@ private:
 	std::string m_displayWord;
 	DialogInfo m_currentDialog;
 	Uint64 m_current_talk_pause_delay;
+	int m_curShop;
 
 	const Uint64 TALK_PAUSE_TIME = 2500;
 };
