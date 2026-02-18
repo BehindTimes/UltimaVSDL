@@ -148,6 +148,10 @@ int UltimaVResource::LoadResources()
 	{
 		return -1;
 	}
+	if (0 != LoadShoppe())
+	{
+		return -1;
+	}
 
 	return 0;
 }
@@ -1714,6 +1718,53 @@ int UltimaVResource::LoadLookData()
 			return -4;
 		}
 		m_LookData[index] = ReadNextString(buffer.begin() + curPos, buffer.end());
+	}
+
+	return 0;
+}
+
+int UltimaVResource::LoadShoppe()
+{
+	std::vector<unsigned char> buffer;
+	int ret = LoadBuffer("SHOPPE.DAT", buffer);
+
+	if (0 != ret)
+	{
+		return ret;
+	}
+
+	std::string strCurString;
+	for (size_t index = 0; index < buffer.size(); index++)
+	{
+		if (buffer[index] == 0 && !strCurString.empty())
+		{
+			m_data.shoppe_words.push_back(strCurString);
+			strCurString.clear();
+			continue;
+		}
+		unsigned char curval = buffer[index];
+		if (curval < 0x80)
+		{
+			strCurString += buffer[index];
+		}
+		else
+		{
+			curval -= 0x80;
+			if (static_cast<size_t>(curval + 1) < m_data.compressed_words.size())
+			{
+				std::string curWord = m_data.compressed_words[curval + 1];
+				if (strCurString.size() > 0 && strCurString.back() != ' ')
+				{
+					strCurString += ' ';
+				}
+				strCurString += curWord;
+				strCurString += ' ';
+			}
+			else
+			{
+				return -2;
+			}
+		}
 	}
 
 	return 0;

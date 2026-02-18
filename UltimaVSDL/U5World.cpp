@@ -1596,6 +1596,7 @@ void U5World::HandleTalk()
 			{
 				dialog_pos = m_parent->m_curNPCs->data[index].dialog_number;
 				npc_type = m_parent->m_curNPCs->data[index].type;
+				std::cout << dialog_pos << " " << npc_type << std::endl;
 				break;
 			}
 		}

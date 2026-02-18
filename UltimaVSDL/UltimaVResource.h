@@ -135,6 +135,7 @@ struct U5Data
 	std::array<std::map<int, U5Dialog>, 4> m_talkData;
 	std::vector<std::string> compressed_words;
 	std::vector<std::string> input_words;
+	std::vector<std::string> shoppe_words;
 };
 
 struct IntroScriptInstruction {
@@ -266,6 +267,7 @@ private:
 	int LoadDungeonSigns(const std::vector<unsigned char>& buffer);
 	int LoadLookData();
 	int LoadTalk(MapTypes map_type);
+	int LoadShoppe();
 
 	int ParseCharacterFile(std::vector<U5ImageData>& bit_file_data, std::vector<unsigned char>& data, int width, int height);
 	int ParseBitFile(std::vector<U5ImageData> &bit_file_data, std::vector<unsigned char> &data);
