@@ -138,6 +138,7 @@ std::vector<std::string> U5Console::FormatText(std::string text, int startElem, 
 	{
 		ret.emplace_back(std::string("\n"));
 		max_len = CONSOLE_SIZE;
+		startElem = 0;
 	}
 
 	if (pretty_print)

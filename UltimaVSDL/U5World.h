@@ -88,6 +88,7 @@ private:
 	int ProcessYesNo();
 	int ProcessDirection();
 	int ProcessLetterImmediate();
+	int ProcessKeyImmediate();
 
 	void ProcessLeaveTown();
 	void HandleLeaveTown();
@@ -116,10 +117,12 @@ private:
 	void PostMove();
 
 	void PrintSign(int x, int y, int z);
+	void PrintSignText();
 
 	void ProcessTalkInput();
 	void ProcessTalkPause();
 	void ProcessTalkKeyWait();
+	void ProcessSignKeyWait();
 	void ProcessLabelInput();
 	void ProcessNameInput();
 	void HandleNameTalkInput();
@@ -135,6 +138,7 @@ private:
 	DialogInfo m_currentDialog;
 	Uint64 m_current_talk_pause_delay;
 	int m_curShop;
+	std::string m_multiline_text;
 
 	const Uint64 TALK_PAUSE_TIME = 2500;
 };

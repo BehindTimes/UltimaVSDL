@@ -48,8 +48,12 @@ U5World::U5World(SDL3Helper* sdl_helper, UltimaVResource* u5_resources) :
 	// 
 	//m_xpos = 50;
 	//m_ypos = 50;
-	m_xpos = 83;  // 53
-	m_ypos = 106; // 6A
+	// britain
+	//m_xpos = 83;  // 53
+	//m_ypos = 106; // 6A
+	// yew
+	m_xpos = 58;  // 3a
+	m_ypos = 44; // 2c
 	//m_xpos = 176;
 	//m_ypos = 210;
 	
@@ -751,6 +755,31 @@ void U5World::ProcessLeaveTown()
 	m_process_key = std::bind(&U5World::HandleLeaveTown, this);
 }
 
+void U5World::PrintSignText()
+{
+	const unsigned char newlinechar = 0x8d;
+	size_t index = m_multiline_text.find(newlinechar);
+	// Yet another hack.  Also, need to properly handle Wanted: Dead or Alive
+	if (m_multiline_text.ends_with('\n'))
+	{
+		m_multiline_text.pop_back();
+	}
+	if (index == std::string::npos)
+	{
+		m_parent->m_console->PrintText(m_multiline_text, false, false, false);
+		m_parent->m_console->PrintText("\n");
+		m_parent->m_console->NewPrompt();
+	}
+	else
+	{
+		std::string tempstr = m_multiline_text.substr(0, index);
+		m_multiline_text = m_multiline_text.substr(index + 1);
+		m_parent->m_console->PrintText(tempstr, false, false, false);
+		m_parent->m_console->PrintText("\n");
+		m_process_key = std::bind(&U5World::ProcessSignKeyWait, this);
+	}
+}
+
 void U5World::PrintSign(int x, int y, int z)
 {
 	bool found = false;
@@ -771,13 +800,15 @@ void U5World::PrintSign(int x, int y, int z)
 	}
 	if (m_parent->m_sign_data[tempindex].text != std::string("\n"))
 	{
-		m_parent->m_console->PrintText(m_parent->m_sign_data[tempindex].text, false, false, false);
+		m_multiline_text = m_parent->m_sign_data[static_cast<size_t>(tempindex)].text;
+		PrintSignText();
 	}
 	else
 	{
 		if (m_parent->m_sign_data.size() > static_cast<size_t>(tempindex + 1))
 		{
-			m_parent->m_console->PrintText(m_parent->m_sign_data[tempindex + 1].text, false, false, false);
+			m_multiline_text = m_parent->m_sign_data[static_cast<size_t>(tempindex + 1)].text;
+			PrintSignText();
 		}
 	}
 }
@@ -864,11 +895,14 @@ void U5World::HandleLook()
 
 	switch (curpos)
 	{
+	case 137:
+	case 138:
 	case 160:
 	case 164:
 	case 248:
 		m_parent->m_console->PrintText("\n");
 		PrintSign(tempx, tempy, m_parent->m_cur_level);
+		return;
 		break;
 	default:
 		curItem = m_resources->m_LookData[curpos];
@@ -1355,6 +1389,19 @@ void U5World::ProcessYell()
 	m_process_key = std::bind(&U5World::StartYell, this);
 }
 
+int U5World::ProcessKeyImmediate()
+{
+	int ret = -1;
+	m_input->m_isValid = true;
+	m_input->SetRequireAllKeysUp();
+	SDL_Keycode curKey = m_input->GetCurrentKeyCode();
+	if (curKey > 0)
+	{
+		return curKey;
+	}
+	return ret;
+}
+
 int U5World::ProcessLetterImmediate()
 {
 	int ret = -1;
@@ -1718,9 +1765,19 @@ void U5World::ProcessTalkPause()
 	}
 }
 
+void U5World::ProcessSignKeyWait()
+{
+	int ret = ProcessKeyImmediate();
+	if (ret > 0)
+	{
+		m_process_key = std::bind(&U5World::ProcessAnyKeyHit, this);
+		PrintSignText();
+	}
+}
+
 void U5World::ProcessTalkKeyWait()
 {
-	int ret = ProcessLetterImmediate();
+	int ret = ProcessKeyImmediate();
 	if (ret > 0)
 	{
 		m_process_key = std::bind(&U5World::DoTalk, this);
