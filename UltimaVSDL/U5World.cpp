@@ -84,6 +84,27 @@ void U5World::SetParent(U5Game* parent)
 	m_parent = parent;
 }
 
+void U5World::SetNPCTiles()
+{
+	for (int index = 1; index < 32; index++)
+	{
+		unsigned char map_tile = m_parent->m_currentMap[m_parent->m_curNPCs->data[index].current_x][m_parent->m_curNPCs->data[index].current_y];
+		m_parent->m_curNPCs->data[index].on_tile = map_tile;
+		if (m_parent->m_curNPCs->data[index].on_tile == BED_HEAD)
+		{
+			m_parent->m_curNPCs->data[index].display_type = BED_SLEEPING - 0x100;
+		}
+		else if (m_parent->m_curNPCs->data[index].on_tile == STOCKADE_TILE)
+		{
+			m_parent->m_curNPCs->data[index].display_type = IN_STOCKS - 0x100;
+		}
+		else
+		{
+			m_parent->m_curNPCs->data[index].display_type = m_parent->m_curNPCs->data[index].type;
+		}
+	}
+}
+
 void U5World::DrawNPCs()
 {
 	if (m_parent->m_curNPCs == nullptr)
@@ -107,7 +128,7 @@ void U5World::DrawNPCs()
 			continue;
 		}
 
-		int curpos = m_parent->m_curNPCs->data[index].type + 0x100;
+		int curpos = m_parent->m_curNPCs->data[index].GetType();
 
 		if (curpos >= m_sdl_helper->m_TileTextures.size() || curpos == 0x100)
 		{
@@ -117,17 +138,22 @@ void U5World::DrawNPCs()
 		int mapX = m_parent->m_curNPCs->data[index].current_x - (m_xpos - 6);
 		int mapY = m_parent->m_curNPCs->data[index].current_y - (m_ypos - 6);
 
-		unsigned char map_tile = m_parent->m_currentMap[m_parent->m_curNPCs->data[index].current_x][m_parent->m_curNPCs->data[index].current_y];
+		//unsigned char map_tile = m_parent->m_currentMap[m_parent->m_curNPCs->data[index].current_x][m_parent->m_curNPCs->data[index].current_y];
 
 		SDL_Texture* curTexture;
-		if (map_tile == BED_HEAD)
+		/*if (map_tile == BED_HEAD)
 		{
 			curTexture = m_sdl_helper->m_TileTextures[BED_SLEEPING].GetTexture();
+		}
+		else if (map_tile == STOCKADE_TILE)
+		{
+			curTexture = m_sdl_helper->m_TileTextures[IN_STOCKS].GetTexture();
 		}
 		else
 		{
 			curTexture = m_sdl_helper->m_TileTextures[curpos].GetTexture();
-		}
+		}*/
+		curTexture = m_sdl_helper->m_TileTextures[curpos].GetTexture();
 		
 		m_sdl_helper->DrawTileTexture(curTexture, mapX, mapY);
 	}
@@ -907,6 +933,7 @@ void U5World::HandleLook()
 	default:
 		curItem = m_resources->m_LookData[curpos];
 		m_parent->m_console->PrintText(curItem);
+		std::cout << "LOOK: " << curpos << std::endl;
 		break;
 	}
 	

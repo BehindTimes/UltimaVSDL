@@ -32,6 +32,7 @@ public:
 	void CreateScrollingTexture(Uint64 animation_speed);
 	void CreateFlagTexture(Uint64 animation_speed, int xpos, int ypos, int width, int height);
 	void UpdateTime(Uint64 elapsedTime);
+	TextureType GetTextureType() const;
 private:
 	void UpdateFireTexture();
 

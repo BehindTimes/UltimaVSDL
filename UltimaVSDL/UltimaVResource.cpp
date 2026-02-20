@@ -21,6 +21,17 @@
 extern std::unique_ptr<GameOptions> m_options;
 extern std::unique_ptr<U5Utils> m_utilities;
 
+int NPC_Data::GetType() const
+{
+	int ret = display_type + 0x100;
+	if (on_tile == BED_HEAD)
+	{
+		ret = BED_SLEEPING;
+	}
+
+	return ret;
+}
+
 UltimaVResource::UltimaVResource() :
 	m_render_mode(m_options->m_render_mode)
 {

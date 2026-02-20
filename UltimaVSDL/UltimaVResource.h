@@ -18,16 +18,20 @@ struct NPC_Schedule
 	uint8_t times[4];
 };
 
-struct NPC_Data
+class NPC_Data
 {
+public:
 	NPC_Schedule schedule;
 	uint8_t facing_direction;
 	uint8_t current_x;
 	uint8_t current_y;
 	uint8_t current_z;
-	uint8_t type;
+	int type;
 	uint8_t dialog_number;
 	Uint64 curNPCDelay;
+	int on_tile;
+	int GetType() const;
+	int display_type;
 };
 
 struct NPC_Info

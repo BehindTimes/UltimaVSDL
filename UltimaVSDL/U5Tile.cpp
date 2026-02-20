@@ -50,6 +50,11 @@ SDL_Texture* U5Tile::GetUnderlyingTexture()
 	return m_texture;
 }
 
+TextureType U5Tile::GetTextureType() const
+{
+	return m_textureType;
+}
+
 SDL_Texture* U5Tile::GetTexture()
 {
 	switch (m_textureType)

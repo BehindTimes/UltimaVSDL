@@ -14,6 +14,7 @@
 #include <iterator>
 #include <cstdint>
 #include "U5Console.h"
+#include "U5Tile.h"
 
 extern std::unique_ptr<U5Utils> m_utilities;
 extern std::unique_ptr<U5Input> m_input;
@@ -130,29 +131,34 @@ void U5Game::Render()
 			}
 			if (changeTile)
 			{
-				int startTile = m_curNPCs->data[index].type - (m_curNPCs->data[index].type % 4);
-				int endTile = startTile + 3;
+				TextureType type = m_sdl_helper->m_TileTextures[m_curNPCs->data[index].display_type + 0x100].GetTextureType();
 
-				int val = m_utilities->GetRandom(0, 2);
-				if (val == 0)
+				if (type == TextureType::NPC)
 				{
-					if (m_curNPCs->data[index].type > 0)
+					int startTile = m_curNPCs->data[index].display_type - (m_curNPCs->data[index].display_type % 4);
+					int endTile = startTile + 3;
+
+					int val = m_utilities->GetRandom(0, 2);
+					if (val == 0)
 					{
-						m_curNPCs->data[index].type--;
-						if (m_curNPCs->data[index].type < static_cast<uint8_t>(startTile))
+						if (m_curNPCs->data[index].display_type > 0)
 						{
-							m_curNPCs->data[index].type = static_cast<uint8_t>(startTile);
+							m_curNPCs->data[index].display_type--;
+							if (m_curNPCs->data[index].display_type < static_cast<uint8_t>(startTile))
+							{
+								m_curNPCs->data[index].display_type = static_cast<uint8_t>(startTile);
+							}
 						}
 					}
-				}
-				else if (val == 1)
-				{
-					if (m_curNPCs->data[index].type < 0xFF)
+					else if (val == 1)
 					{
-						m_curNPCs->data[index].type++;
-						if (m_curNPCs->data[index].type > static_cast<uint8_t>(endTile))
+						if (m_curNPCs->data[index].display_type < 0xFF)
 						{
-							m_curNPCs->data[index].type = static_cast<uint8_t>(endTile);
+							m_curNPCs->data[index].display_type++;
+							if (m_curNPCs->data[index].display_type > static_cast<uint8_t>(endTile))
+							{
+								m_curNPCs->data[index].display_type = static_cast<uint8_t>(endTile);
+							}
 						}
 					}
 				}
@@ -232,15 +238,19 @@ void U5Game::ChangeLevel(int map_level)
 		{
 		case MapTypes::Castle:
 			m_currentMap = m_resources->m_data.castle_maps[temp_level];
+			m_world->SetNPCTiles();
 			break;
 		case MapTypes::Dwelling:
 			m_currentMap = m_resources->m_data.dwelling_maps[temp_level];
+			m_world->SetNPCTiles();
 			break;
 		case MapTypes::Keep:
 			m_currentMap = m_resources->m_data.keep_maps[temp_level];
+			m_world->SetNPCTiles();
 			break;
 		case MapTypes::Town:
 			m_currentMap = m_resources->m_data.town_maps[temp_level];
+			m_world->SetNPCTiles();
 			break;
 		default:
 			break;
@@ -391,4 +401,5 @@ void U5Game::LoadNPCData()
 		m_curNPCs->data[index].current_z = m_curNPCs->data[index].schedule.z_coordinates[1];
 		m_curNPCs->data[index].curNPCDelay = 0;
 	}
+	m_world->SetNPCTiles();
 }

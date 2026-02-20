@@ -61,6 +61,7 @@ public:
 	virtual void ProcessEvents() override;
 	void DrawBorder() override;
 	void SetParent(U5Game* parent);
+	void SetNPCTiles();
 	std::vector<PositionData> m_vec_pos;
 
 	GameLocation m_location_type;
