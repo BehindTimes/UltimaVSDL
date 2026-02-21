@@ -163,7 +163,9 @@ const int INPUT_THANK = 4;
 const size_t INPUT_NAUGHTY = 5;
 
 const int IN_STOCKS = 352;
+const int IN_CHAINS = 356;
 const int STOCKADE_TILE = 132;
+const int CHAINS_TILE = 133;
 const int BED_HEAD = 171;
 const int BED_SLEEPING = 282;
 const int STAIRS_UP = 196;

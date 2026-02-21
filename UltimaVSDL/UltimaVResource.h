@@ -287,7 +287,7 @@ private:
 	int LoadWorldMap();
 	int LoadUnderworldMap();
 	int LoadMap(MapTypes map_type);
-	int LoadMapChunk(unsigned char cur_chunk_val, size_t curChunkX, size_t curChunkY, std::vector<std::vector<unsigned char>>& map, const std::vector<unsigned char>& buffer);
+	int LoadMapChunk(unsigned char cur_chunk_val, size_t curChunkX, size_t curChunkY, std::vector<std::vector<unsigned char>>& map, const std::vector<unsigned char>& buffer, bool isUnderworld);
 	int LoadSigns();
 	int LoadDungeonSigns(const std::vector<unsigned char>& buffer);
 	int LoadLookData();

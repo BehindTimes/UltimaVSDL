@@ -98,6 +98,10 @@ void U5World::SetNPCTiles()
 		{
 			m_parent->m_curNPCs->data[index].display_type = IN_STOCKS - 0x100;
 		}
+		else if (m_parent->m_curNPCs->data[index].on_tile == CHAINS_TILE)
+		{
+			m_parent->m_curNPCs->data[index].display_type = IN_CHAINS - 0x100;
+		}
 		else
 		{
 			m_parent->m_curNPCs->data[index].display_type = m_parent->m_curNPCs->data[index].type;

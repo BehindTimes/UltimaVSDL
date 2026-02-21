@@ -1432,7 +1432,7 @@ int UltimaVResource::LoadMiscMaps()
 	return 0;
 }
 
-int UltimaVResource::LoadMapChunk(unsigned char cur_chunk_val, size_t curChunkX, size_t curChunkY, std::vector<std::vector<unsigned char>> &map, const std::vector<unsigned char>& buffer)
+int UltimaVResource::LoadMapChunk(unsigned char cur_chunk_val, size_t curChunkX, size_t curChunkY, std::vector<std::vector<unsigned char>> &map, const std::vector<unsigned char>& buffer, bool isUnderworld)
 {
 	const size_t CHUNK_WIDTH = 16;
 	const size_t CHUNK_HEIGHT = 16;
@@ -1444,7 +1444,7 @@ int UltimaVResource::LoadMapChunk(unsigned char cur_chunk_val, size_t curChunkX,
 		curRow.resize(256);
 	}
 
-	if (cur_chunk_val == 0xFF) // All water
+	if (cur_chunk_val == 0xFF && !isUnderworld) // All water
 	{
 		for (size_t indexY = 0; indexY < CHUNK_HEIGHT; indexY++)
 		{
@@ -1636,7 +1636,7 @@ int UltimaVResource::LoadWorldMap()
 		{
 			size_t cur_chunk = curChunkY * CHUNK_WIDTH + curChunkX;
 			unsigned char cur_chunk_val = m_data.map_chunks[cur_chunk];
-			if (0 != LoadMapChunk(cur_chunk_val, curChunkX, curChunkY, m_data.world_map, buffer))
+			if (0 != LoadMapChunk(cur_chunk_val, curChunkX, curChunkY, m_data.world_map, buffer, false))
 			{
 				return -1;
 			}
@@ -1665,7 +1665,7 @@ int UltimaVResource::LoadUnderworldMap()
 	{
 		for (size_t curChunkX = 0; curChunkX < CHUNK_WIDTH; curChunkX++)
 		{
-			if (0 != LoadMapChunk(static_cast<unsigned char>(cur_chunk_val), curChunkX, curChunkY, m_data.underworld_map, buffer))
+			if (0 != LoadMapChunk(static_cast<unsigned char>(cur_chunk_val), curChunkX, curChunkY, m_data.underworld_map, buffer, true))
 			{
 				return -1;
 			}
