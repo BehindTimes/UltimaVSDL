@@ -228,6 +228,20 @@ struct U5PaddedImageData : public U5ImageData
 	uint32_t real_height;
 };
 
+struct U5CombatMap
+{
+	std::array<std::array<uint8_t, 11>, 11> map;
+	std::array<uint8_t, 8> triggered_tile_ids;
+	std::array<std::pair<int, int>, 6> party_from_east;
+	std::array<std::pair<int, int>, 6> party_from_west;
+	std::array<std::pair<int, int>, 6> party_from_south;
+	std::array<std::pair<int, int>, 6> party_from_north;
+	std::array<uint8_t, 16> monster_tiles;
+	std::array<std::pair<int, int>, 16> monster_tile_pos;
+	std::array<std::pair<int, int>, 8> trigger_positions;
+	std::array<std::pair<int, int>, 16> triggered_tile_pos;
+};
+
 const size_t NUM_CUTSCENES = 4;
 const size_t NUM_DEMOS = 4;
 const size_t CUTSCENE_WIDTH = 11;
@@ -261,6 +275,8 @@ public:
 	std::vector<std::vector< U5SignData>> m_SignData;
 	std::vector<std::vector< U5SignData>> m_DungeonSignData;
 	std::vector<std::string> m_LookData;
+	std::vector<U5CombatMap> m_CombatMaps;
+	std::vector<U5CombatMap> m_DungeonCombatMaps;
 	U5Data m_data;
 	RenderMode m_render_mode;
 	int m_CutsceneMap[NUM_CUTSCENES][CUTSCENE_WIDTH][CUTSCENE_HEIGHT];
@@ -282,6 +298,7 @@ private:
 	int LoadCharacterSets();
 	int LoadProportionalFont();
 	int LoadMiscMaps();
+	int LoadCombatMaps(CombatMapTypes map_type);
 	int LoadTiles();
 	int LoadDungeons();
 	int LoadWorldMap();
@@ -308,5 +325,6 @@ private:
 	int ReadCompressedWords(const std::vector<unsigned char>& buffer);
 	std::string ReadNextString(std::vector<unsigned char>::const_iterator data, std::vector<unsigned char>::const_iterator end);
 	void LoadVendorData(const std::vector<unsigned char>& buffer);
+	void LoadCombatMapRow(U5CombatMap& curCombatMap, size_t curRow, std::vector<unsigned char>::const_iterator buffer_iter);
 };
 

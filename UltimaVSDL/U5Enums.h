@@ -81,6 +81,12 @@ enum class MapTypes
 	Dungeon
 };
 
+enum class CombatMapTypes
+{
+	Brit = 0,
+	Dungeon
+};
+
 const int MAX_YELL = 30;
 const int MAX_TALK = 15;
 

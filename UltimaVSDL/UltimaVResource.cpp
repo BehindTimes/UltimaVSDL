@@ -91,6 +91,14 @@ int UltimaVResource::LoadResources()
 	{
 		return -1;
 	}
+	if (0 != LoadCombatMaps(CombatMapTypes::Brit))
+	{
+		return -1;
+	}
+	if (0 != LoadCombatMaps(CombatMapTypes::Dungeon))
+	{
+		return -1;
+	}
 	if (0 != LoadWorldMap())
 	{
 		return -1;
@@ -1427,6 +1435,138 @@ int UltimaVResource::LoadMiscMaps()
 		}
 		index += variable_count;
 		m_IntroInstructions.push_back(curInstruction);
+	}
+
+	return 0;
+}
+
+void UltimaVResource::LoadCombatMapRow(U5CombatMap& curCombatMap, size_t curRow, std::vector<unsigned char>::const_iterator buffer_iter)
+{
+	const size_t MAP_ROW_SIZE = 11;
+	const size_t NUM_TRIGGERS = 8;
+	const size_t PARTY_SIZE = 6;
+	const size_t NUM_MONSTERS = 16;
+	const size_t NUM_TILES = 16;
+	for (size_t index = 0; index < MAP_ROW_SIZE; index++)
+	{
+		curCombatMap.map[index][curRow] = *(buffer_iter + index);
+	}
+	switch (curRow)
+	{
+	case 0: // Triggered tile ids
+		for (size_t val_index = 0; val_index < NUM_TRIGGERS; val_index++)
+		{
+			curCombatMap.triggered_tile_ids[val_index] = *(buffer_iter + MAP_ROW_SIZE + val_index);
+		}
+		break;
+	case 1: // Party positions from east
+		for (size_t party_index = 0; party_index < PARTY_SIZE; party_index++)
+		{
+			curCombatMap.party_from_east[party_index] = { *(buffer_iter + MAP_ROW_SIZE + (party_index * 2)), *(buffer_iter + MAP_ROW_SIZE + (party_index * 2) + 1) };
+		}
+		break;
+	case 2: // Party positions from west
+		for (size_t party_index = 0; party_index < PARTY_SIZE; party_index++)
+		{
+			curCombatMap.party_from_west[party_index] = { *(buffer_iter + MAP_ROW_SIZE + (party_index * 2)), *(buffer_iter + MAP_ROW_SIZE + (party_index * 2) + 1) };
+		}
+		break;
+	case 3: // Party positions from south/below
+		for (size_t party_index = 0; party_index < PARTY_SIZE; party_index++)
+		{
+			curCombatMap.party_from_south[party_index] = { *(buffer_iter + MAP_ROW_SIZE + (party_index * 2)), *(buffer_iter + MAP_ROW_SIZE + (party_index * 2) + 1) };
+		}
+		break;
+	case 4: // Party positions from north/above
+		for (size_t party_index = 0; party_index < PARTY_SIZE; party_index++)
+		{
+			curCombatMap.party_from_north[party_index] = { *(buffer_iter + MAP_ROW_SIZE + (party_index * 2)), *(buffer_iter + MAP_ROW_SIZE + (party_index * 2) + 1) };
+		}
+		break;
+	case 5: // Monster tiles
+		for (size_t monster_index = 0; monster_index < NUM_MONSTERS; monster_index++)
+		{
+			curCombatMap.monster_tiles[monster_index] = *(buffer_iter + MAP_ROW_SIZE + monster_index);
+		}
+		break;
+	case 6: // Monster x pos
+		for (size_t monster_index = 0; monster_index < NUM_MONSTERS; monster_index++)
+		{
+			curCombatMap.monster_tile_pos[monster_index].first = *(buffer_iter + MAP_ROW_SIZE + monster_index);
+		}
+		break;
+	case 7: // Monster y pos
+		for (size_t monster_index = 0; monster_index < NUM_MONSTERS; monster_index++)
+		{
+			curCombatMap.monster_tile_pos[monster_index].second = *(buffer_iter + MAP_ROW_SIZE + monster_index);
+		}
+		break;
+	case 8: // Trigger positions
+		for (size_t val_index = 0; val_index < NUM_TRIGGERS; val_index++)
+		{
+			curCombatMap.trigger_positions[val_index].first = *(buffer_iter + MAP_ROW_SIZE + (val_index * 2));
+			curCombatMap.trigger_positions[val_index].second = *(buffer_iter + MAP_ROW_SIZE + (val_index * 2) + 1);
+		}
+		break;
+	case 9: // New tile positions
+		for (size_t tile_index = 0; tile_index < NUM_TILES; tile_index++)
+		{
+			curCombatMap.triggered_tile_pos[tile_index].first = *(buffer_iter + MAP_ROW_SIZE + tile_index);
+		}
+		break;
+	case 10: // New tile positions
+		for (size_t tile_index = 0; tile_index < NUM_TILES; tile_index++)
+		{
+			curCombatMap.triggered_tile_pos[tile_index].second = *(buffer_iter + MAP_ROW_SIZE + tile_index);
+		}
+		break;
+	default:
+		break;
+	}
+}
+
+int UltimaVResource::LoadCombatMaps(CombatMapTypes map_type)
+{
+	std::vector<unsigned char> buffer;
+	std::string strStoryFile;
+	std::vector<U5CombatMap>* curCombatMaps;
+	const size_t COMBAT_MAP_SIZE = 352;
+	const size_t ROW_SIZE = 32;
+	const size_t NUM_ROWS = 11;
+
+	switch (map_type)
+	{
+	case CombatMapTypes::Dungeon:
+		strStoryFile = std::string("DUNGEON.CBT");
+		curCombatMaps = &m_DungeonCombatMaps;
+		break;
+	default:
+		strStoryFile = std::string("BRIT.CBT");
+		curCombatMaps = &m_CombatMaps;
+		break;
+	}
+
+	int ret = LoadBuffer(strStoryFile, buffer);
+
+	if (0 != ret)
+	{
+		return ret;
+	}
+
+	if (buffer.size() % COMBAT_MAP_SIZE != 0) // Sanity check
+	{
+		return -2;
+	}
+	size_t numMaps = buffer.size() / COMBAT_MAP_SIZE;
+	curCombatMaps->resize(numMaps);
+
+	for (size_t index = 0; index < numMaps; index++)
+	{
+		size_t curPos = COMBAT_MAP_SIZE * index;
+		for (size_t rowIndex = 0; rowIndex < NUM_ROWS; rowIndex++)
+		{
+			LoadCombatMapRow((*curCombatMaps)[index], rowIndex, buffer.begin() + curPos + (rowIndex * ROW_SIZE));
+		}
 	}
 
 	return 0;
