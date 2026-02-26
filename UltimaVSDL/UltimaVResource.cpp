@@ -2083,6 +2083,7 @@ int UltimaVResource::LoadTalk(MapTypes map_type)
 		int isDefault = -1;
 		int curId = -1;
 		std::vector<std::string> keyword_vec;
+		std::vector<std::string> corrupt_keyword_vec;
 		while (1)
 		{
 			if (curpos + 3 > buffer.size())
@@ -2114,6 +2115,10 @@ int UltimaVResource::LoadTalk(MapTypes map_type)
 						curData.emplace_back( 0, strCurString );
 					}
 					dlg.name = curData;
+					/*if (dlg.name.back().second == "Mario")
+					{
+						int j = 9;
+					}*/
 					strCurString.clear();
 					curData.clear();
 					curFix++;
@@ -2308,7 +2313,28 @@ int UltimaVResource::LoadTalk(MapTypes map_type)
 								}
 								else
 								{
-									break; // Corrupt talk file
+									// Mario in Yew's dialog is broken into two texts.
+									// Typically, it's a keyword followed by dialog commands, separated by a null terminator, but there's an extra
+									// null terminator here.  Just append it to the previous set of dialog commands
+									// In the original game, it would just skip this section, so you lose out on some text, whereas this will fix
+									// the bug and allow you to see the extra text.
+									size_t curIndex = dlg.keywords.size() - corrupt_keyword_vec.size();
+									for (size_t corrupt_index = 0; corrupt_index < corrupt_keyword_vec.size(); corrupt_index++)
+									{
+										if (dlg.keywords[curIndex + corrupt_index].second.back().first == 0 && curData[0].first == 0)
+										{
+											dlg.keywords[curIndex + corrupt_index].second.back().second += curData[0].second;
+											dlg.keywords[curIndex + corrupt_index].second.insert(dlg.keywords[curIndex + corrupt_index].second.end(),
+												curData.begin() + 1, curData.end());
+										}
+										else
+										{
+											dlg.keywords[curIndex + corrupt_index].second.insert(dlg.keywords[curIndex + corrupt_index].second.end(),
+												curData.begin(), curData.end());
+										}
+									}
+									corrupt_keyword_vec.clear(); // Corrupt talk file
+									keywordMode = true;
 								}
 							}
 							else
@@ -2354,6 +2380,7 @@ int UltimaVResource::LoadTalk(MapTypes map_type)
 										dlg.keywords.push_back(std::make_pair(curKeyword, curData));
 									}
 									keywordMode = true;
+									corrupt_keyword_vec = keyword_vec;
 									keyword_vec.clear();
 									break;
 								}

@@ -306,6 +306,8 @@ bool U5Dungeon::DrawSecondLayer(std::pair<uint8_t, uint8_t> left, std::pair<uint
 			hasSign = true;
 		}
 		break;
+	case 13: // Secret door
+		break;
 	case 15:
 		m_sdl_helper->RenderTextureAt(curTextures[13], hMult * 48, vMult * 22, hMult * 56, vMult * 164);
 		m_sdl_helper->RenderFlipTextureAt(curTextures[13], hMult * 103, vMult * 22, hMult * 56, vMult * 164, 2);
@@ -432,6 +434,8 @@ bool U5Dungeon::DrawThirdLayer(std::pair<uint8_t, uint8_t> left, std::pair<uint8
 		m_sdl_helper->RenderTextureAt(curTextures[26], hMult * 80, vMult * 22, hMult * 24, vMult * 164);
 		m_sdl_helper->RenderFlipTextureAt(curTextures[26], hMult * 103, vMult * 22, hMult * 24, vMult * 164, 2);
 		break;
+	case 13: // Secret door
+		break;
 	case 15:
 		m_sdl_helper->RenderTextureAt(curTextures[14], hMult * 80, vMult * 22, hMult * 24, vMult * 164);
 		m_sdl_helper->RenderFlipTextureAt(curTextures[14], hMult * 103, vMult * 22, hMult * 24, vMult * 164, 2);
@@ -557,6 +561,8 @@ bool U5Dungeon::DrawFourthLayer(std::pair<uint8_t, uint8_t> left, std::pair<uint
 	case 12:
 		m_sdl_helper->RenderTextureAt(curTextures[27], hMult * 96, vMult * 22, hMult * 8, vMult * 164);
 		m_sdl_helper->RenderFlipTextureAt(curTextures[27], hMult * 103, vMult * 22, hMult * 8, vMult * 164, 2);
+		break;
+	case 13: // Secret door
 		break;
 	case 15:
 		m_sdl_helper->RenderTextureAt(curTextures[15], hMult * 96, vMult * 22, hMult * 8, vMult * 164);
