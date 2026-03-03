@@ -52,13 +52,14 @@ U5World::U5World(SDL3Helper* sdl_helper, UltimaVResource* u5_resources) :
 	//m_xpos = 83;  // 53
 	//m_ypos = 106; // 6A
 	// yew
-	m_xpos = 58;  // 3a
-	m_ypos = 44; // 2c
+	//m_xpos = 58;  // 3a
+	//m_ypos = 44; // 2c
 	//m_xpos = 176;
 	//m_ypos = 210;
 	
-	//m_xpos = 91;
-	//m_ypos = 68;
+	// despise
+	m_xpos = 91; // 5b
+	m_ypos = 68; // 44
 
 	//m_xpos = 148;
 	//m_ypos = 83;
