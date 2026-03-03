@@ -130,6 +130,7 @@ private:
 	void HandleTalkInput();
 	void HandleTalkWord(std::string strReponse);
 	void HandleNameTalkWord(std::string strReponse);
+	bool HandleLookShop(int tile, int x, int y);
 
 	std::function<void()> m_process_key;
 

@@ -49,8 +49,8 @@ U5World::U5World(SDL3Helper* sdl_helper, UltimaVResource* u5_resources) :
 	//m_xpos = 50;
 	//m_ypos = 50;
 	// britain
-	//m_xpos = 83;  // 53
-	//m_ypos = 106; // 6A
+	m_xpos = 83;  // 53
+	m_ypos = 106; // 6A
 	// yew
 	//m_xpos = 58;  // 3a
 	//m_ypos = 44; // 2c
@@ -58,8 +58,8 @@ U5World::U5World(SDL3Helper* sdl_helper, UltimaVResource* u5_resources) :
 	//m_ypos = 210;
 	
 	// despise
-	m_xpos = 91; // 5b
-	m_ypos = 68; // 44
+	//m_xpos = 91; // 5b
+	//m_ypos = 68; // 44
 
 	//m_xpos = 148;
 	//m_ypos = 83;
@@ -935,6 +935,15 @@ void U5World::HandleLook()
 		PrintSign(tempx, tempy, m_parent->m_cur_level);
 		return;
 		break;
+	case 224:
+		HandleLookShop(curpos, tempx, tempy);
+		break;
+	case 225:
+		HandleLookShop(curpos, tempx, tempy);
+		break;
+	case 226:
+		HandleLookShop(curpos, tempx, tempy);
+		break;
 	default:
 		curItem = m_resources->m_LookData[curpos];
 		m_parent->m_console->PrintText(curItem);
@@ -948,6 +957,62 @@ void U5World::HandleLook()
 	}*/
 	m_parent->m_console->PrintText("\n");
 	m_parent->m_console->NewPrompt();
+}
+
+bool U5World::HandleLookShop(int tile, int x, int y)
+{
+	const int GRASS = 5;
+	const int MIN_SIGN = 240;
+	const int MAX_SIGN = 249;
+	const int SIGN_UP_LEFT = 225;
+	const int SIGN_UP_RIGHT = 226;
+	const int SIGN_BOTTOM = 224;
+	int curtile;
+	if (tile == SIGN_UP_LEFT)
+	{
+		if (x < 31)
+		{
+			curtile = m_parent->m_currentMap[static_cast<size_t>(x + 1)][y];
+			if (curtile >= MIN_SIGN && curtile <= MAX_SIGN)
+			{
+				return HandleLookShop(curtile, x + 1, y);
+			}
+		}
+	}
+	else if (tile == SIGN_UP_RIGHT)
+	{
+		if (x >  0)
+		{
+			curtile = m_parent->m_currentMap[static_cast<size_t>(x - 1)][y];
+			if (curtile >= MIN_SIGN && curtile <= MAX_SIGN)
+			{
+				return HandleLookShop(curtile, x - 1, y);
+			}
+		}
+	}
+	else if (tile >= MIN_SIGN && tile <= MAX_SIGN && tile != (MAX_SIGN - 1))
+	{
+		std::string curItem = m_resources->m_LookData[tile];
+		m_parent->m_console->PrintText(curItem);
+		return true;
+	}
+	else if (tile == SIGN_BOTTOM)
+	{
+		if (y > 0)
+		{
+			curtile = m_parent->m_currentMap[x][static_cast<size_t>(y - 1)];
+			if (curtile == SIGN_UP_LEFT || curtile == SIGN_UP_RIGHT || (curtile >= MIN_SIGN && curtile <= MAX_SIGN))
+			{
+				return HandleLookShop(curtile, x, y - 1);
+			}
+		}
+	}
+	else
+	{
+		std::string curItem = m_resources->m_LookData[GRASS];
+		m_parent->m_console->PrintText(curItem);
+	}
+	return false;
 }
 
 void U5World::HandleKlimb()
