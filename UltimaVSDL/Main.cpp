@@ -60,9 +60,9 @@ static void MainLoop()
 
 	m_charData = std::make_unique<CharacterData>();
 
-	curObject = m_game.get();
+	//curObject = m_game.get();
 	//curObject = splash_screen.get();
-	//curObject = intro_screen.get();
+	curObject = intro_screen.get();
 	curObject->LoadData();
 	
 	while (1)

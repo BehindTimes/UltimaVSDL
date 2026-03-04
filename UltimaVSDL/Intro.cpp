@@ -18,6 +18,7 @@
 #include <cstring>
 #include <SDL3/SDL_stdinc.h>
 #include <iostream>
+#include <SDL3/SDL_keyboard.h>
 
 extern std::unique_ptr<CutScene> cutscene_screen;
 extern std::unique_ptr<U5Utils> m_utilities;
@@ -50,7 +51,8 @@ Intro::Intro(SDL3Helper* sdl_helper, UltimaVResource* u5_resources) :
 	m_numLoops(0),
 	m_loopPos(0),
 	m_isZap(false),
-	m_playerHit(-1)
+	m_playerHit(-1),
+	m_create_status(CharacterCreate::NAME)
 {
 	m_clearScreen = true;
 
@@ -235,12 +237,51 @@ void Intro::RenderFlame()
 	m_sdl_helper->RenderTextureAt(curTexture, x * hMult, y * vMult, width * hMult, height * vMult);
 }
 
+void Intro::CreateNewCharacter()
+{
+	SDL_Texture* curTexture = m_sdl_helper->m_TargetTextures[TTV_INTRO_RENDER];
+	m_sdl_helper->SetRenderTarget(curTexture);
+	SDL_SetRenderDrawColor(m_sdl_helper->m_renderer, 0, 0, 0, 0xFF);
+	m_sdl_helper->ClearScreen();
+	m_sdl_helper->DrawTiledText(m_resources->m_data.game_strings[BY_WHAT_NAME_STRING], 2, 1);
+	m_sdl_helper->DrawTiledText(":", 13, 3);
+	m_sdl_helper->DrawTiledText(m_character_name, 14, 3);
+
+	m_cursor_pos.first = static_cast<int>(15 + m_character_name.size());
+	m_cursor_pos.second = 19;
+
+	if (m_create_status == CharacterCreate::SEX)
+	{
+		m_sdl_helper->DrawTiledText(m_resources->m_data.game_strings[MALE_OR_FEMALE_STRING], 7, 5);
+		m_cursor_pos.first = static_cast<int>(33 + m_character_sex.size());
+		m_cursor_pos.second = 21;
+		m_sdl_helper->DrawTiledText(m_character_sex, 32, 5);
+	}
+	
+	CreateIntroBox();
+	curTexture = m_sdl_helper->m_TargetTextures[TTV_INTROBOX];
+	m_sdl_helper->SetRenderTarget(curTexture);
+	m_sdl_helper->DrawTiledText(m_resources->m_data.intro_strings[12], 6, 9); // Copyright Lord British
+
+	m_sdl_helper->DrawTileRect(33, 9);
+	m_sdl_helper->DrawTileRect(5, 9);
+
+	m_sdl_helper->DrawTileTexture8(m_sdl_helper->m_ArrowTextures[0], 33, 9);
+	m_sdl_helper->DrawTileTexture8(m_sdl_helper->m_ArrowTextures[1], 5, 9);
+
+	curTexture = m_sdl_helper->m_TargetTextures[TTV_INTRO_RENDER];
+
+	m_sdl_helper->RenderTextureAt(curTexture, HALF_TILE_WIDTH, HALF_TILE_HEIGHT, RENDER_WIDTH - RENDER_TILE_WIDTH, RENDER_TILE_HEIGHT * 4);
+
+	m_sdl_helper->SetRenderTarget(nullptr);
+}
+
 void Intro::CreateDemo()
 {
 	m_curMode = IntroMode::DEMO;
 	SDL_Texture* curTexture = m_sdl_helper->m_TargetTextures[TTV_INTRO_RENDER];
 	m_sdl_helper->SetRenderTarget(curTexture);
-	SDL_SetRenderDrawColor(m_sdl_helper->m_renderer, 0x00, 0, 0, 0xFF);
+	SDL_SetRenderDrawColor(m_sdl_helper->m_renderer, 0, 0, 0, 0xFF);
 	m_sdl_helper->ClearScreen();
 	m_sdl_helper->SetRenderTarget(nullptr);
 	m_demoInstructionNum = 0;
@@ -306,12 +347,15 @@ void Intro::CreateMenu()
 	m_sdl_helper->DrawTileTexture8(m_sdl_helper->m_ArrowTextures[1], 5, 9);
 
 	m_sdl_helper->SetRenderTarget(nullptr);
+
+	m_cursor_pos.first = 23;
+	m_cursor_pos.second = 15;
 	//m_sdl_helper->DrawInvertRect(invertx, inverty, invert_width, 1);	
 }
 
 void Intro::RenderCursor()
 {
-	m_sdl_helper->DrawTileTexture8(m_sdl_helper->m_CharacterSetsTextures[0][0][static_cast<size_t>(5 + m_curFlame)], 23, 15);
+	m_sdl_helper->DrawTileTexture8(m_sdl_helper->m_CharacterSetsTextures[0][0][static_cast<size_t>(5 + m_curFlame)], m_cursor_pos.first, m_cursor_pos.second);
 }
 
 void Intro::RenderMenu()
@@ -754,6 +798,12 @@ void Intro::Render()
 		RenderIntroBox();
 		RenderDemo();
 		break;
+	case IntroMode::CREATE_NEW_CHARACTER:
+		RenderLogo();
+		RenderFlame();
+		RenderIntroBox();
+		RenderCursor();
+		break;
 	default:
 		RenderLogo();
 		RenderFlame();
@@ -877,6 +927,85 @@ void Intro::StoryOverCallback()
 	GoToSelection();
 }
 
+int Intro::ProcessLetterImmediate()
+{
+	int ret = -1;
+	m_input->m_isValid = true;
+	//SDL_Keycode display_key = SDL_GetKeyFromScancode(key.scancode, key.mod, false);
+	SDL_Keycode curKey = m_input->GetCurrentKeyCode();
+	if (curKey >= SDLK_0 && curKey <= SDLK_9)
+	{
+		ret = static_cast<int>(curKey);
+	}
+	else if (curKey >= SDLK_A && curKey <= SDLK_Z)
+	{
+		ret = static_cast<int>(curKey);
+	}
+	else if (curKey == SDLK_RETURN || curKey == SDLK_BACKSPACE)
+	{
+		ret = static_cast<int>(curKey);
+	}
+	else if (curKey >= SDLK_SPACE && curKey <= SDLK_TILDE)
+	{
+		ret = static_cast<int>(curKey);
+	}
+	else if (curKey == SDLK_LEFT)
+	{
+		ret = static_cast<int>(SDLK_BACKSPACE);
+	}
+	else
+	{
+		ret = -1;
+	}
+	return ret;
+}
+
+void Intro::HandleName()
+{
+	const size_t MAX_NAME = 8;
+	int curKey = ProcessLetterImmediate();
+	if (curKey < 0)
+	{
+		return;
+	}
+	if (curKey == SDLK_RETURN)
+	{
+		m_input->SetRequireAllKeysUp();
+		if (m_character_name.empty())
+		{
+			GoToSelection();
+			return;
+		}
+		m_create_status = CharacterCreate::SEX;
+	}
+	else if(curKey == SDLK_BACKSPACE)
+	{
+		if (m_character_name.empty())
+		{
+			return;
+		}
+		m_character_name.pop_back();
+	}
+	else
+	{
+		if (m_character_name.size() >= MAX_NAME)
+		{
+			return;
+		}
+		if (curKey == SDLK_SPACE)
+		{
+			m_character_name += ' ';
+		}
+		else
+		{
+			const char value = static_cast<char>(curKey);
+			m_character_name += value;
+		}
+		
+	}
+	CreateNewCharacter();
+}
+
 void Intro::ProcessEvents()
 {
 	switch (m_curMode)
@@ -911,6 +1040,33 @@ void Intro::ProcessEvents()
 			case AcknowlegementType::SCROLL_DOWN:
 				m_curAcknowledgement = AcknowlegementType::SCROLL_UP;
 				GoToSelection();
+				break;
+			default:
+				break;
+			}
+		}
+		break;
+	case IntroMode::CREATE_NEW_CHARACTER:
+		if (m_create_status == CharacterCreate::NAME)
+		{
+			HandleName();
+		}
+		else
+		{
+			int curKey = ProcessLetterImmediate();
+			if (curKey < 0)
+			{
+				return;
+			}
+			switch (curKey)
+			{
+			case SDLK_F:
+				m_character_sex = "F";
+				CreateNewCharacter();
+				break;
+			case SDLK_M:
+				m_character_sex = "M";
+				CreateNewCharacter();
 				break;
 			default:
 				break;
@@ -954,6 +1110,13 @@ void Intro::ProcessEvents()
 				case MenuChoices::RETURN_TO_VIEW:
 					CreateDemo();
 					m_input->SetRequireAllKeysUp();
+					break;
+				case MenuChoices::CREATE_NEW_CHARACTER:
+					m_create_status = CharacterCreate::NAME;
+					CreateNewCharacter();
+					m_curMode = IntroMode::CREATE_NEW_CHARACTER;
+					m_input->SetRequireAllKeysUp();
+					return;
 					break;
 				case MenuChoices::JOURNEY_ONWARD:
 					m_newMode = U5Modes::Game;

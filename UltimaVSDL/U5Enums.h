@@ -161,6 +161,9 @@ const int PROMPT_NAME_STRING = 0x501;
 const int IF_YOU_SAY_SO_STRING = 0x503;
 const int A_PLEASURE_STRING = 0x504;
 
+const int BY_WHAT_NAME_STRING = 0x5D0;
+const int MALE_OR_FEMALE_STRING = 0x5D1;
+
 const int INPUT_NAME = 0;
 const int INPUT_JOB = 1;
 const int INPUT_WORK = 2;

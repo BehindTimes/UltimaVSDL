@@ -20,7 +20,8 @@ enum class IntroMode : uint_fast16_t
 	FADE_FLAME_2,
 	MENU,
 	ACKNOWLEDGEMENTS,
-	DEMO
+	DEMO,
+	CREATE_NEW_CHARACTER
 };
 
 enum class MenuChoices :uint_fast16_t
@@ -48,6 +49,12 @@ enum class MoongateStatus
 	CLOSING,
 	OPENING,
 	OPENED
+};
+
+enum class CharacterCreate
+{
+	NAME,
+	SEX
 };
 
 struct DemoMoongate
@@ -124,9 +131,12 @@ private:
 	void CreateIntroBox();
 	void CreateMenu();
 	void CreateDemo();
+	void CreateNewCharacter();
 	void ProcessDemoScript();
 	
 	void StoryOverCallback();
+	void HandleName();
+	int ProcessLetterImmediate();
 
 	Uint64 m_curDelayFlame;
 
@@ -178,5 +188,9 @@ private:
 
 	AcknowlegementType m_curAcknowledgement;
 	std::map<int, DemoCharacter> m_map_demo_char;
+	std::pair<int, int> m_cursor_pos;
+	std::string m_character_name;
+	std::string m_character_sex;
+	CharacterCreate m_create_status;
 };
 

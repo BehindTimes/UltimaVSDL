@@ -1520,6 +1520,10 @@ int U5World::ProcessLetterImmediate()
 	{
 		ret = static_cast<int>(curKey);
 	}
+	else if (curKey == SDLK_LEFT)
+	{
+		ret = static_cast<int>(SDLK_BACKSPACE);
+	}
 	else
 	{
 		ret = -1;
