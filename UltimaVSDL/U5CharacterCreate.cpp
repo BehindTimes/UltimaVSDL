@@ -8,6 +8,8 @@
 #include <string>
 #include "U5Input.h"
 #include <memory>
+#include <iostream>
+#include <vector>
 
 extern std::unique_ptr<U5Input> m_input;
 
@@ -178,14 +180,15 @@ void U5CharacterCreate::RenderIntroLine(int x_left, int x_right, int y_pos, std:
 	const size_t DASH_POS = 13;
 	const int SPACE_LEN = 5;
 	const int TAB_LEN = 15;
-	int total_size = x_right - x_left;
+	int total_size = (x_right - x_left) - 2;
 	int space_size = 0;
 
 	int remainder = 0;
+
 	if (num_spaces > 0 && final_size > 0)
 	{
-		space_size = (total_size - final_size) / num_spaces;
-		remainder = (total_size - final_size) % num_spaces;
+		space_size = (total_size - (final_size + 1)) / num_spaces;
+		remainder = (total_size - (final_size + 1)) % num_spaces;
 	}
 
 	int cur_left = x_left;
@@ -195,13 +198,20 @@ void U5CharacterCreate::RenderIntroLine(int x_left, int x_right, int y_pos, std:
 		if (str_line[index] == 0x7b)
 		{
 			cur_left += TAB_LEN;
+
 		}
 		else if (str_line[index] == ' ')
 		{
-			cur_left += SPACE_LEN + space_size + (remainder > 0 ? 1 : 0);
-			if (remainder > 0)
+			if (cur_left > 0)
 			{
-				remainder--;
+				cur_left--;
+			}
+			//cur_left += SPACE_LEN + space_size /*+ (remainder > 0 ? 1 : 0)*/;
+			cur_left += SPACE_LEN + space_size;
+
+			if (index > (num_spaces - remainder))
+			{
+				cur_left++;
 			}
 		}
 		else if (str_line[index] > 0x20)
@@ -233,7 +243,7 @@ int U5CharacterCreate::GetLine(int left, int right, size_t start_word, std::vect
 	auto& dash_letter = m_resources->m_ProportionalFontData[13];
 	int dash_len = dash_letter.real_width;
 	const int TAB_LEN = 15;
-	int max_len = right - left;
+	int max_len = (right - left);
 	max_len--;
 	num_spaces = 0;
 	final_size = 0;
@@ -243,9 +253,13 @@ int U5CharacterCreate::GetLine(int left, int right, size_t start_word, std::vect
 	}
 	int curlen = 0;
 
-	if (start_word == 198)
+	bool ppp = false;
+	//if (start_word == 198)
+	if (start_word == 0)
+	//if (start_word == 137)
 	{
 		int j = 9;
+		ppp = true;
 	}
 
 	for (size_t index = start_word; index < letter_list.size(); index++)
@@ -254,7 +268,7 @@ int U5CharacterCreate::GetLine(int left, int right, size_t start_word, std::vect
 		int temp_len = 0;
 		if (temp_letter == 0x7b)
 		{
-			temp_len = TAB_LEN - 1;
+			temp_len = TAB_LEN/* - 1*/;
 		}
 		else if (temp_letter == 0x0A) // newline
 		{
@@ -263,7 +277,7 @@ int U5CharacterCreate::GetLine(int left, int right, size_t start_word, std::vect
 		}
 		else if (temp_letter == 0x20) // space
 		{
-			temp_len = SPACE_LEN - 1;
+			temp_len = SPACE_LEN/* - 1*/;
 		}
 		else if (temp_letter == 0x5F) // underscore
 		{
@@ -278,8 +292,12 @@ int U5CharacterCreate::GetLine(int left, int right, size_t start_word, std::vect
 		{
 			return -1; // ???
 		}
+		if (ppp)
+		{
+			std::cout << ((char)temp_letter) << "\t" << (curlen + temp_len) << std::endl;
+		}
 		// TO DO: DO STUFF HERE
-		if (curlen + temp_len > max_len)
+		if (curlen + temp_len >= max_len)
 		{
 			// Sanity check
 			if (index < 2)
@@ -304,7 +322,7 @@ int U5CharacterCreate::GetLine(int left, int right, size_t start_word, std::vect
 					// We're done here
 					if (back_char == ' ')
 					{
-						curlen -= SPACE_LEN;
+						curlen -= (SPACE_LEN - 1);
 						final_size = curlen;
 						num_spaces--;
 						temp_index++;
@@ -335,7 +353,20 @@ int U5CharacterCreate::GetLine(int left, int right, size_t start_word, std::vect
 		str_out += temp_letter;
 		if (temp_letter == ' ')
 		{
+			if (curlen > 0)
+			{
+				curlen--;
+			}
+			curlen--;
 			num_spaces++;
+		}
+		else if (temp_letter == 0x7b)
+		{
+			if (curlen > 0)
+			{
+				curlen--;
+			}
+			curlen--;
 		}
 	}
 	return 0;
