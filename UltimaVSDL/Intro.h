@@ -2,7 +2,6 @@
 
 #include "GameObject.h"
 #include <cstdint>
-#include <vector>
 #include <memory>
 #include <string>
 #include <SDL3/SDL_stdinc.h>
@@ -10,8 +9,8 @@
 #include "UltimaVResource.h"
 #include "FadeObject.h"
 #include "U5Enums.h"
-#include "AnimationTexture.h"
 #include <map>
+#include <utility>
 
 enum class IntroMode : uint_fast16_t
 {

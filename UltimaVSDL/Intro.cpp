@@ -17,8 +17,6 @@
 #include <SDL3/SDL_keycode.h>
 #include <cstring>
 #include <SDL3/SDL_stdinc.h>
-#include <iostream>
-#include <SDL3/SDL_keyboard.h>
 #include "U5CharacterCreate.h"
 
 extern std::unique_ptr<CutScene> cutscene_screen;
@@ -906,6 +904,8 @@ void Intro::CreateIntroBox()
 
 void Intro::GoToSelection()
 {
+	m_character_name.clear();
+	m_character_sex.clear();
 	m_curMode = IntroMode::MENU;
 	CreateMenu();
 }

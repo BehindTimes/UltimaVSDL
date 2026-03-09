@@ -9,6 +9,7 @@ enum class InputType
 {
 	UP_DOWN_ENTER,
 	LEFT_RIGHT_ENTER,
+	A_OR_B,
 	ANY_KEY
 };
 

@@ -24,11 +24,14 @@ private:
 	void RenderStoryTexture();
 	void RenderIntroLine(int x_left, int x_right, int y_pos, std::string str_line, int num_spaces, int final_size, int SPACE_LEN = 6);
 	int GetLine(int left, int right, size_t start_word, std::vector<unsigned char> letter_list, std::string& str_out, int& num_spaces, int& final_size, int SPACE_LEN = 6);
+	void IncrementStory();
 
 	int m_window_width;
 	int m_window_height;
 	std::function<void(void)> m_callback;
 	U5Modes m_oldMode;
 	std::vector<U5StoryScreen> m_story;
+	int m_curStoryboard;
+	int m_number_screens;
 };
 

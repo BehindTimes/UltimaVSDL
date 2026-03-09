@@ -1,6 +1,5 @@
 #include "U5CharacterCreate.h"
 #include <functional>
-#include <SDL3/SDL_render.h>
 #include "GameObject.h"
 #include "SDL3Helper.h"
 #include "U5Enums.h"
@@ -17,7 +16,9 @@ U5CharacterCreate::U5CharacterCreate(SDL3Helper* sdl_helper, UltimaVResource* u5
 	GameObject(sdl_helper, u5_resources),
 	m_window_width(0),
 	m_window_height(0),
-	m_oldMode(U5Modes::None)
+	m_oldMode(U5Modes::None),
+	m_curStoryboard(0),
+	m_number_screens(0)
 {
 }
 
@@ -47,31 +48,62 @@ void U5CharacterCreate::SetSDLData()
 
 void U5CharacterCreate::ProcessEvents()
 {
-	/*if (m_input->isAnyKeyHit())
+	if (m_input->isAnyKeyHit())
 	{
 		IncrementStory();
-	}*/
+	}
 }
 
 void U5CharacterCreate::RenderCharacterCreate()
 {
-	U5StoryScreen& curData = m_story[0];
-
-	auto& curStoryImages = m_resources->m_Image16FileData[static_cast<size_t>(curData.story_number)];
-	auto& curStoryTextures = m_sdl_helper->m_Image16FileTextures[static_cast<size_t>(curData.story_number)];
-
 	int window_width, window_height;
 	m_sdl_helper->GetScreenDimensions(window_width, window_height);
 	float vMult = window_height / static_cast<float>(ORIGINAL_GAME_HEIGHT);
 	float hMult = window_width / static_cast<float>(ORIGINAL_GAME_WIDTH);
 
-	auto& curImageData = curStoryImages[0];
-	auto& curImageTexture = curStoryTextures[0];
+	const int END_CREATE = 2;
+	if (m_curStoryboard == 0)
+	{
+		U5StoryScreen& curData = m_story[0];
 
-	// In the original, this is rendered after images rendered in action 1, but render this before to avoid cutting off the text
-	m_sdl_helper->RenderTextureAt(curImageTexture, curData.picture_x * hMult, curData.picture_y * vMult, curImageData.width * hMult, curImageData.height * vMult);
+		auto& curStoryImages = m_resources->m_Image16FileData[static_cast<size_t>(curData.story_number)];
+		auto& curStoryTextures = m_sdl_helper->m_Image16FileTextures[static_cast<size_t>(curData.story_number)];
 
-	m_sdl_helper->RenderTextureAt(m_sdl_helper->m_FullScreenTexture, 0, 0, RENDER_WIDTH, RENDER_HEIGHT);
+		auto& curImageData = curStoryImages[0];
+		auto& curImageTexture = curStoryTextures[0];
+
+		// In the original, this is rendered after images rendered in action 1, but render this before to avoid cutting off the text
+		m_sdl_helper->RenderTextureAt(curImageTexture, curData.picture_x * hMult, curData.picture_y * vMult, curImageData.width * hMult, curImageData.height * vMult);
+		m_sdl_helper->RenderTextureAt(m_sdl_helper->m_FullScreenTexture, 0, 0, RENDER_WIDTH, RENDER_HEIGHT);
+	}
+	else if (m_curStoryboard == END_CREATE)
+	{
+		const int END_CREATE_PIC = 10;
+		U5StoryScreen& curData = m_story[1];
+
+		auto& curStoryImages = m_resources->m_Image16FileData[static_cast<size_t>(curData.story_number)];
+		auto& curStoryTextures = m_sdl_helper->m_Image16FileTextures[static_cast<size_t>(curData.story_number)];
+
+		auto& curImageData = curStoryImages[END_CREATE_PIC];
+		auto& curImageTexture = curStoryTextures[END_CREATE_PIC];
+
+		// In the original, this is rendered after images rendered in action 1, but render this before to avoid cutting off the text
+		m_sdl_helper->RenderTextureAt(curImageTexture, curData.picture_x * hMult, curData.picture_y * vMult, curImageData.width * hMult, curImageData.height * vMult);
+		m_sdl_helper->RenderTextureAt(m_sdl_helper->m_FullScreenTexture, 0, 0, RENDER_WIDTH, RENDER_HEIGHT);
+	}
+	else // Handle the character create stuff
+	{
+		U5StoryScreen& curData = m_story[0];
+		auto& curStoryImages = m_resources->m_Image16FileData[static_cast<size_t>(curData.story_number)];
+		auto& curStoryTextures = m_sdl_helper->m_Image16FileTextures[static_cast<size_t>(curData.story_number)];
+		auto& curImageData = curStoryImages[1];
+		auto& curImageTexture = curStoryTextures[1];
+
+		// In the original, this is rendered after images rendered in action 1, but render this before to avoid cutting off the text
+		m_sdl_helper->RenderTextureAt(curImageTexture, 0x10 * hMult, 0 * vMult, curImageData.width * hMult, curImageData.height * vMult);
+		m_sdl_helper->RenderTextureAt(curImageTexture, 0xC8 * hMult, 0 * vMult, curImageData.width * hMult, curImageData.height * vMult);
+		//m_sdl_helper->RenderTextureAt(m_sdl_helper->m_FullScreenTexture, 0, 0, RENDER_WIDTH, RENDER_HEIGHT);
+	}
 }
 
 void U5CharacterCreate::RenderStoryTexture()
@@ -84,7 +116,20 @@ void U5CharacterCreate::RenderStoryTexture()
 		return;
 	}
 
-	auto& curData = m_story[0];
+	U5StoryScreen curData;
+
+	int SPACE_LEN = 6;
+
+	if (m_curStoryboard == 0)
+	{
+		curData = m_story[0];
+	}
+	else
+	{
+		const int END_CREATE = 1;
+		curData = m_story[END_CREATE];
+		SPACE_LEN = 5;
+	}
 
 	m_sdl_helper->SetRenderTarget(m_sdl_helper->m_FullScreenTexture);
 	m_sdl_helper->ClearScreen();
@@ -96,8 +141,6 @@ void U5CharacterCreate::RenderStoryTexture()
 	int x_left = curData.first_line_offset;
 	int x_right = curData.paragraph[0].text_right_pos;
 	std::string text_line;
-
-	int SPACE_LEN = 6;
 
 	int num_spaces = 0;
 	int final_size = 0;
@@ -372,9 +415,36 @@ int U5CharacterCreate::GetLine(int left, int right, size_t start_word, std::vect
 
 void U5CharacterCreate::SetCutScreenInfo(U5Modes old_mode, std::function<void(void)> callback)
 {
+	const int NUM_CREATE_SCREENS = 3;
 	m_input->SetInputType(InputType::ANY_KEY);
 	m_oldMode = old_mode;
 	m_callback = callback;
 	m_story = m_resources->m_data.question_text;
+	m_curStoryboard = 0;
+	m_number_screens = NUM_CREATE_SCREENS;
 	RenderStoryTexture();
+}
+
+void U5CharacterCreate::IncrementStory()
+{
+	m_curStoryboard++;
+	if (m_curStoryboard >= m_number_screens)
+	{
+		m_curStoryboard = 0;
+		m_newMode = m_oldMode;
+		if (m_callback)
+		{
+			m_callback();
+		}
+		return;
+	}
+	if (m_curStoryboard == 2)
+	{
+		m_input->SetInputType(InputType::ANY_KEY);
+		RenderStoryTexture();
+	}
+	else
+	{
+		m_input->SetInputType(InputType::A_OR_B);
+	}
 }
