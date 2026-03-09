@@ -55,6 +55,10 @@ int UltimaVResource::LoadResources()
 	{
 		return -1;
 	}
+	if (0 != LoadFontOvl())
+	{
+		return -1;
+	}
 	if (0 != LoadTiles())
 	{
 		return -1;
@@ -743,6 +747,64 @@ void UltimaVResource::LoadStoryText(const std::vector<unsigned char>& buffer, si
 	}
 }
 
+int UltimaVResource::LoadQuestion(std::vector<unsigned char>& data_buffer)
+{
+	std::vector<unsigned char> buffer;
+	int ret = LoadBuffer("QUESTION.DAT", buffer);
+
+	if (0 != ret)
+	{
+		return ret;
+	}
+
+	size_t index = 0;
+
+	m_data.question_text[index].text_offset = 0;
+	if (m_data.question_text[index].text_offset >= buffer.size())
+	{
+		return -2;
+	}
+
+	LoadStoryText(buffer, m_data.question_text[index].text_offset, m_data.question_text[index].text);
+	m_data.question_text[index].image_index = 0;
+	m_data.question_text[index].story_number = 0;
+	m_data.question_text[index].picture_x = 0;
+	m_data.question_text[index].picture_y = 0x60;
+	m_data.question_text[index].action = 0;
+	m_data.question_text[index].text_y_pos = 9;
+	m_data.question_text[index].first_line_offset = 0;
+	m_data.question_text[index].paragraph[0].y_extent = 0x59;
+	m_data.question_text[index].paragraph[1].y_extent = 200;
+	m_data.question_text[index].paragraph[0].text_left_pos = 0;// data_buffer[X_LEFT_PARAGRAPH_OFFSET + (index * 2)];
+	m_data.question_text[index].paragraph[1].text_left_pos = 0xAF;// data_buffer[X_LEFT_PARAGRAPH_OFFSET + (index * 2) + 1];
+	m_data.question_text[index].paragraph[0].text_right_pos = 320;
+	m_data.question_text[index].paragraph[1].text_right_pos = 320;
+
+	index = 1;
+	m_data.question_text[index].text_offset = 0x322;
+	if (m_data.question_text[index].text_offset >= buffer.size())
+	{
+		return -2;
+	}
+
+	LoadStoryText(buffer, m_data.question_text[index].text_offset, m_data.question_text[index].text);
+	m_data.question_text[index].image_index = 0;
+	m_data.question_text[index].story_number = 0;
+	m_data.question_text[index].picture_x = 0xa8;
+	m_data.question_text[index].picture_y = 100;
+	m_data.question_text[index].action = 0;
+	m_data.question_text[index].text_y_pos = 0;
+	m_data.question_text[index].first_line_offset = 0;
+	m_data.question_text[index].paragraph[0].y_extent = 0x5a;
+	m_data.question_text[index].paragraph[1].y_extent = 200;
+	m_data.question_text[index].paragraph[0].text_left_pos = 0;// data_buffer[X_LEFT_PARAGRAPH_OFFSET + (index * 2)];
+	m_data.question_text[index].paragraph[1].text_left_pos = 0;// data_buffer[X_LEFT_PARAGRAPH_OFFSET + (index * 2) + 1];
+	m_data.question_text[index].paragraph[0].text_right_pos = 320;
+	m_data.question_text[index].paragraph[1].text_right_pos = 0xa6;
+
+	return 0;
+}
+
 int UltimaVResource::LoadEnding(std::vector<unsigned char>& data_buffer)
 {
 	const size_t NUM_STORIES = 6;
@@ -1086,6 +1148,18 @@ int UltimaVResource::ReadCompressedWords(const std::vector<unsigned char>& buffe
 	return 0;
 }
 
+int UltimaVResource::LoadFontOvl()
+{
+	int ret = LoadBuffer("FONT.OVL", m_data.buffer);
+
+	if (0 != ret)
+	{
+		return ret;
+	}
+
+	return 0;
+}
+
 int UltimaVResource::LoadDataOvl()
 {
 	
@@ -1110,109 +1184,113 @@ int UltimaVResource::LoadDataOvl()
 	{
 		return -4;
 	}
-	if (!ReadStrings(m_data.buffer, m_data.intro_strings, 0x311c, 0x3664))
+	if (0 != LoadQuestion(m_data.buffer))
 	{
 		return -5;
+	}
+	if (!ReadStrings(m_data.buffer, m_data.intro_strings, 0x311c, 0x3664))
+	{
+		return -6;
 	}
 	if (!ReadStrings(m_data.buffer, m_data.intro_demo_string, 0xa020, 0xa053))
 	{
-		return -5;
+		return -6;
 	}
 	if (!ReadStrings(m_data.buffer, m_data.game_strings, 0x52, 0x129a))
 	{
-		return -5;
+		return -6;
 	}
 	if (!ReadStrings(m_data.buffer, m_data.game_strings, 0x266a, 0x28d5))
 	{
-		return -5;
+		return -6;
 	}
 	if (!ReadStrings(m_data.buffer, m_data.game_strings, 0x2956, 0x2bd0))
 	{
-		return -5;
+		return -6;
 	}
 	if (!ReadStrings(m_data.buffer, m_data.game_strings, 0x2c8c, 0x2df8))
 	{
-		return -5;
+		return -6;
 	}
 	if (!ReadStrings(m_data.buffer, m_data.game_strings, 0x6aea, 0x6d56))
 	{
-		return -5;
+		return -6;
 	}
 	if (!ReadStrings(m_data.buffer, m_data.game_strings, 0x6d84, 0x7010))
 	{
-		return -5;
+		return -6;
 	}
 	if (!ReadStrings(m_data.buffer, m_data.game_strings, 0x702a, 0x70e8))
 	{
-		return -5;
+		return -6;
 	}
 
 	if (!ReadStrings(m_data.buffer, m_data.game_strings, 0x70f2, 0x71d1))
 	{
-		return -5;
+		return -6;
 	}
 
 	if (!ReadStrings(m_data.buffer, m_data.game_strings, 0x71dc, 0x7208))
 	{
-		return -5;
+		return -6;
 	}
 
 	if (!ReadStrings(m_data.buffer, m_data.game_strings, 0x721c, 0x7384))
 	{
-		return -5;
+		return -6;
 	}
 
 	if (!ReadStrings(m_data.buffer, m_data.game_strings, 0x7398, 0x74f5))
 	{
-		return -5;
+		return -6;
 	}
 
 	if (!ReadStrings(m_data.buffer, m_data.game_strings, 0x750a, 0x77f3))
 	{
-		return -5;
+		return -6;
 	}
 
 	if (!ReadStrings(m_data.buffer, m_data.game_strings, 0x7808, 0x7850))
 	{
-		return -5;
+		return -6;
 	}
 
 	if (!ReadStrings(m_data.buffer, m_data.game_strings, 0x785c, 0x7a19))
 	{
-		return -5;
+		return -6;
 	}
 
 	if (!ReadStrings(m_data.buffer, m_data.game_strings, 0x7a26, 0x7f09))
 	{
-		return -5;
+		return -6;
 	}
 
 	if (!ReadStrings(m_data.buffer, m_data.game_strings, 0x7f26, 0x820e))
 	{
-		return -5;
+		return -6;
 	}
 
 	if (!ReadStrings(m_data.buffer, m_data.game_strings, 0x8216, 0x848f))
 	{
-		return -5;
+		return -6;
 	}
 
 	if (!ReadStrings(m_data.buffer, m_data.game_strings, 0x84aa, 0x9215))
 	{
-		return -5;
+		return -6;
 	}
 
 	if (!ReadStrings(m_data.buffer, m_data.game_strings, 0x9338, 0xa45a))
 	{
-		return -5;
+		return -6;
 	}
 	if (!ReadStrings(m_data.buffer, m_data.game_strings, 0x441b, 0x4aa9))
 	{
-		return -5;
+		return -6;
 	}
 	if (!ReadStrings(m_data.buffer, m_data.input_words, 0x9244, 0x9338))
 	{
-		return -5;
+		return -6;
 	}
 
 	const size_t MAP_CHUNK_LOC = 0x3886;
@@ -1235,7 +1313,7 @@ int UltimaVResource::LoadDataOvl()
 			m_data.location_z_index[index] = m_data.buffer[LOCATION_Z + index];
 			if (m_data.location_z_index[index] >= 16)
 			{
-				return -6;
+				return -7;
 			}
 		}
 
@@ -1248,12 +1326,12 @@ int UltimaVResource::LoadDataOvl()
 
 	if (0 != LoadDungeonSigns(m_data.buffer))
 	{
-		return -7;
+		return -8;
 	}
 
 	if(0 != ReadCompressedWords(m_data.buffer))
 	{
-		return -8;
+		return -9;
 	}
 
 	LoadVendorData(m_data.buffer);

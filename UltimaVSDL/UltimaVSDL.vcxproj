@@ -145,6 +145,7 @@
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="SDL3Helper.cpp" />
     <ClCompile Include="SplashScreen.cpp" />
+    <ClCompile Include="U5CharacterCreate.cpp" />
     <ClCompile Include="U5Console.cpp" />
     <ClCompile Include="U5Dungeon.cpp" />
     <ClCompile Include="U5Game.cpp" />
@@ -167,6 +168,7 @@
     <ClInclude Include="LzwDecompressor.h" />
     <ClInclude Include="SDL3Helper.h" />
     <ClInclude Include="SplashScreen.h" />
+    <ClInclude Include="U5CharacterCreate.h" />
     <ClInclude Include="U5Console.h" />
     <ClInclude Include="U5Dungeon.h" />
     <ClInclude Include="U5Enums.h" />

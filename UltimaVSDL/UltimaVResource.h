@@ -137,8 +137,10 @@ struct U5Data
 	std::vector<unsigned char> buffer;
 	const size_t NUM_STORIES = 21;
 	const size_t NUM_ENDING = 6;
+	const size_t NUM_QUESTIONS = 2;
 	std::vector<U5StoryScreen> story_text{ NUM_STORIES };
 	std::vector<U5StoryScreen> ending_text{ NUM_ENDING };
+	std::vector<U5StoryScreen> question_text{ NUM_QUESTIONS };
 	std::vector<unsigned char> intro_string_1;
 	std::vector<unsigned char> intro_string_2;
 	std::vector<std::string> intro_demo_string;
@@ -242,6 +244,10 @@ struct U5CombatMap
 	std::array<std::pair<int, int>, 16> triggered_tile_pos;
 };
 
+struct U5FontOvlData
+{
+};
+
 const size_t NUM_CUTSCENES = 4;
 const size_t NUM_DEMOS = 4;
 const size_t CUTSCENE_WIDTH = 11;
@@ -281,6 +287,7 @@ public:
 	RenderMode m_render_mode;
 	int m_CutsceneMap[NUM_CUTSCENES][CUTSCENE_WIDTH][CUTSCENE_HEIGHT];
 	int m_DemoMap[NUM_DEMOS][DEMO_WIDTH][DEMO_HEIGHT];
+	U5FontOvlData m_FontOvlData;
 private:
 	
 	void Cleanup();
@@ -294,7 +301,9 @@ private:
 	int LoadMaskedImages();
 	int LoadStory(std::vector<unsigned char> &buffer);
 	int LoadEnding(std::vector<unsigned char>& buffer);
+	int LoadQuestion(std::vector<unsigned char>& data_buffer);
 	int LoadDataOvl();
+	int LoadFontOvl();
 	int LoadCharacterSets();
 	int LoadProportionalFont();
 	int LoadMiscMaps();

@@ -19,10 +19,12 @@
 #include <SDL3/SDL_stdinc.h>
 #include <iostream>
 #include <SDL3/SDL_keyboard.h>
+#include "U5CharacterCreate.h"
 
 extern std::unique_ptr<CutScene> cutscene_screen;
 extern std::unique_ptr<U5Utils> m_utilities;
 extern std::unique_ptr<U5Input> m_input;
+extern std::unique_ptr<U5CharacterCreate> m_characterCreate;
 
 Intro::Intro(SDL3Helper* sdl_helper, UltimaVResource* u5_resources) :
 	GameObject(sdl_helper, u5_resources),
@@ -917,6 +919,10 @@ bool Intro::ChangeMode(U5Modes& newMode)
 		cutscene_screen->SetCutScreenInfo(U5Modes::MenuSkip, m_resources->m_data.story_text, IV16_STORY1, std::bind(&Intro::StoryOverCallback, this));
 		//cutscene_screen->SetCutScreenInfo(U5Modes::MenuSkip, m_resources->m_data.ending_text, IV16_END1, std::bind(&Intro::StoryOverCallback, this));
 	}
+	else if (newMode == U5Modes::CreateCharacter)
+	{
+		m_characterCreate->SetCutScreenInfo(U5Modes::MenuSkip, std::bind(&Intro::StoryOverCallback, this));
+	}
 
 	return ret;
 }
@@ -1063,10 +1069,14 @@ void Intro::ProcessEvents()
 			case SDLK_F:
 				m_character_sex = "F";
 				CreateNewCharacter();
+				m_newMode = U5Modes::CreateCharacter;
+				m_input->SetRequireAllKeysUp();
 				break;
 			case SDLK_M:
 				m_character_sex = "M";
 				CreateNewCharacter();
+				m_newMode = U5Modes::CreateCharacter;
+				m_input->SetRequireAllKeysUp();
 				break;
 			default:
 				break;

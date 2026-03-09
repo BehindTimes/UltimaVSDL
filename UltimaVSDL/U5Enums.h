@@ -18,7 +18,8 @@ enum class U5Modes
 	Menu,
 	MenuSkip,
 	Game,
-	Cutscene
+	Cutscene,
+	CreateCharacter
 };
 
 const int RENDER_TILE_HEIGHT = 64;

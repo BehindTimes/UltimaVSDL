@@ -75,6 +75,9 @@
     <ClCompile Include="CharacterData.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="U5CharacterCreate.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SDL3Helper.h">
@@ -138,6 +141,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="CharacterData.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="U5CharacterCreate.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

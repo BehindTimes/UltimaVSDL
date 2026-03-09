@@ -7,6 +7,10 @@
 #include "UltimaVResource.h"
 #include <string>
 #include "U5Input.h"
+#include <cstdint>
+#include <memory>
+#include <vector>
+#include "FadeObject.h"
 
 extern std::unique_ptr<U5Input> m_input;
 
@@ -42,7 +46,7 @@ void CutScene::LoadData()
 {
 	SetSDLData();
 	CreateStreamingTextures();
-	RenderStoryTexture();
+	//RenderStoryTexture();
 }
 
 void CutScene::SetSDLData()
@@ -311,6 +315,7 @@ void CutScene::RenderStoryTexture()
 	// Sanity check
 	if (new_text_pos < 0)
 	{
+		m_sdl_helper->SetRenderTarget(nullptr);
 		return;
 	}
 	else if (new_text_pos == 0)

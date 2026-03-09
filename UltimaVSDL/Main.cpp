@@ -16,6 +16,7 @@
 #include "U5Game.h"
 #include "GameOptions.h"
 #include "CharacterData.h"
+#include "U5CharacterCreate.h"
 
 static std::unique_ptr<SDL3Helper> sdl_helper;
 static std::unique_ptr<UltimaVResource> u5_resources;
@@ -28,6 +29,7 @@ std::unique_ptr<U5Input> m_input;
 std::unique_ptr<U5Game> m_game;
 std::unique_ptr<GameOptions> m_options;
 std::unique_ptr<CharacterData> m_charData;
+std::unique_ptr<U5CharacterCreate> m_characterCreate;
 
 static void MainLoop()
 {
@@ -57,6 +59,9 @@ static void MainLoop()
 
 	m_game = std::make_unique<U5Game>(sdl_helper.get(), u5_resources.get());
 	m_game->LoadData();
+
+	m_characterCreate = std::make_unique<U5CharacterCreate>(sdl_helper.get(), u5_resources.get());
+	m_characterCreate->LoadData();
 
 	m_charData = std::make_unique<CharacterData>();
 
@@ -107,6 +112,10 @@ static void MainLoop()
 			case U5Modes::Game:
 				m_game->LoadData();
 				curObject = m_game.get();
+				break;
+			case U5Modes::CreateCharacter:
+				m_characterCreate->LoadData();
+				curObject = m_characterCreate.get();
 				break;
 			default:
 				curObject = nullptr;
