@@ -26,8 +26,8 @@ private:
 	void RenderStory();
 	void CreateStreamingTextures();
 	void RenderStoryTexture();
-	void RenderIntroLine(int x_left, int x_right, int y_pos, std::string str_line, int num_spaces, int final_size);
-	int GetLine(int left, int right, size_t start_word, std::vector<unsigned char> letter_list, std::string& str_out, int& num_spaces, int& final_size);
+	void RenderIntroLine(int x_left, int x_right, int y_pos, std::string str_line, int num_spaces, int final_size, int SPACE_LEN = 6);
+	int GetLine(int left, int right, size_t start_word, std::vector<unsigned char> letter_list, std::string& str_out, int& num_spaces, int& final_size, int SPACE_LEN = 6);
 	void IncrementStory();
 
 	int m_number_screens;

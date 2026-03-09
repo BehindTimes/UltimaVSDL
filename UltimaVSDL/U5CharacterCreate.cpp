@@ -16,7 +16,8 @@ extern std::unique_ptr<U5Input> m_input;
 U5CharacterCreate::U5CharacterCreate(SDL3Helper* sdl_helper, UltimaVResource* u5_resources) :
 	GameObject(sdl_helper, u5_resources),
 	m_window_width(0),
-	m_window_height(0)
+	m_window_height(0),
+	m_oldMode(U5Modes::None)
 {
 }
 
@@ -54,7 +55,7 @@ void U5CharacterCreate::ProcessEvents()
 
 void U5CharacterCreate::RenderCharacterCreate()
 {
-	U5StoryScreen& curData = m_story[1];
+	U5StoryScreen& curData = m_story[0];
 
 	auto& curStoryImages = m_resources->m_Image16FileData[static_cast<size_t>(curData.story_number)];
 	auto& curStoryTextures = m_sdl_helper->m_Image16FileTextures[static_cast<size_t>(curData.story_number)];
@@ -64,8 +65,8 @@ void U5CharacterCreate::RenderCharacterCreate()
 	float vMult = window_height / static_cast<float>(ORIGINAL_GAME_HEIGHT);
 	float hMult = window_width / static_cast<float>(ORIGINAL_GAME_WIDTH);
 
-	auto& curImageData = curStoryImages[10];
-	auto& curImageTexture = curStoryTextures[10];
+	auto& curImageData = curStoryImages[0];
+	auto& curImageTexture = curStoryTextures[0];
 
 	// In the original, this is rendered after images rendered in action 1, but render this before to avoid cutting off the text
 	m_sdl_helper->RenderTextureAt(curImageTexture, curData.picture_x * hMult, curData.picture_y * vMult, curImageData.width * hMult, curImageData.height * vMult);
@@ -83,7 +84,7 @@ void U5CharacterCreate::RenderStoryTexture()
 		return;
 	}
 
-	auto& curData = m_story[IV16_CREATE + 1];
+	auto& curData = m_story[0];
 
 	m_sdl_helper->SetRenderTarget(m_sdl_helper->m_FullScreenTexture);
 	m_sdl_helper->ClearScreen();
@@ -96,9 +97,11 @@ void U5CharacterCreate::RenderStoryTexture()
 	int x_right = curData.paragraph[0].text_right_pos;
 	std::string text_line;
 
+	int SPACE_LEN = 6;
+
 	int num_spaces = 0;
 	int final_size = 0;
-	int new_text_pos = GetLine(x_left, x_right, 0, curData.text, text_line, num_spaces, final_size);
+	int new_text_pos = GetLine(x_left, x_right, 0, curData.text, text_line, num_spaces, final_size, SPACE_LEN);
 	// Sanity check
 	if (new_text_pos < 0)
 	{
@@ -110,7 +113,7 @@ void U5CharacterCreate::RenderStoryTexture()
 		final_size = 0;
 	}
 
-	RenderIntroLine(x_left, x_right, ypos, text_line, num_spaces, final_size);
+	RenderIntroLine(x_left, x_right, ypos, text_line, num_spaces, final_size, SPACE_LEN);
 	ypos += LINE_HEIGHT;
 
 	int curParagraph = 0;
@@ -133,7 +136,7 @@ void U5CharacterCreate::RenderStoryTexture()
 			x_left = 0;
 			x_right = 320;
 		}
-		new_text_pos = GetLine(x_left, x_right, new_text_pos, curData.text, new_text_line, num_spaces, final_size);
+		new_text_pos = GetLine(x_left, x_right, new_text_pos, curData.text, new_text_line, num_spaces, final_size, SPACE_LEN);
 		if (new_text_pos < 0)
 		{
 			break;
@@ -144,7 +147,7 @@ void U5CharacterCreate::RenderStoryTexture()
 		}
 		if (!new_text_line.empty())
 		{
-			RenderIntroLine(x_left, x_right, ypos, new_text_line, num_spaces, final_size);
+			RenderIntroLine(x_left, x_right, ypos, new_text_line, num_spaces, final_size, SPACE_LEN);
 		}
 		if (final_size == 0)
 		{
@@ -170,7 +173,7 @@ void U5CharacterCreate::RenderStoryTexture()
 	m_sdl_helper->SetRenderTarget(nullptr);
 }
 
-void U5CharacterCreate::RenderIntroLine(int x_left, int x_right, int y_pos, std::string str_line, int num_spaces, int final_size)
+void U5CharacterCreate::RenderIntroLine(int x_left, int x_right, int y_pos, std::string str_line, int num_spaces, int final_size, int SPACE_LEN)
 {
 	// We always end on a letter, so remove the letter spacing of the very last letter
 	m_sdl_helper->GetScreenDimensions(m_window_width, m_window_height);
@@ -178,38 +181,44 @@ void U5CharacterCreate::RenderIntroLine(int x_left, int x_right, int y_pos, std:
 	float hMult = m_window_width / static_cast<float>(ORIGINAL_GAME_WIDTH);
 
 	const size_t DASH_POS = 13;
-	const int SPACE_LEN = 5;
+	//const int SPACE_LEN = 5;
 	const int TAB_LEN = 15;
-	int total_size = (x_right - x_left) - 2;
+	int total_size = (x_right - x_left);
 	int space_size = 0;
 
 	int remainder = 0;
 
 	if (num_spaces > 0 && final_size > 0)
 	{
-		space_size = (total_size - (final_size + 1)) / num_spaces;
-		remainder = (total_size - (final_size + 1)) % num_spaces;
+		space_size = (total_size - (final_size)) / num_spaces;
+		remainder = (total_size - (final_size)) % num_spaces;
 	}
 
 	int cur_left = x_left;
+	int cur_space = 0;
 
 	for (size_t index = 0; index < str_line.size(); index++)
 	{
 		if (str_line[index] == 0x7b)
 		{
 			cur_left += TAB_LEN;
+			if (index != 0)
+			{
+				cur_left--;
+			}
 
 		}
 		else if (str_line[index] == ' ')
 		{
-			if (cur_left > 0)
+			cur_space++;
+			if (index != 0)
 			{
 				cur_left--;
 			}
-			//cur_left += SPACE_LEN + space_size /*+ (remainder > 0 ? 1 : 0)*/;
+
 			cur_left += SPACE_LEN + space_size;
 
-			if (index > (num_spaces - remainder))
+			if (cur_space > (num_spaces - remainder))
 			{
 				cur_left++;
 			}
@@ -237,9 +246,9 @@ void U5CharacterCreate::RenderIntroLine(int x_left, int x_right, int y_pos, std:
 // The game wants full words, and will space those words appropriately.
 // That is unless an _ is found, at which point, if that still fits, it will cut off at that and use a -.
 int U5CharacterCreate::GetLine(int left, int right, size_t start_word, std::vector<unsigned char> letter_list, std::string& str_out,
-	int& num_spaces, int& final_size)
+	int& num_spaces, int& final_size, int SPACE_LEN)
 {
-	const int SPACE_LEN = 5;
+	//const int SPACE_LEN = 5;
 	auto& dash_letter = m_resources->m_ProportionalFontData[13];
 	int dash_len = dash_letter.real_width;
 	const int TAB_LEN = 15;
@@ -253,22 +262,13 @@ int U5CharacterCreate::GetLine(int left, int right, size_t start_word, std::vect
 	}
 	int curlen = 0;
 
-	bool ppp = false;
-	//if (start_word == 198)
-	if (start_word == 0)
-	//if (start_word == 137)
-	{
-		int j = 9;
-		ppp = true;
-	}
-
 	for (size_t index = start_word; index < letter_list.size(); index++)
 	{
 		unsigned char temp_letter = letter_list[index];
 		int temp_len = 0;
 		if (temp_letter == 0x7b)
 		{
-			temp_len = TAB_LEN/* - 1*/;
+			temp_len = TAB_LEN;
 		}
 		else if (temp_letter == 0x0A) // newline
 		{
@@ -277,7 +277,7 @@ int U5CharacterCreate::GetLine(int left, int right, size_t start_word, std::vect
 		}
 		else if (temp_letter == 0x20) // space
 		{
-			temp_len = SPACE_LEN/* - 1*/;
+			temp_len = SPACE_LEN;
 		}
 		else if (temp_letter == 0x5F) // underscore
 		{
@@ -292,10 +292,7 @@ int U5CharacterCreate::GetLine(int left, int right, size_t start_word, std::vect
 		{
 			return -1; // ???
 		}
-		if (ppp)
-		{
-			std::cout << ((char)temp_letter) << "\t" << (curlen + temp_len) << std::endl;
-		}
+
 		// TO DO: DO STUFF HERE
 		if (curlen + temp_len >= max_len)
 		{
@@ -331,11 +328,11 @@ int U5CharacterCreate::GetLine(int left, int right, size_t start_word, std::vect
 					else if (back_char == '_')
 					{
 
-						if (curlen + dash_len < max_len)
+						if (curlen + (dash_len) < max_len)
 						{
 							str_out += "_";
 							curlen += dash_len;
-							final_size = curlen;
+							final_size = curlen + 1;
 							return temp_index + 1;
 						}
 					}
@@ -349,11 +346,12 @@ int U5CharacterCreate::GetLine(int left, int right, size_t start_word, std::vect
 			}
 		}
 
+		int orig_curlin = curlen;
 		curlen += (temp_len + 1);
 		str_out += temp_letter;
 		if (temp_letter == ' ')
 		{
-			if (curlen > 0)
+			if (orig_curlin > 0)
 			{
 				curlen--;
 			}
@@ -362,7 +360,7 @@ int U5CharacterCreate::GetLine(int left, int right, size_t start_word, std::vect
 		}
 		else if (temp_letter == 0x7b)
 		{
-			if (curlen > 0)
+			if (orig_curlin > 0)
 			{
 				curlen--;
 			}

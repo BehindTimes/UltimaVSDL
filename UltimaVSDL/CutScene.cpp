@@ -383,7 +383,7 @@ void CutScene::RenderStoryTexture()
 	m_sdl_helper->SetRenderTarget(nullptr);
 }
 
-void CutScene::RenderIntroLine(int x_left, int x_right, int y_pos, std::string str_line, int num_spaces, int final_size)
+void CutScene::RenderIntroLine(int x_left, int x_right, int y_pos, std::string str_line, int num_spaces, int final_size, int SPACE_LEN)
 {
 	// We always end on a letter, so remove the letter spacing of the very last letter
 	m_sdl_helper->GetScreenDimensions(m_window_width, m_window_height);
@@ -391,32 +391,46 @@ void CutScene::RenderIntroLine(int x_left, int x_right, int y_pos, std::string s
 	float hMult = m_window_width / static_cast<float>(ORIGINAL_GAME_WIDTH);
 
 	const size_t DASH_POS = 13;
-	const int SPACE_LEN = 5;
+	//const int SPACE_LEN = 5;
 	const int TAB_LEN = 15;
-	int total_size = x_right - x_left;
+	int total_size = (x_right - x_left);
 	int space_size = 0;
 
 	int remainder = 0;
+
 	if (num_spaces > 0 && final_size > 0)
 	{
-		space_size = (total_size - final_size) / num_spaces;
-		remainder = (total_size - final_size) % num_spaces;
+		space_size = (total_size - (final_size)) / num_spaces;
+		remainder = (total_size - (final_size)) % num_spaces;
 	}
 
 	int cur_left = x_left;
+	int cur_space = 0;
 
 	for (size_t index = 0; index < str_line.size(); index++)
 	{
 		if (str_line[index] == 0x7b)
 		{
 			cur_left += TAB_LEN;
+			if (index != 0)
+			{
+				cur_left--;
+			}
+
 		}
 		else if (str_line[index] == ' ')
 		{
-			cur_left += SPACE_LEN + space_size + (remainder > 0 ? 1 : 0);
-			if (remainder > 0)
+			cur_space++;
+			if (index != 0)
 			{
-				remainder--;
+				cur_left--;
+			}
+
+			cur_left += SPACE_LEN + space_size;
+
+			if (cur_space > (num_spaces - remainder))
+			{
+				cur_left++;
 			}
 		}
 		else if (str_line[index] > 0x20)
@@ -442,13 +456,13 @@ void CutScene::RenderIntroLine(int x_left, int x_right, int y_pos, std::string s
 // The game wants full words, and will space those words appropriately.
 // That is unless an _ is found, at which point, if that still fits, it will cut off at that and use a -.
 int CutScene::GetLine(int left, int right, size_t start_word, std::vector<unsigned char> letter_list, std::string& str_out,
-	int& num_spaces, int& final_size)
+	int& num_spaces, int& final_size, int SPACE_LEN)
 {
-	const int SPACE_LEN = 5;
+	//const int SPACE_LEN = 5;
 	auto& dash_letter = m_resources->m_ProportionalFontData[13];
 	int dash_len = dash_letter.real_width;
 	const int TAB_LEN = 15;
-	int max_len = right - left;
+	int max_len = (right - left);
 	max_len--;
 	num_spaces = 0;
 	final_size = 0;
@@ -457,13 +471,14 @@ int CutScene::GetLine(int left, int right, size_t start_word, std::vector<unsign
 		return -1;
 	}
 	int curlen = 0;
+
 	for (size_t index = start_word; index < letter_list.size(); index++)
 	{
 		unsigned char temp_letter = letter_list[index];
 		int temp_len = 0;
 		if (temp_letter == 0x7b)
 		{
-			temp_len = TAB_LEN - 1;
+			temp_len = TAB_LEN;
 		}
 		else if (temp_letter == 0x0A) // newline
 		{
@@ -472,7 +487,7 @@ int CutScene::GetLine(int left, int right, size_t start_word, std::vector<unsign
 		}
 		else if (temp_letter == 0x20) // space
 		{
-			temp_len = SPACE_LEN - 1;
+			temp_len = SPACE_LEN;
 		}
 		else if (temp_letter == 0x5F) // underscore
 		{
@@ -487,6 +502,7 @@ int CutScene::GetLine(int left, int right, size_t start_word, std::vector<unsign
 		{
 			return -1; // ???
 		}
+
 		// TO DO: DO STUFF HERE
 		if (curlen + temp_len >= max_len)
 		{
@@ -513,7 +529,7 @@ int CutScene::GetLine(int left, int right, size_t start_word, std::vector<unsign
 					// We're done here
 					if (back_char == ' ')
 					{
-						curlen -= SPACE_LEN;
+						curlen -= (SPACE_LEN - 1);
 						final_size = curlen;
 						num_spaces--;
 						temp_index++;
@@ -521,12 +537,11 @@ int CutScene::GetLine(int left, int right, size_t start_word, std::vector<unsign
 					}
 					else if (back_char == '_')
 					{
-
-						if (curlen + dash_len < max_len)
+						if (curlen + (dash_len) < max_len)
 						{
 							str_out += "_";
 							curlen += dash_len;
-							final_size = curlen;
+							final_size = curlen + 1;
 							return temp_index + 1;
 						}
 					}
@@ -540,11 +555,25 @@ int CutScene::GetLine(int left, int right, size_t start_word, std::vector<unsign
 			}
 		}
 
+		int orig_curlin = curlen;
 		curlen += (temp_len + 1);
 		str_out += temp_letter;
 		if (temp_letter == ' ')
 		{
+			if (orig_curlin > 0)
+			{
+				curlen--;
+			}
+			curlen--;
 			num_spaces++;
+		}
+		else if (temp_letter == 0x7b)
+		{
+			if (orig_curlin > 0)
+			{
+				curlen--;
+			}
+			curlen--;
 		}
 	}
 	return 0;
