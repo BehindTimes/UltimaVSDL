@@ -260,6 +260,25 @@ enum TLK_ENUM
 	TLK_STRING
 };
 
+enum class QuestionVirtue
+{
+	Honesty,
+	Compassion,
+	Valor,
+	Justice,
+	Sacrifice,
+	Honor,
+	Spirituality,
+	Humility
+};
+
+struct QuestionsDat
+{
+	std::string question;
+	QuestionVirtue virtue1;
+	QuestionVirtue virtue2;
+};
+
 class UltimaVResource
 {
 public:
@@ -283,6 +302,7 @@ public:
 	std::vector<std::string> m_LookData;
 	std::vector<U5CombatMap> m_CombatMaps;
 	std::vector<U5CombatMap> m_DungeonCombatMaps;
+	std::vector< QuestionsDat> m_createCharacterQuestions;
 	U5Data m_data;
 	RenderMode m_render_mode;
 	int m_CutsceneMap[NUM_CUTSCENES][CUTSCENE_WIDTH][CUTSCENE_HEIGHT];

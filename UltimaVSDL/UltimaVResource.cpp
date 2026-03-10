@@ -775,8 +775,8 @@ int UltimaVResource::LoadQuestion(std::vector<unsigned char>& data_buffer)
 	m_data.question_text[index].first_line_offset = 0;
 	m_data.question_text[index].paragraph[0].y_extent = 0x59;
 	m_data.question_text[index].paragraph[1].y_extent = 200;
-	m_data.question_text[index].paragraph[0].text_left_pos = 0;// data_buffer[X_LEFT_PARAGRAPH_OFFSET + (index * 2)];
-	m_data.question_text[index].paragraph[1].text_left_pos = 0xAF;// data_buffer[X_LEFT_PARAGRAPH_OFFSET + (index * 2) + 1];
+	m_data.question_text[index].paragraph[0].text_left_pos = 0;
+	m_data.question_text[index].paragraph[1].text_left_pos = 0xAF;
 	m_data.question_text[index].paragraph[0].text_right_pos = 320;
 	m_data.question_text[index].paragraph[1].text_right_pos = 320;
 
@@ -797,10 +797,61 @@ int UltimaVResource::LoadQuestion(std::vector<unsigned char>& data_buffer)
 	m_data.question_text[index].first_line_offset = 0;
 	m_data.question_text[index].paragraph[0].y_extent = 0x5a;
 	m_data.question_text[index].paragraph[1].y_extent = 200;
-	m_data.question_text[index].paragraph[0].text_left_pos = 0;// data_buffer[X_LEFT_PARAGRAPH_OFFSET + (index * 2)];
-	m_data.question_text[index].paragraph[1].text_left_pos = 0;// data_buffer[X_LEFT_PARAGRAPH_OFFSET + (index * 2) + 1];
+	m_data.question_text[index].paragraph[0].text_left_pos = 0;
+	m_data.question_text[index].paragraph[1].text_left_pos = 0;
 	m_data.question_text[index].paragraph[0].text_right_pos = 320;
 	m_data.question_text[index].paragraph[1].text_right_pos = 0xa6;
+
+
+	//const size_t QUESTION_LOC_OFFSET = 0x518e;
+	//const size_t QUESTION_SIZE = 0x7c;
+	const int NUM_QUESTIONS = 28;
+	m_createCharacterQuestions.resize(NUM_QUESTIONS);
+
+	/*for (size_t temp_index = 0; temp_index < QUESTION_SIZE; temp_index += 2)
+	{
+		size_t curPos = QUESTION_LOC_OFFSET + temp_index;
+		uint32_t offset = ReadInt16(m_data.buffer.begin(), curPos);
+		if (offset != 0)
+		{
+			m_createCharacterQuestions.push_back({});
+			m_createCharacterQuestions.back().question = ReadNextString(buffer.begin() + offset, buffer.end());
+		}
+		else
+		{
+			m_createCharacterQuestions.push_back({});
+		}
+		//m_createCharacterQuestions[index].question = ReadNextString(buffer.begin() + offset, buffer.end());
+	}*/
+
+	size_t question_start = 0x6c2;
+	size_t question_end = 0x1e41;
+
+	std::vector<std::string> questions;
+
+	ReadStrings(buffer, questions, question_start, question_end);
+	if (questions.size() != NUM_QUESTIONS)
+	{
+		return -3;
+	}
+	std::vector< QuestionVirtue> virtuelist = { QuestionVirtue::Honesty, QuestionVirtue::Compassion, QuestionVirtue::Valor, QuestionVirtue::Justice,
+		QuestionVirtue::Sacrifice, QuestionVirtue::Honor, QuestionVirtue::Spirituality, QuestionVirtue::Humility };
+	int virtue1 = 0;
+	int virtue2 = 1;
+
+	for (int virtue_index = 0; virtue_index < NUM_QUESTIONS; virtue_index++)
+	{
+		m_createCharacterQuestions[virtue_index].question = questions[virtue_index];
+		m_createCharacterQuestions[virtue_index].virtue1 = virtuelist[virtue1];
+		m_createCharacterQuestions[virtue_index].virtue2 = virtuelist[virtue2];
+
+		virtue2++;
+		if (virtue2 >= virtuelist.size())
+		{
+			virtue1++;
+			virtue2 = virtue1 + 1;
+		}
+	}
 
 	return 0;
 }

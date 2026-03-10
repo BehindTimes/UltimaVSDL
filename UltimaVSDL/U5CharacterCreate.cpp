@@ -9,6 +9,9 @@
 #include <memory>
 #include <iostream>
 #include <vector>
+#include <algorithm>
+#include <SDL3/SDL_keycode.h>
+#include <iterator>
 
 extern std::unique_ptr<U5Input> m_input;
 
@@ -48,9 +51,28 @@ void U5CharacterCreate::SetSDLData()
 
 void U5CharacterCreate::ProcessEvents()
 {
+	const int END_CREATE = 3;
 	if (m_input->isAnyKeyHit())
 	{
-		IncrementStory();
+		m_input->SetRequireAllKeysUp();
+		if (m_curStoryboard == 0 || m_curStoryboard == END_CREATE)
+		{
+			IncrementStory();
+		}
+		else
+		{
+			SDL_Keycode curKey = m_input->GetCurrentKeyCode();
+			bool valid = false;
+			if (curKey == SDLK_A || curKey == SDLK_B)
+			{
+				valid = true;
+			}
+			if (!valid)
+			{
+				return;
+			}
+			IncrementStory();
+		}
 	}
 }
 
@@ -102,8 +124,43 @@ void U5CharacterCreate::RenderCharacterCreate()
 		// In the original, this is rendered after images rendered in action 1, but render this before to avoid cutting off the text
 		m_sdl_helper->RenderTextureAt(curImageTexture, 0x10 * hMult, 0 * vMult, curImageData.width * hMult, curImageData.height * vMult);
 		m_sdl_helper->RenderTextureAt(curImageTexture, 0xC8 * hMult, 0 * vMult, curImageData.width * hMult, curImageData.height * vMult);
-		//m_sdl_helper->RenderTextureAt(m_sdl_helper->m_FullScreenTexture, 0, 0, RENDER_WIDTH, RENDER_HEIGHT);
+		m_sdl_helper->RenderTextureAt(m_sdl_helper->m_FullScreenTexture, 0, 0, RENDER_WIDTH, RENDER_HEIGHT);
 	}
+}
+
+void U5CharacterCreate::RenderQuestionTexture(int question_num)
+{
+	const int LINE_HEIGHT = 9;
+	m_sdl_helper->SetRenderTarget(m_sdl_helper->m_FullScreenTexture);
+	m_sdl_helper->ClearScreen();
+	int ypos = 152;
+	int num_spaces = 0;
+	int final_size = 0;
+	std::string text_line;
+	std::vector<unsigned char> data;
+
+	std::copy(m_resources->m_createCharacterQuestions[question_num].question.begin(),
+		m_resources->m_createCharacterQuestions[question_num].question.end(), std::back_inserter(data));
+	int new_text_pos = GetLine(0, 320, 0, data, text_line, num_spaces, final_size);
+	RenderIntroLine(0, 320, ypos, text_line, num_spaces, final_size);
+	ypos += LINE_HEIGHT;
+	while (final_size != 0)
+	{
+		std::string new_text_line;
+		new_text_pos = GetLine(0, 320, new_text_pos, data, new_text_line, num_spaces, final_size);
+		if (new_text_pos < 0)
+		{
+			break;
+		}
+		else if (new_text_pos == 0)
+		{
+			final_size = 0;
+		}
+		RenderIntroLine(0, 320, ypos, new_text_line, num_spaces, final_size);
+		ypos += LINE_HEIGHT;
+	}
+
+	m_sdl_helper->SetRenderTarget(nullptr);
 }
 
 void U5CharacterCreate::RenderStoryTexture()
@@ -446,5 +503,6 @@ void U5CharacterCreate::IncrementStory()
 	else
 	{
 		m_input->SetInputType(InputType::A_OR_B);
+		RenderQuestionTexture(21);
 	}
 }
