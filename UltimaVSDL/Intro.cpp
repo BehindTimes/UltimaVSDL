@@ -1103,34 +1103,51 @@ void Intro::ProcessEvents()
 					m_curMenuIndex = 0;
 				}
 				break;
+			case SDLK_J:
+				m_curMenuIndex = 0;
+				RunJourneyOnward();
+				break;
+			case SDLK_C:
+				m_curMenuIndex = 1;
+				RunCreateNewCharacter();
+				return;
+				break;
+			case SDLK_T:
+				RunTransferCharacter();
+				break;
+			case SDLK_I:
+				m_curMenuIndex = 3;
+				RunIntroduction();
+				break;
+			case SDLK_A:
+				m_curMenuIndex = 4;
+				RunAcknowledgements();
+				break;
+			case SDLK_R:
+				m_curMenuIndex = 5;
+				RunReturnToView();
+				break;
 			case SDLK_RETURN:
 				switch (static_cast<MenuChoices>(m_curMenuIndex))
 				{
-				case MenuChoices::ACKNOWLEDGEMENTS:
-					m_curMode = IntroMode::ACKNOWLEDGEMENTS;
-					m_curAcknowledgement = AcknowlegementType::SCROLL_UP;
-					m_curAcknowledgementYDelay = 0;
-					m_curAcknowledgementXDelay = 0;
-					m_input->SetRequireAllKeysUp();
-					break;
-				case MenuChoices::INTRODUCTION: // Introduction
-					m_newMode = U5Modes::Cutscene;
-					m_input->SetRequireAllKeysUp();
-					break;
-				case MenuChoices::RETURN_TO_VIEW:
-					CreateDemo();
-					m_input->SetRequireAllKeysUp();
+				case MenuChoices::JOURNEY_ONWARD:
+					RunJourneyOnward();
 					break;
 				case MenuChoices::CREATE_NEW_CHARACTER:
-					m_create_status = CharacterCreate::NAME;
-					CreateNewCharacter();
-					m_curMode = IntroMode::CREATE_NEW_CHARACTER;
-					m_input->SetRequireAllKeysUp();
+					RunCreateNewCharacter();
 					return;
 					break;
-				case MenuChoices::JOURNEY_ONWARD:
-					m_newMode = U5Modes::Game;
-					m_input->SetRequireAllKeysUp();
+				case MenuChoices::TRANSFER_CHARACTER:
+					RunTransferCharacter();
+					break;
+				case MenuChoices::INTRODUCTION: // Introduction
+					RunIntroduction();
+					break;
+				case MenuChoices::ACKNOWLEDGEMENTS:
+					RunAcknowledgements();
+					break;
+				case MenuChoices::RETURN_TO_VIEW:
+					RunReturnToView();
 					break;
 				default:
 					break;
@@ -1145,6 +1162,45 @@ void Intro::ProcessEvents()
 	default:
 		break;
 	}
+}
+
+void Intro::RunAcknowledgements()
+{
+	m_curMode = IntroMode::ACKNOWLEDGEMENTS;
+	m_curAcknowledgement = AcknowlegementType::SCROLL_UP;
+	m_curAcknowledgementYDelay = 0;
+	m_curAcknowledgementXDelay = 0;
+	m_input->SetRequireAllKeysUp();
+}
+
+void Intro::RunIntroduction()
+{
+	m_newMode = U5Modes::Cutscene;
+	m_input->SetRequireAllKeysUp();
+}
+
+void Intro::RunReturnToView()
+{
+	CreateDemo();
+	m_input->SetRequireAllKeysUp();
+}
+
+void Intro::RunCreateNewCharacter()
+{
+	m_create_status = CharacterCreate::NAME;
+	CreateNewCharacter();
+	m_curMode = IntroMode::CREATE_NEW_CHARACTER;
+	m_input->SetRequireAllKeysUp();
+}
+
+void Intro::RunTransferCharacter()
+{
+}
+
+void Intro::RunJourneyOnward()
+{
+	m_newMode = U5Modes::Game;
+	m_input->SetRequireAllKeysUp();
 }
 
 void Intro::ProcessDemoScript()

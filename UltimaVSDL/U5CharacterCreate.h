@@ -7,6 +7,7 @@
 #include <vector>
 #include <functional>
 #include "U5Enums.h"
+#include <queue>
 
 class U5CharacterCreate : public GameObject
 {
@@ -34,5 +35,10 @@ private:
 	std::vector<U5StoryScreen> m_story;
 	int m_curStoryboard;
 	int m_number_screens;
+	std::vector< QuestionVirtue> m_virtue_list;
+	std::queue<int> m_question_list;
+	int m_current_question;
+
+	const int NUM_CREATE_SCREENS = 9;
 };
 

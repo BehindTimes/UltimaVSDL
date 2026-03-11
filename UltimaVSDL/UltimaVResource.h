@@ -164,6 +164,7 @@ struct U5Data
 	std::vector<std::string> input_words;
 	std::vector<std::string> shoppe_words;
 	std::map<int, ShopInfo> shop_info;
+	std::vector<std::pair<int, int>> create_image_pos;
 };
 
 struct IntroScriptInstruction {
@@ -321,7 +322,7 @@ private:
 	int LoadMaskedImages();
 	int LoadStory(std::vector<unsigned char> &buffer);
 	int LoadEnding(std::vector<unsigned char>& buffer);
-	int LoadQuestion(std::vector<unsigned char>& data_buffer);
+	int LoadQuestion();
 	int LoadDataOvl();
 	int LoadFontOvl();
 	int LoadCharacterSets();

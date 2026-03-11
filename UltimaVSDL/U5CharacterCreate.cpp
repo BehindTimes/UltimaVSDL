@@ -12,6 +12,7 @@
 #include <algorithm>
 #include <SDL3/SDL_keycode.h>
 #include <iterator>
+#include <random>
 
 extern std::unique_ptr<U5Input> m_input;
 
@@ -21,7 +22,8 @@ U5CharacterCreate::U5CharacterCreate(SDL3Helper* sdl_helper, UltimaVResource* u5
 	m_window_height(0),
 	m_oldMode(U5Modes::None),
 	m_curStoryboard(0),
-	m_number_screens(0)
+	m_number_screens(0),
+	m_current_question(-1)
 {
 }
 
@@ -51,7 +53,7 @@ void U5CharacterCreate::SetSDLData()
 
 void U5CharacterCreate::ProcessEvents()
 {
-	const int END_CREATE = 3;
+	const int END_CREATE = NUM_CREATE_SCREENS;
 	if (m_input->isAnyKeyHit())
 	{
 		m_input->SetRequireAllKeysUp();
@@ -65,6 +67,19 @@ void U5CharacterCreate::ProcessEvents()
 			bool valid = false;
 			if (curKey == SDLK_A || curKey == SDLK_B)
 			{
+				if (m_current_question < 0 || m_current_question >= m_resources->m_createCharacterQuestions.size())
+				{
+					return;
+				}
+				if (curKey == SDLK_A)
+				{
+					m_virtue_list.push_back(m_resources->m_createCharacterQuestions[m_current_question].virtue1);
+				}
+				else
+				{
+					m_virtue_list.push_back(m_resources->m_createCharacterQuestions[m_current_question].virtue2);
+				}
+				//m_virtue_list
 				valid = true;
 			}
 			if (!valid)
@@ -83,7 +98,7 @@ void U5CharacterCreate::RenderCharacterCreate()
 	float vMult = window_height / static_cast<float>(ORIGINAL_GAME_HEIGHT);
 	float hMult = window_width / static_cast<float>(ORIGINAL_GAME_WIDTH);
 
-	const int END_CREATE = 2;
+	const int END_CREATE = NUM_CREATE_SCREENS - 1;
 	if (m_curStoryboard == 0)
 	{
 		U5StoryScreen& curData = m_story[0];
@@ -124,12 +139,39 @@ void U5CharacterCreate::RenderCharacterCreate()
 		// In the original, this is rendered after images rendered in action 1, but render this before to avoid cutting off the text
 		m_sdl_helper->RenderTextureAt(curImageTexture, 0x10 * hMult, 0 * vMult, curImageData.width * hMult, curImageData.height * vMult);
 		m_sdl_helper->RenderTextureAt(curImageTexture, 0xC8 * hMult, 0 * vMult, curImageData.width * hMult, curImageData.height * vMult);
+
+		if (m_current_question >= 0 && m_current_question < m_resources->m_createCharacterQuestions.size())
+		{
+			int virtue1 = static_cast<int>(m_resources->m_createCharacterQuestions[m_current_question].virtue1);
+			int virtue2 = static_cast<int>(m_resources->m_createCharacterQuestions[m_current_question].virtue2);
+			virtue1 += 2;
+			virtue2 += 2;
+
+			if (virtue1 < curStoryImages.size())
+			{
+				auto& curVirtueImageData = curStoryImages[virtue1];
+				auto& curVirtueImageTexture = curStoryTextures[virtue1];
+				float xpos = static_cast<float>(m_resources->m_data.create_image_pos[static_cast<size_t>(virtue1 - 2)].first);
+				float ypos = static_cast<float>(m_resources->m_data.create_image_pos[static_cast<size_t>(virtue1 - 2)].second);
+				m_sdl_helper->RenderTextureAt(curVirtueImageTexture, xpos * hMult, ypos * vMult, curVirtueImageData.width * hMult, curVirtueImageData.height * vMult);
+			}
+			if (virtue2 < curStoryImages.size())
+			{
+				auto& curVirtueImageData = curStoryImages[virtue2];
+				auto& curVirtueImageTexture = curStoryTextures[virtue2];
+				float xpos = static_cast<float>(m_resources->m_data.create_image_pos[static_cast<size_t>(virtue2 - 2)].first + 0xB8);
+				float ypos = static_cast<float>(m_resources->m_data.create_image_pos[static_cast<size_t>(virtue2 - 2)].second);
+				m_sdl_helper->RenderTextureAt(curVirtueImageTexture, xpos * hMult, ypos * vMult, curVirtueImageData.width * hMult, curVirtueImageData.height * vMult);
+			}
+		}
+		//m_resources->m_createCharacterQuestions
 		m_sdl_helper->RenderTextureAt(m_sdl_helper->m_FullScreenTexture, 0, 0, RENDER_WIDTH, RENDER_HEIGHT);
 	}
 }
 
 void U5CharacterCreate::RenderQuestionTexture(int question_num)
 {
+	m_current_question = question_num;
 	const int LINE_HEIGHT = 9;
 	m_sdl_helper->SetRenderTarget(m_sdl_helper->m_FullScreenTexture);
 	m_sdl_helper->ClearScreen();
@@ -472,13 +514,15 @@ int U5CharacterCreate::GetLine(int left, int right, size_t start_word, std::vect
 
 void U5CharacterCreate::SetCutScreenInfo(U5Modes old_mode, std::function<void(void)> callback)
 {
-	const int NUM_CREATE_SCREENS = 3;
 	m_input->SetInputType(InputType::ANY_KEY);
 	m_oldMode = old_mode;
 	m_callback = callback;
 	m_story = m_resources->m_data.question_text;
 	m_curStoryboard = 0;
+	m_current_question = -1;
 	m_number_screens = NUM_CREATE_SCREENS;
+	m_virtue_list = { QuestionVirtue::Honesty, QuestionVirtue::Compassion, QuestionVirtue::Valor, QuestionVirtue::Justice,
+				QuestionVirtue::Sacrifice, QuestionVirtue::Honor, QuestionVirtue::Spirituality, QuestionVirtue::Humility };
 	RenderStoryTexture();
 }
 
@@ -495,7 +539,7 @@ void U5CharacterCreate::IncrementStory()
 		}
 		return;
 	}
-	if (m_curStoryboard == 2)
+	if (m_curStoryboard == (NUM_CREATE_SCREENS - 1))
 	{
 		m_input->SetInputType(InputType::ANY_KEY);
 		RenderStoryTexture();
@@ -503,6 +547,50 @@ void U5CharacterCreate::IncrementStory()
 	else
 	{
 		m_input->SetInputType(InputType::A_OR_B);
-		RenderQuestionTexture(21);
+		// Time to randomize the questions
+		if (m_curStoryboard == 1 || m_curStoryboard == 5 || m_curStoryboard == 7)
+		{
+			std::random_device rd;
+			std::mt19937 g(rd());
+
+			std::vector< QuestionVirtue> virtuelist = m_virtue_list;
+			m_virtue_list.clear();
+			// This should never happen
+			while (!m_question_list.empty())
+			{
+				m_question_list.pop();
+			}
+
+			std::shuffle(virtuelist.begin(), virtuelist.end(), g);
+
+			for (size_t index = 0; index < virtuelist.size(); index += 2)
+			{
+				int virtueval1 = static_cast<int>(virtuelist[index]);
+				int virtueval2 = static_cast<int>(virtuelist[index + 1]);
+				if (virtueval2 < virtueval1)
+				{
+					int temp = virtueval1;
+					virtueval1 = virtueval2;
+					virtueval2 = temp;
+				}
+
+				int question_num = 0;
+				int temp1 = 8 - virtueval1;
+				for (int sum_index = temp1; sum_index <= 7; sum_index++)
+				{
+					question_num += sum_index;
+				}
+				question_num += ((virtueval2 - virtueval1) - 1);
+
+				m_question_list.push(question_num);
+			}
+		}
+		if (!m_question_list.empty())
+		{
+			int question_num = m_question_list.front();
+			m_question_list.pop();
+			RenderQuestionTexture(question_num);
+		}
+		
 	}
 }

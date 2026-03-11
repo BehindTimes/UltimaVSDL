@@ -11,6 +11,7 @@
 #include "U5Enums.h"
 #include <map>
 #include <utility>
+#include <vector>
 
 enum class IntroMode : uint_fast16_t
 {
@@ -136,6 +137,13 @@ private:
 	void StoryOverCallback();
 	void HandleName();
 	int ProcessLetterImmediate();
+
+	void RunAcknowledgements();
+	void RunIntroduction();
+	void RunReturnToView();
+	void RunCreateNewCharacter();
+	void RunJourneyOnward();
+	void RunTransferCharacter();
 
 	Uint64 m_curDelayFlame;
 

@@ -747,7 +747,7 @@ void UltimaVResource::LoadStoryText(const std::vector<unsigned char>& buffer, si
 	}
 }
 
-int UltimaVResource::LoadQuestion(std::vector<unsigned char>& data_buffer)
+int UltimaVResource::LoadQuestion()
 {
 	std::vector<unsigned char> buffer;
 	int ret = LoadBuffer("QUESTION.DAT", buffer);
@@ -805,24 +805,10 @@ int UltimaVResource::LoadQuestion(std::vector<unsigned char>& data_buffer)
 
 	//const size_t QUESTION_LOC_OFFSET = 0x518e;
 	//const size_t QUESTION_SIZE = 0x7c;
+
+	// Simulating what happens rather than duplicating the logic
 	const int NUM_QUESTIONS = 28;
 	m_createCharacterQuestions.resize(NUM_QUESTIONS);
-
-	/*for (size_t temp_index = 0; temp_index < QUESTION_SIZE; temp_index += 2)
-	{
-		size_t curPos = QUESTION_LOC_OFFSET + temp_index;
-		uint32_t offset = ReadInt16(m_data.buffer.begin(), curPos);
-		if (offset != 0)
-		{
-			m_createCharacterQuestions.push_back({});
-			m_createCharacterQuestions.back().question = ReadNextString(buffer.begin() + offset, buffer.end());
-		}
-		else
-		{
-			m_createCharacterQuestions.push_back({});
-		}
-		//m_createCharacterQuestions[index].question = ReadNextString(buffer.begin() + offset, buffer.end());
-	}*/
 
 	size_t question_start = 0x6c2;
 	size_t question_end = 0x1e41;
@@ -1235,7 +1221,7 @@ int UltimaVResource::LoadDataOvl()
 	{
 		return -4;
 	}
-	if (0 != LoadQuestion(m_data.buffer))
+	if (0 != LoadQuestion())
 	{
 		return -5;
 	}
@@ -1386,6 +1372,17 @@ int UltimaVResource::LoadDataOvl()
 	}
 
 	LoadVendorData(m_data.buffer);
+
+	// Load Character Create Virtue Images
+	const int NUM_VIRTUES = 8;
+	m_data.create_image_pos.resize(NUM_VIRTUES);
+	const size_t VIRTUE_IMAGE_OFFSET_X = 0x520c;
+	const size_t VIRTUE_IMAGE_OFFSET_Y = 0x5214;
+	for (int index = 0; index < NUM_VIRTUES; index++)
+	{
+		m_data.create_image_pos[index].first = m_data.buffer[VIRTUE_IMAGE_OFFSET_X + index];
+		m_data.create_image_pos[index].second = m_data.buffer[VIRTUE_IMAGE_OFFSET_Y + index];
+	}
 
 	return 0;
 }
