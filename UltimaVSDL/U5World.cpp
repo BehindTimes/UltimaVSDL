@@ -2228,7 +2228,15 @@ void U5World::HandleTalkWord(std::string strResponse)
 		drawNewLine = false;
 	}
 
+	// This is a bug in the game, as it splits the text, but one of the naughty words
+	// is EA, which has a space, thus never matches.  Let's correct this oversight
+	std::string very_bad_word("ELECTRONIC ARTS");
 	std::vector<std::string> words = m_utilities->splitString(strResponse, ' ', false);
+	if (strResponse == very_bad_word)
+	{
+		words.clear();
+		words.push_back(very_bad_word);
+	}
 
 	// Check for naughty words
 	for (size_t index = INPUT_NAUGHTY; index < m_resources->m_data.input_words.size(); index++)
