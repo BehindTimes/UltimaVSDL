@@ -53,7 +53,7 @@ void U5CharacterCreate::SetSDLData()
 
 void U5CharacterCreate::ProcessEvents()
 {
-	const int END_CREATE = NUM_CREATE_SCREENS;
+	const int END_CREATE = NUM_CREATE_SCREENS - 1;
 	if (m_input->isAnyKeyHit())
 	{
 		m_input->SetRequireAllKeysUp();
@@ -469,7 +469,9 @@ int U5CharacterCreate::GetLine(int left, int right, size_t start_word, std::vect
 					}
 					else if (back_char == '_')
 					{
-
+						// This is a slight bug that will never occur in the original PC version.  It should be dash_len + 1.
+						// Changing it to that changes some of the text formatting though, so I'm leaving this bug in to match
+						// the PC version.  It might be an issue with translations on the character create's last screen though.
 						if (curlen + (dash_len) < max_len)
 						{
 							str_out += "_";
@@ -591,6 +593,15 @@ void U5CharacterCreate::IncrementStory()
 			m_question_list.pop();
 			RenderQuestionTexture(question_num);
 		}
-		
 	}
+}
+
+int U5CharacterCreate::GetSelectedVirtue()
+{
+	// This should always be size of 1.
+	if (m_virtue_list.size() > 0)
+	{
+		return static_cast<int>(m_virtue_list[0]);
+	}
+	return -1;
 }

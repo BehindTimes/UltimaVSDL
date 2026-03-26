@@ -537,6 +537,9 @@ int CutScene::GetLine(int left, int right, size_t start_word, std::vector<unsign
 					}
 					else if (back_char == '_')
 					{
+						// This is a slight bug that will never occur in the original PC version.  It should be dash_len + 1.
+						// Changing it to that changes some of the text formatting though, so I'm leaving this bug in to match
+						// the PC version.  It might be an issue with translations on the character create's last screen though.
 						if (curlen + (dash_len) < max_len)
 						{
 							str_out += "_";

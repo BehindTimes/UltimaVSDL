@@ -20,6 +20,7 @@ public:
 	virtual void LoadData() override;
 	void SetSDLData() override;
 	void SetCutScreenInfo(U5Modes old_mode, std::function<void(void)> callback);
+	int GetSelectedVirtue();
 private:
 	void RenderCharacterCreate();
 	void RenderStoryTexture();

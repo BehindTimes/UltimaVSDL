@@ -18,6 +18,7 @@
 #include <cstring>
 #include <SDL3/SDL_stdinc.h>
 #include "U5CharacterCreate.h"
+#include <array>
 
 extern std::unique_ptr<CutScene> cutscene_screen;
 extern std::unique_ptr<U5Utils> m_utilities;
@@ -921,7 +922,7 @@ bool Intro::ChangeMode(U5Modes& newMode)
 	}
 	else if (newMode == U5Modes::CreateCharacter)
 	{
-		m_characterCreate->SetCutScreenInfo(U5Modes::MenuSkip, std::bind(&Intro::StoryOverCallback, this));
+		m_characterCreate->SetCutScreenInfo(U5Modes::MenuSkip, std::bind(&Intro::CharacterCreateCallback, this));
 	}
 
 	return ret;
@@ -929,6 +930,28 @@ bool Intro::ChangeMode(U5Modes& newMode)
 
 void Intro::StoryOverCallback()
 {
+	m_input->SetInputType(InputType::UP_DOWN_ENTER);
+	GoToSelection();
+}
+
+void Intro::CharacterCreateCallback()
+{
+	/*const std::array<std::array<int, 4>, 8> character_stats = { {
+		// Strength, Dexterity, Intelligence, MP
+		{0x14,0x11,0x15,0x15},	// Honesty {0x14,0x15,0x18,0x18}
+		{0x14,0x15,0x13,0x13},	// Compassion
+		{0x15,0x12,0x14,0x14},	// Valor
+		{0x14,0x14,0x16,0x16},	// Justice
+		{0x14,0x14,0x13,0x13},	// Sacrifice
+		{0x17,0x10,0x12,0x12},	// Honor
+		{0x14,0x13,0x17,0x17},	// Spirituality
+		{0x14,0x11,0x13,0x13}	// Humility
+	} };*/
+	// std::string m_character_name;
+	// std::string m_character_sex;
+
+	int selected_virtue = m_characterCreate->GetSelectedVirtue();
+
 	m_input->SetInputType(InputType::UP_DOWN_ENTER);
 	GoToSelection();
 }

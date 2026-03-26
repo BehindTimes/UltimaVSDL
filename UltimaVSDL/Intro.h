@@ -135,6 +135,7 @@ private:
 	void ProcessDemoScript();
 	
 	void StoryOverCallback();
+	void CharacterCreateCallback();
 	void HandleName();
 	int ProcessLetterImmediate();
 
